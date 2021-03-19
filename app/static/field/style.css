@@ -1,0 +1,134 @@
+.field {
+  width: 100%; 
+  height: 100%;
+  padding: 400px 400px;
+}
+
+.hexsCont{
+  border: 5px var(--grid-c) solid;
+  border-width: 0;
+}
+
+.hexagon-visible:hover, .hexagon-active{
+  transform: scale(.92);
+}
+.hexagon-visible{
+  --bgc: var(--visible-hex-bgc);
+  opacity: 1;
+  z-index: 3;
+}
+.hexagon-visible .polygon{
+  stroke-width: 0;
+}
+.hexagon-active{
+  --bgc: var(--main-c);
+  z-index: 20;
+}
+.hexagon-first{
+  transform: scale(1);
+}
+.hexagon-first:hover, .hexagon-first .hexagon-active{
+  transform: scale(1.02);
+}
+.hexagon-lineCont{
+  height: calc(var(--triangle-height) * 2 + var(--body-height));
+  width: var(--hexagon-width);
+  position: absolute;
+  /* bottom: calc(0px - var(--triangle-height)); */
+  bottom: 0;
+  right: 0;
+  z-index: 4;
+  pointer-events: none;
+  transition: inherit;
+  overflow: visible;
+}
+.hexagon-line{
+  stroke-width: 2.5px;
+  stroke: var(--highlight-line-c);
+  transition: inherit;
+  opacity: 0;
+}
+.hexagon-line#l6, .hexagon-line#l3{
+  stroke-width: 2.5px;
+}
+.hexagon-num{
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  background-color: var(--body-bgc);
+  font-family: Arial, Helvetica, sans-serif;
+  color: var(--black-c);
+  border: 1px var(--main-c) solid;
+  position: absolute;
+  top: calc(var(--triangle-height) - 8px);
+  right: -4px;
+  opacity: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 12px;
+  z-index: 5;
+}
+.hexagon-visible .hexagon-num{
+  opacity: 1;
+}
+.founded-polygon{
+  overflow: visible;
+  z-index: 10;
+  filter: brightness(120%);
+}
+
+.hexagon-about{
+  background: var(--about-bgc);
+  color: var(--black-c);
+  width: 350px;
+  height: 400px;
+  position: absolute;
+  top: calc(var(--triangle-height) + 5px);
+  z-index: 10;
+  overflow-y: auto;
+  border-radius: 5px;
+  padding: 10px;
+  font-size: 1em;
+  box-sizing: border-box;
+  transition: inherit;
+  font-family: Arial, Helvetica, sans-serif;
+  user-select: text;
+}
+.hexagon-about:focus{
+  outline: none;
+  border: none;
+  box-shadow: 2px 2px 5px 1px rgba(68, 68, 68, 0.3);
+}
+
+.find{
+  margin: 0;
+  width: unset;
+  margin-right: 5px;
+}
+.find *{
+  width: unset;
+}
+
+
+
+
+.settings{
+  height: 70%;
+  width: unset;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+.settings-title{
+  margin-bottom: 10px;
+}
+.colors-grid{
+  display: grid;  
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-gap: 10px;
+}
+.settings-button{
+  width: min-content;
+}

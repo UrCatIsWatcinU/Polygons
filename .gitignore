@@ -1,0 +1,8 @@
+venv
+
+wo backend
+
+__pycache__
+
+*.db
+to send

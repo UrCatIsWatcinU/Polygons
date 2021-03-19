@@ -1,0 +1,51 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <h1>Register</h1>
+    <form action="" method="POST" novalidate>
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.username.label }}
+            {{ form.username(size=32) }}
+            {% for error in form.username.errors %}
+                <span style="color: red;">{{ error }}</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.email.label }}
+            {{ form.email(size=32) }}
+            {% for error in form.email.errors %}
+                <span style="color: red;">{{ error }}</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.password.label }}
+            {{ form.password(size=32) }}
+            {% for error in form.password.errors %}
+                <span style="color: red;">{{ error }}</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.password2.label }}
+            {{ form.password2(size=32) }}
+            {% for error in form.password2.errors %}
+                <span style="color: red;">{{ error }}</span>
+            {% endfor %}
+        </p>
+        <p>{{ form.submit() }}</p>
+    </form>
+    <style>
+        label{
+            display: block;
+            margin-bottom: 7px;
+        }
+        p{
+            margin: 7px 0;
+        }
+    </style>
+{% endblock %}
+
+{% block btns %}
+    <button class="auth" onclick="window.location.href = `{{ url_for('login') }}`">Login</button>
+    <button class="back" onclick="window.location.href = `{{ url_for('index') }}`">Back</button>
+{% endblock %}

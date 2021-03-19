@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <h1>Users</h1>
+    <div class="users">
+        {% for user in users %}
+            <div class="user" id='{{user.id}}'>
+                <span >{{user.id}}.</span>
+                <span class="role">{{user.role.name}}</span>
+                <span class="username">{{user.username}}</span>
+                <span class="email">{{user.email}}</span>
+                <button class="user-delete">Delete</button>
+            </div>
+        {% endfor %}  
+    </div>
+
+    <style>
+        .app{
+            margin-top: 30px;
+            height: 100%;
+        }
+    </style>
+    <script>
+        document.querySelectorAll('.user-delete').forEach(btn => {
+            btn.onclick = (evt) => {
+                fetch('/users/delete/' + evt.target.parentElement.id, {
+                    method: 'DELETE'
+                })
+            }
+        })
+    </script>
+{% endblock %}
+
+{% block btns %}
+    <button class="back" onclick="window.location.href = `{{ url_for('index') }}`">Back</button>
+{% endblock %}

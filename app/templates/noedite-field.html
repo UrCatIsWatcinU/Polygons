@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ru" >
+<head>
+  <meta charset="UTF-8">
+  <title>{{ field_name }}</title>
+  <link rel="stylesheet" href="{{url_for('static', filename='public.css')}}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='field/style.css') }}">
+  <script src="{{ url_for('static', filename='socketio.js') }}"></script>
+  <script src="{{ url_for('static', filename='field/noedite-script.js') }}"></script>
+  <script src="{{url_for('static', filename='public.js')}}"></script>
+  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.png') }}" type="image/png">
+</head>
+<body>
+  <div class="modal">
+    <div class="modal-content">
+      <h2 class="modal-title"></h2>
+      <p class="modal-body"></p>
+    </div>
+  </div>
+  <div class="loading">
+    <svg class='loading-svg' version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+      viewBox="0 0 52 100" enable-background="new 0 0 0 0" xml:space="preserve">
+      <circle stroke="none" cx="6" cy="50" r="6">
+        <animate
+          attributeName="opacity"
+          dur="1s"
+          values="0;1;0"
+          repeatCount="indefinite"
+          begin="0.1"/>    
+      </circle>
+      <circle stroke="none" cx="26" cy="50" r="6">
+        <animate
+          attributeName="opacity"
+          dur="1s"
+          values="0;1;0"
+          repeatCount="indefinite" 
+          begin="0.2"/>       
+      </circle>
+      <circle stroke="none" cx="46" cy="50" r="6">
+        <animate
+          attributeName="opacity"
+          dur="1s"
+          values="0;1;0"
+          repeatCount="indefinite" 
+          begin="0.3"/>     
+      </circle>
+    </svg>
+  </div>
+
+  <div class="controls">
+    <div class="find">
+      <input type="text" class="find-input">
+      <button class="find-button">Search</button>
+    </div>  
+    <button class="back" onclick="window.location.href = `{{ url_for('index') }}`">Back</button>
+    <button onclick="window.location.href = `{{ url_for('login') }}`">Login</button>
+    <button class="auth" onclick="window.location.href = `{{ url_for('registration') }}`">Register</button>
+</div>
+  <img class="icon" src="{{ url_for('static', filename='favicon.png') }}" alt="logo" width="40px">
+</body>
+</html>
+</html>

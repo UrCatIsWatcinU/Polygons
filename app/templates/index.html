@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="descript-cont">
+    <h1 class="first-title">Library Hexagon</h1>
+    <p class="descript">This project will allow you to took information from a different angle. Alternative way, quick access to information</p>
+</div>
+
+<div class="find">
+    <input type="text" class="find-input">
+    <button class="find-button">Search</button>
+</div>
+
+<div class="categs">
+    {% for row in rows %}      
+    <div class="row">
+        {% for categ in row %}
+            <div class="categ hexagon" style="--bgc: #{{categ.color.strip()}}; color: #{{categ.text_color}}">
+                <div class="hexagon-editedField">{{categ.name}}</div>
+            </div>
+        {% endfor %}    
+    </div>
+    {% endfor %}
+    
+</div>
+{% endblock %}
+
+{% block btns %}
+    {% if is_auth %}
+    <div class="user-cont">
+        <span class="username"> {{ user.username }}</span>
+    </div>
+    <button class="auth" onclick="window.location.href = `{{ url_for('logout') }}`">Logout</button>
+        {% if user.role.name == 'admin' %}
+            <button class="auth" onclick="window.location.href = `{{ url_for('users_all') }}`">Users</button>
+        {% endif %}
+    {% else %}
+    <button class="auth" onclick="window.location.href = `{{ url_for('login') }}`">Login</button>
+    <button class="auth" onclick="window.location.href = `{{ url_for('registration') }}`">Register</button>
+    {% endif %}
+{% endblock %}
+
+{% block head%}
+    <script src="{{ url_for('static', filename='index/script.js') }}"></script>
+{% endblock %}

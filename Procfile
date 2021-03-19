@@ -1,0 +1,1 @@
+web: flask db init; flask db upgrade; flask db migrate; gunicorn --worker-class eventlet -w 1 index:app
