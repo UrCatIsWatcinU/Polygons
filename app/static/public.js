@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         foundedHex.classList.remove('founded-polygon');
                     }, 4000)  
                 }else{ 
-                    window.location.href = `/fields/${neededHex.categ}?${neededHex.selector}`;
+                    window.location.href = `/fields/${neededHex.categ}?${neededHex.selector.replace(/\s+/g, '')}`;
                 } 
             }
         }
