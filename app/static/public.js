@@ -36,7 +36,14 @@ const showAsk = (yesCallback, noCallback = () => {document.querySelector('.ask')
 
 function showModal(title, body, empty = false){
     let modal = document.querySelector('.modal');
-    if(getComputedStyle(modal).display != 'none') modal.innerHTML = ''
+    let needToClose = true;
+    if(getComputedStyle(modal).display != 'none'){
+        console.log(modal.style.display);
+        modal.innerHTML = ''
+        modal.onclick = null;
+        needToClose = false;
+
+    } 
 
     modal.style.display = 'flex';
     if(!empty){
@@ -47,12 +54,24 @@ function showModal(title, body, empty = false){
             <button>Close</button>
         </div>`;   
 
-    
-        modal.onclick = () => {
-            modal.style.display = 'none';
-    
-            modal.querySelector('.modal-title').innerText = '';
-            modal.querySelector('.modal-body').innerText = '';
+        if(needToClose){
+            modal.onclick = () => {
+                modal.style.display = 'none';
+            
+                modal.querySelector('.modal-title').innerText = '';
+                modal.querySelector('.modal-body').innerText = '';
+            }
+        }else{
+            let clickCount = 0;
+            modal.onclick = () => {
+                if(clickCount++ >= 1){
+                    clickCount = 0;
+                    modal.style.display = 'none';
+                
+                    modal.querySelector('.modal-title').innerText = '';
+                    modal.querySelector('.modal-body').innerText = '';
+                }
+            }
         }
     
         modal.querySelector('.modal-title').innerText = title;
@@ -70,9 +89,12 @@ let colors = {
     DARK_MAIN_C: '#703868',
 }
 
-const hexsColors = [
+let hexsColors = [
     '#00A9B6', '#82B034', '#FFCA56', '#FF7626', '#FB91AF'
 ]
+if(localStorage.getItem('hexsColors')){
+    hexsColors = JSON.parse(localStorage.getItem('hexsColors'))
+}
 
 if(localStorage.getItem('colors')){
     colors = JSON.parse(localStorage.getItem('colors'));

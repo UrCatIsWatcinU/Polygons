@@ -828,48 +828,135 @@ document.addEventListener('DOMContentLoaded', async () => {
                 let scrollCoords = JSON.parse(localStorage.getItem('userScroll') || `{"x": ${document.body.scrollWidth / 2}, "y":  ${document.body.scrollHeight / 2}}`)
                 window.scrollTo(scrollCoords.x, scrollCoords.y);
             }
-            // настройки
-            
+            // настройки  
+            document.querySelector('.settings-button').onclick = () => {
+                let settingsCont = showModal('', '', true).firstElementChild;
+                settingsCont.classList.add('settings');
 
-                document.querySelector('.settings-button').onclick = () => {
-                    try{
-                        
-                        let settingsCont = showModal('', '', true).firstElementChild;
-                        console.log(settingsCont);
-                        settingsCont.classList.add('settings');
-        
-                        settingsCont.innerHTML = `
-                        <h1 class="settings-title">Settings</h1>
-                        <div class="colors">
-                          <h2 class="colors-title">Theme colors</h2>
-                          <div class="colors-grid"></div>
-                        </div>
-                        <div class="hexs-dColors">
-                          <h2 class="colors-title">Hexagon colors</h2>
-                        </div>
-                        <button class="settings-button">Save</button>
-                        <button class="settings-button">Close</button>
-                        `;
-        
-                        for(let color in colors){
-                            document.querySelector('.colors-grid').innerHTML += `<div><label for="${color}">${color}: </label><br> <input id="${color}" class='color-input' value="${colors[color]}" data-jscolor="{}"></div>`
+                settingsCont.innerHTML = `
+                <h1 class="settings-title">Settings</h1>
+                <div class="colors">
+                    <h2 class="colors-title">Theme colors</h2>
+                    <div class="colors-grid colors"></div>
+                    </div>
+                <div class="hexs-dColors">
+                    <h2 class="colors-title">Hexagon colors</h2>
+                    <div class="colors-grid dColors"></div>
+                </div>
+                <div class="btn-cont" style="display: flex;">
+                    <button class="save-button">Save</button>
+                    <button class="close-button">Close</button>
+                </div>
+                `;
+
+
+                for(let color in colors){
+                    settingsCont.querySelector('.colors-grid.colors').innerHTML += `<div><label for="${color}">${color}: </label><br> <input id="${color}" class="color-input" value="${colors[color]}" data-jscolor="{}"></div>`
+                }
+                settingsCont.querySelectorAll('.color-input').forEach(input => {
+                    input.onchange = () => {
+                        colors[input.id] = input.value;
+
+                        localStorage.setItem('colors', JSON.stringify(colors));
+                    }
+                })
+
+                for(let i = 0; i < hexsColors.length; i++){
+                    settingsCont.querySelector('.colors-grid.dColors').innerHTML += `
+                    <div class="dColor-cont">
+                        <label class="dColor-label" for="dC${i+1}">${i+1}.</label> <input id="dC${i+1}" class="dColor-input" value="${hexsColors[i]}" data-jscolor="{}">
+                        <svg class="settings-minus"><line x1="0%" y1="50%" x2="100%" y2="50%"></line></svg> 
+                    </div>`;
+                }
+                const setDColorProps = input => {
+                    let num = +input.previousElementSibling.innerText.replace('.', '') - 1;
+
+                    input.onchange = () => {
+                        hexsColors[num] = input.value;
+                        localStorage.setItem('hexsColors', JSON.stringify(hexsColors));
+                    }
+                    
+                    let minus = input.nextElementSibling;
+                    minus.style.width = getComputedStyle(settingsCont.querySelector('.jscolor')).height;
+                    minus.style.height = getComputedStyle(settingsCont.querySelector('.jscolor')).height;
+                    
+                    minus.onclick = () => {
+                        if(!input.toDelete){
+                            input.toDelete = true;
+                            hexsColors.splice(num, 1);
+                            
+                            minus.classList.add('settings-overline');
+                            minus.style.width = '';
+                        }else{
+                            input.toDelete = false;
+                            minus.classList.remove('settings-overline');
+                            minus.style.width = getComputedStyle(settingsCont.querySelector('.jscolor')).height;
+                            
+                            hexsColors.splice(num, 0, input.value);
                         }
-                        jscolor.install();
-        
-                        settingsCont.querySelectorAll('.settings-button').forEach(elem => {
-                            elem.onclick = () => {
-                                try{
-
-                                    throw Error('err')
-                                }catch(err){
-                                    showModal('An error occurred while changing the settings', err)
-                                }
-                            }
-                        });
-                    }catch(err){
-                        showModal('An error occurred while changing the settings', err)
+                        localStorage.setItem('hexsColors', JSON.stringify(hexsColors));
                     }
                 }
+
+                setTimeout(() => {
+                    settingsCont.querySelectorAll('.dColor-input').forEach(setDColorProps)
+                }, 0);
+
+                jscolor.install();
+
+                settingsCont.querySelector('.colors-grid.dColors').innerHTML += `<div class="plus-cont"></div>`;
+
+                let plus = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                plus.classList.add('settings-plus');
+                plus.innerHTML = `<line x1="50%" y1="0%" x2="50%" y2="100%"></line><line x1="0%" y1="50%" x2="100%" y2="50%"></line>`;
+
+                settingsCont.querySelector('.plus-cont').append(plus);
+
+                plus.style.width = getComputedStyle(settingsCont.querySelector('.jscolor')).height;
+                plus.style.height = getComputedStyle(settingsCont.querySelector('.jscolor')).height;
+
+                plus.onclick = () => {
+                    const getRandColor = () =>{
+                        let symbols = [1, 2, 3, 4, 5, 6, 7, 8, 9,'a','b','c','d', 'f'];
+                        let result = '#';
+                    
+                        for (let i = 0; i < 6; i++){
+                            result += symbols[getRand(0, symbols.length-1)]
+                        } 
+                        return result;
+                    }
+                    let color = getRandColor();
+                    hexsColors.push(color);
+                    let colorInput = document.createElement('div');
+                    colorInput.classList.add('dColor-cont');
+                    colorInput.innerHTML = `${hexsColors.length}. <input class='color-input' value="${color}" data-jscolor="{}">`;
+                    colorInput.innerHTML = `
+                    <label class="dColor-label" for="dC${hexsColors.length}">${hexsColors.length}.</label> <input id="dC${hexsColors.length}" class="dColor-input" value="${color}" data-jscolor="{}">
+                    <svg class="settings-minus"><line x1="0%" y1="50%" x2="100%" y2="50%"></line></svg>`;
+                    setDColorProps(colorInput.querySelector('input'))
+
+                    settingsCont.querySelector('.plus-cont').before(colorInput);
+
+                    jscolor.install();
+
+                    localStorage.setItem('hexsColors', JSON.stringify(hexsColors));
+                }
+
+
+                settingsCont.querySelector('.save-button').onclick = () => {
+                    try{
+                        window.location.reload();
+                    }catch(err){
+                        showModal('An error occurred while changing the settings', err);
+                    }
+                }
+                settingsCont.querySelector('.close-button').onclick = () => {
+                    document.querySelector('.modal').style.display = 'none';
+                }
+                
+
+                jscolor.install();
+            }
 
             document.querySelector('.hexsCont').style.borderWidth = 'unset';
         }

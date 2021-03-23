@@ -124,11 +124,50 @@
 .settings-title{
   margin-bottom: 10px;
 }
+.settings-button{
+  width: min-content;
+}
 .colors-grid{
   display: grid;  
   grid-template-columns: 1fr 1fr 1fr;
   grid-gap: 10px;
 }
-.settings-button{
-  width: min-content;
+.dColors{
+  margin-bottom: 10px;
+}
+.dColor-cont{
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+.dColor-label{
+  margin-right: 5px;
+}
+.plus-cont{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* margin-bottom: 5px; */
+}
+.settings-minus{
+  /* width: 10px; */
+  margin-bottom: 5px;
+  margin-left: 5px;
+}
+.settings-overline{
+  position: absolute;
+  width: 100%;
+  left: 0;
+  margin-right: 0;
+}
+.settings-minus,
+.settings-plus{
+  stroke: var(--main-c);
+  stroke-width: 1.5px;
+  border-radius: 50%;
+  cursor: pointer;   
+}
+.settings-minus:hover,
+.settings-plus:hover{
+  transform: scale(1.04);
 }

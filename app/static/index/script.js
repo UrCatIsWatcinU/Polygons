@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         let plus = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         plus.classList.add('categs-plus');
-        plus.innerHTML = `<line x1="50%" y1="0%" x2="50%" y2="100%"></line><line x1="0%" y1="50%" x2="100%" y2="50%"></line>`
+        plus.innerHTML = `<line x1="50%" y1="0%" x2="50%" y2="100%"></line><line x1="0%" y1="50%" x2="100%" y2="50%"></line>`;
         if(!document.querySelector('.categs').lastElementChild){
             document.querySelector('.categs').innerHTML = '<div class="row"></div>'
         }
