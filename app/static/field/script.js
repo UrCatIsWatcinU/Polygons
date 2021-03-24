@@ -828,6 +828,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 let scrollCoords = JSON.parse(localStorage.getItem('userScroll') || `{"x": ${document.body.scrollWidth / 2}, "y":  ${document.body.scrollHeight / 2}}`)
                 window.scrollTo(scrollCoords.x, scrollCoords.y);
             }
+            
             // настройки  
             document.querySelector('.settings-button').onclick = () => {
                 let settingsCont = showModal('', '', true).firstElementChild;
