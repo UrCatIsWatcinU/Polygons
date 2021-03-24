@@ -811,6 +811,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 let isFromSearch = selector.includes('%20');
                 selector = selector.replace(/[\s(%20)]+/g, '').split(/[#(%23)]/).filter(s => s);
                 // console.log(window.innerWidth);
+                console.log(selector);
                 let foundedHex = document.querySelector(`#${selector[0]} #${selector[1]}`);
                 
                 window.scrollTo(foundedHex.offsetLeft - (document.documentElement.clientWidth - foundedHex.offsetWidth/2) / 2, 0);
@@ -828,7 +829,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 let scrollCoords = JSON.parse(localStorage.getItem('userScroll') || `{"x": ${document.body.scrollWidth / 2}, "y":  ${document.body.scrollHeight / 2}}`)
                 window.scrollTo(scrollCoords.x, scrollCoords.y);
             }
-            
+
             // настройки  
             document.querySelector('.settings-button').onclick = () => {
                 let settingsCont = showModal('', '', true).firstElementChild;
