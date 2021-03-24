@@ -84,7 +84,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         contextmenu.firstElementChild.onclick = () => {
             showAsk(() => {     
-                fetch('/categ/delete/' + hexagon.innerText, {method: 'DELETE'})
+                fetch('/categ/delete/' + hexagon.innerText, {method: 'DELETE'});
+                window.location.reload();
             })
         }
 
