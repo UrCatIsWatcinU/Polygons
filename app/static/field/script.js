@@ -810,7 +810,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 let selector = window.location.href.split('?')[1];
                 let isFromSearch = selector.includes('%20');
                 console.log(selector);
-                selector = selector.replace(/[\s(%20)]+/g, '').split(/[#(%23)]/).filter(s => s);
+                selector = selector.replace(/[\s(%20)]+/g, '').split(/#/).filter(s => s);
                 // console.log(window.innerWidth);
                 console.log(selector);
                 let foundedHex = document.querySelector(`#${selector[0]} #${selector[1]}`);

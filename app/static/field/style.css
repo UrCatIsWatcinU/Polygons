@@ -81,8 +81,9 @@
 .hexagon-about{
   background: var(--about-bgc);
   color: var(--black-c);
-  width: 350px;
-  height: 400px;
+  width: 380px;
+  min-height: 100px;
+  max-height: 450px;
   position: absolute;
   top: calc(var(--triangle-height) + 5px);
   z-index: 10;
