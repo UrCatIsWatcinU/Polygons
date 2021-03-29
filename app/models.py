@@ -12,6 +12,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'), nullable=False, default=1)
     hexs = db.relationship('Hexagon', backref='author', lazy='dynamic')
+    settings = db.Column(db.String(400))
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

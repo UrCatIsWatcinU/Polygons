@@ -40,7 +40,6 @@ function showModal(title, body, empty = false){
     let modal = document.querySelector('.modal');
     let needToClose = true;
     if(getComputedStyle(modal).display != 'none'){
-        console.log(modal.style.display);
         modal.innerHTML = ''
         modal.onclick = null;
         needToClose = false;
@@ -83,6 +82,13 @@ function showModal(title, body, empty = false){
     return modal;
 }
 
+let otherSettings = {
+    rounded: false, 
+    bordered: false,
+    turned: false,
+    innerNum: false
+}
+
 let colors = {
     BODY_BGC:'#f0f0f0',
     ABOUT_BGC: '#dfdfdf',
@@ -101,32 +107,28 @@ let font = {
     size: ".98em"
 };
 
+// const savedSettings = localStorage.getItem('otherSettings');
+// if(savedSettings){
+//     otherSettings = JSON.parse(savedSettings);
+// }
 
-if(localStorage.getItem('font')){
-    font = JSON.parse(localStorage.getItem('font'));
-}
+// if(localStorage.getItem('font')){
+//     font = JSON.parse(localStorage.getItem('font'));
+// }
 
-if(font.family != 'Arial'){
-    WebFont.load({
-        google: {
-            families: [font.family],
-        }
-    })
-}
+// if(localStorage.getItem('hexsColors')){
+//     hexsColors = JSON.parse(localStorage.getItem('hexsColors'))
+// }
 
-if(localStorage.getItem('hexsColors')){
-    hexsColors = JSON.parse(localStorage.getItem('hexsColors'))
-}
-
-if(localStorage.getItem('colors')){
-    colors = JSON.parse(localStorage.getItem('colors'));
-}
+// if(localStorage.getItem('colors')){
+//     colors = JSON.parse(localStorage.getItem('colors'));
+// }
 const BODY_HEIGHT = 52;
 const TRIANGLE_HEIGHT = BODY_HEIGHT * (35 / 60);
 const HEXAGON_HEIGHT  = TRIANGLE_HEIGHT * 2 + BODY_HEIGHT;
 let HEXAGON_WIDTH = HEXAGON_HEIGHT
 
-const main = () => {
+const main = async () => {
     document.body.style.setProperty('--body-height', BODY_HEIGHT + 'px');
     document.body.style.setProperty('--body-bgc', colors.BODY_BGC);
     document.body.style.setProperty('--about-bgc', colors.ABOUT_BGC);
@@ -135,11 +137,44 @@ const main = () => {
     document.body.style.setProperty('--dark-main-c', colors.DARK_MAIN_C);
     document.body.style.setProperty('--black-c', colors.BLACK_C);
     document.body.style.setProperty('--hex-stroke-c', colors.HEX_STROKE_C);
+    
+    try{
+        let user = await fetch('/users/i')
+        if(user.ok){
+            user = await user.json();
+            if(!user.err){
+                let settingsRes = await fetch('/settings');
+                if(settingsRes.ok){
+                    let settings = await settingsRes.json();
+                    if(settings.success){
+                        settings = JSON.parse(settings.body);
+        
+                        otherSettings = settings.otherSettings;
+                        colors = settings.colors;
+                        hexsColors = settings.hexsColors;
+                        font = settings.font;
+                    }
+                }else{
+                    showModal('An error occurred while loading the settings', 'Please try later. The settings are set to default');
+                }
+            }
+        }
+    }catch(err){
+        showModal('An error occurred while loading the settings', err)
+    }
+
+    if(font.family != 'Arial'){
+        WebFont.load({
+            google: {
+                families: [font.family],
+            }
+        })
+    }
     document.body.style.setProperty('--font', font.family);
     document.body.style.setProperty('--font-size', font.size);
     
     window.onerror = (msg) => {
-        showModal('Произошла ошибка', msg);
+        showModal('Error', msg);
     };
 
     if(document.querySelector('.find-button')){

@@ -151,6 +151,23 @@ def delete_user(id):
     return json.dumps({"success":True})
 
 
+@app.route('/settings')
+@login_required
+def get_settings():
+    if current_user.settings:
+        return json.dumps({"success": True, "body": current_user.settings})
+    else:
+        return json.dumps({"success": False})
+
+@app.route('/settings/set', methods=['POST'])
+@login_required
+def set_settings():
+    current_user.settings = request.get_data(as_text=True)
+    db.session.add(current_user)
+    db.session.commit()
+    return json.dumps({"success": "true"})
+
+
 @app.route('/fields/<categ_name>')
 def fields(categ_name):
     categ = Categ.query.filter_by(name=categ_name).first_or_404()

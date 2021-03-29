@@ -32,20 +32,7 @@ const stringifyHexs = hexsArr => {
     return JSON.stringify(hexsArr.map(prepareHex))
 }
 
-
 let paramsRes = fetch(`/categ/${document.title}/params`);
-
-let otherSettings = {
-    rounded: false, 
-    bordered: false,
-    turned: false,
-    innerNum: false
-}
-const savedSettings = localStorage.getItem('otherSettings');
-if(savedSettings){
-    otherSettings = JSON.parse(savedSettings);
-}
-
 
 document.addEventListener('DOMContentLoaded', async () => {
     document.querySelector('.loading').style.opacity = 1;
@@ -55,6 +42,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         else{
             showModal('Critical error', 'the administrator has been notified, please try again in later');
             return
+        }
+        try{
+            let user = await fetch('/users/i')
+            if(user.ok){
+                user = await user.json();
+                if(!user.err){
+                    let settingsRes = await fetch('/settings');
+                    if(settingsRes.ok){
+                        let settings = await settingsRes.json();
+                        if(settings.success){
+                            settings = JSON.parse(settings.body);
+            
+                            otherSettings = settings.otherSettings;
+                            colors = settings.colors;
+                            hexsColors = settings.hexsColors;
+                            font = settings.font;
+                        }
+                    }else{
+                        showModal('An error occurred while loading the settings', 'Please try later. The settings are set to default');
+                    }
+                }
+            }
+        }catch(err){
+            showModal('An error occurred while loading the settings', err)
         }
         document.querySelector('.loading').style.opacity = 0;
         let isTransEnd = false;
@@ -874,7 +885,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 let selector = window.location.href.split('?')[1];
                 let isFromSearch = selector.includes('%20');
                 selector = selector.replace(/\s+/g, '').replace('%20', '').split(/#/).filter(s => s);
-                
+
                 let foundedHex = document.querySelector(`#${selector[0]} #${selector[1]}`);
                 
                 window.scrollTo(foundedHex.offsetLeft - (document.documentElement.clientWidth - foundedHex.offsetWidth/2) / 2, 0);
@@ -895,6 +906,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // настройки  
             document.querySelector('.settings-button').onclick = () => {
+                document.querySelector('.modal').onclick = null;
                 let settingsCont = showModal('', '', true).firstElementChild;
                 settingsCont.classList.add('settings');
 
@@ -1031,19 +1043,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
 
 
-                settingsCont.querySelector('.save-button').onclick = () => {
-                    try{
-                        window.location.reload();
-                    }catch(err){
-                        showModal('An error occurred while changing the settings', err);
-                    }
-                }
-                let closeSettings = settingsCont.querySelector('.close-button').onclick = () => {
-                    document.querySelector('.modal').style.display = 'none';
-                }
-                settingsCont.querySelector('.settings-close').onclick = closeSettings;
                 
-                jscolor.install();
 
                 settingsCont.querySelectorAll('.check-input').forEach(input => {
                     if(otherSettings[input.id]){
@@ -1075,8 +1075,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                         }, 
                         active: () => {
                             settingsCont.querySelector('.font-preview').style.fontFamily = evt.target.value;
-
-                            localStorage.setItem('font', JSON.stringify({family: evt.target.value, size: settingsCont.querySelector('#font-size').value + 'em'}));
+                            font = {family: evt.target.value, size: settingsCont.querySelector('#font-size').value + 'em'};
+                            // localStorage.setItem('font', JSON.stringify(font));
                         }
                     }
                     try{
@@ -1088,8 +1088,42 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
                 settingsCont.querySelector('#font-size').onchange = (evt) => {
                     settingsCont.querySelector('.font-preview').style.fontSize = evt.target.value + 'em';
-                    localStorage.setItem('font', JSON.stringify({family: settingsCont.querySelector('#font-family').value, size: evt.target.value + 'em'}));
+
+                    font = {family: settingsCont.querySelector('#font-family').value, size: evt.target.value + 'em'};
+                    localStorage.setItem('font', JSON.stringify(font));
                 }
+
+                settingsCont.querySelector('.save-button').onclick = async () => {
+                    try{
+                        let res = await fetch('/settings/set', {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                hexsColors: hexsColors,
+                                colors: colors,
+                                otherSettings: otherSettings,
+                                font: font
+                            })
+                        });
+                        if(res.ok){
+                            res = await res.json();
+                            if(!res.success){
+                                showModal('An error occurred while changing the settings');
+                            }else{
+                                window.location.reload();
+                            } 
+                        }else{
+                            showModal('An error occurred while changing the settings');
+                        }
+                    }catch(err){
+                        showModal('An error occurred while changing the settings', err);
+                    }
+                }
+                let closeSettings = settingsCont.querySelector('.close-button').onclick = () => {
+                    document.querySelector('.modal').style.display = 'none';
+                }
+                settingsCont.querySelector('.settings-close').onclick = closeSettings;
+                
+                jscolor.install();
             }
 
             document.querySelector('.hexsCont').style.borderWidth = 'unset';
