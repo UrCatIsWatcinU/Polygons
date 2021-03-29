@@ -236,6 +236,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                         document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});
                         
                         evt.stopPropagation();
+                        hexagon.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center',
+                            inline: 'center'
+                        })
+
                         if(hexagon.classList.contains('hexagon-active')) return
                         hexagon.classList.add('hexagon-active');
                         const clearAbouts = evt => {
@@ -388,11 +394,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             if(window.location.href.split('?#r')[1]){
                 let selector = window.location.href.split('?')[1];
                 let isFromSearch = selector.includes('%20');
-                selector = selector.replace(/[\s(%20)]+/g, '').split(/[#(%23)]/).filter(s => s);
-                console.log(selector);
+                selector = selector.replace(/\s+/g, '').replace('%20', '').split(/#/).filter(s => s);
                 let foundedHex = document.querySelector(`#${selector[0]} #${selector[1]}`);
                 
-                window.scrollTo(foundedHex.offsetLeft-(window.innerWidth - foundedHex.offsetWidth/2) / 2, 0);
+                window.scrollTo(foundedHex.offsetLeft - (document.documentElement.clientWidth - foundedHex.offsetWidth/2) / 2, 0);
                 foundedHex.scrollIntoView(true)
                 window.scrollBy(0, -(window.innerHeight - foundedHex.offsetHeight/2)/2);
                 

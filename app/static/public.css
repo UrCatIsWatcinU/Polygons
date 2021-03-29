@@ -309,7 +309,7 @@ h1{
 }
 .header-img{
     height: 100%;
-    fill: var(--main-c);
+    fill: var(--dark-main-c);
 }
 .btns{
     display: flex;

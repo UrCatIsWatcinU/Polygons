@@ -30,7 +30,7 @@
     <div class="user-cont">
         <span class="username"> {{ user.username }}</span>
     </div>
-    <button class="auth" onclick="window.location.href = `{{ url_for('logout') }}`">Logout</button>
+    <button class="auth logout">Logout</button>
         {% if user.role.name == 'admin' %}
             <button class="auth" onclick="window.location.href = `{{ url_for('users_all') }}`">Users</button>
         {% endif %}

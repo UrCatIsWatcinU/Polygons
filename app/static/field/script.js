@@ -873,10 +873,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             if(window.location.href.split('?#r')[1]){
                 let selector = window.location.href.split('?')[1];
                 let isFromSearch = selector.includes('%20');
-                console.log(selector);
                 selector = selector.replace(/\s+/g, '').replace('%20', '').split(/#/).filter(s => s);
-                // console.log(window.innerWidth);
-                console.log(selector);
+                
                 let foundedHex = document.querySelector(`#${selector[0]} #${selector[1]}`);
                 
                 window.scrollTo(foundedHex.offsetLeft - (document.documentElement.clientWidth - foundedHex.offsetWidth/2) / 2, 0);

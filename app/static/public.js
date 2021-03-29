@@ -98,7 +98,7 @@ let hexsColors = [
 
 let font = {
     family: 'Arial',
-    size: ".95em"
+    size: ".98em"
 };
 
 
@@ -218,6 +218,14 @@ const main = () => {
         window.onresize = () => {
             document.body.style.width = window.innerWidth + 'px';
             document.body.style.height = window.innerHeight + 'px';
+        }
+    }
+
+
+    if(document.querySelector('.logout')){
+        document.querySelector('.logout').onclick = () => {
+            window.location.href = '/logout';
+            localStorage.clear();
         }
     }
 }
