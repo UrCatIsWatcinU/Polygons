@@ -118,7 +118,7 @@ h1{
 
 .contextmenu{
     position: fixed;
-    z-index: 3;
+    z-index: 9;
     padding: 7.5px;
     font-size: .9em;
 }

@@ -1,5 +1,16 @@
 'use strict';
 
+const scrollTo = (element, to, duration) => {
+    if (duration <= 0) return;
+    let difference = to - element.scrollLeft;
+    let perTick = difference / duration * 10;
+
+    setTimeout(function() {
+        element.scrollLeft = element.scrollLeft + perTick;
+        if (element.scrollLeft === to) return;
+        scrollTo(element, to, duration - 10);
+    }, 10);
+}
 
 const setClassName = (elem, classList) => {
     elem.classList.add(classList);
@@ -551,7 +562,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                     hexagon.isContextmenu = true;
                     
-                    if(hexagon.userId && (user.userId == hexagon.userId) && user.userRole == 2){
+                    if(!hexagon.userId || (user.userId == hexagon.userId) || user.userRole == 2){
                         let menuInfo = contextmenu.innerHTML;
                         contextmenu.innerHTML = `<div class="contextmenu-item">Delete</div> <hr class="contextmenu-line">` + menuInfo;
 
@@ -618,6 +629,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                         document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});
                         
                         evt.stopPropagation();
+                        hexagon.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center',
+                            inline: 'center'
+                        })
+                        // window.scrollTo(hexagon.offsetLeft - (document.documentElement.clientWidth - hexagon.offsetWidth/2) / 2, 0);
+                        // window.scrollBy(0, -(window.innerHeight - hexagon.offsetHeight/2)/2);
                         if(hexagon.classList.contains('hexagon-active')) return
                         hexagon.classList.add('hexagon-active');
                         const clearAbouts = evt => {
@@ -1041,6 +1059,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 })
 
                 settingsCont.querySelector('#font-family').onchange = (evt) => {
+                    if(settingsCont.querySelector('.font-wrong')) settingsCont.querySelector('.font-wrong').remove();
                     const loadConf = {
                         google: {
                             families: [evt.target.value],
@@ -1050,7 +1069,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                             let wrongFontElem = document.createElement('span');
                             wrongFontElem.innerText = 'Wrong font family';
                             wrongFontElem.className = 'font-wrong';
-
+                            setTimeout(() => {
+                                if(wrongFontElem) wrongFontElem.remove();
+                            }, 10000)
+                            
                             settingsCont.querySelector('.font-cont').append(wrongFontElem);
                         }, 
                         active: () => {
