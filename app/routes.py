@@ -7,7 +7,9 @@ from flask_socketio import send, emit
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 from flask_sqlalchemy import sqlalchemy
+
 import json
+import time
 
 @app.route('/')
 @app.route('/index')
@@ -129,10 +131,11 @@ def users_all():
     
     return render_template('users.html', users=User.query.all())
 
+
 @app.route('/users/i')
 def give_current_user():
     if(current_user and current_user.is_authenticated):
-        return json.dumps({'userId': current_user.id, 'userRole': current_user.role_id})
+        return json.dumps({'userId': current_user.id, 'userRole': current_user.role_id, 'username': current_user.username})
     else:
         return json.dumps({'err': 'no user'})
 
@@ -188,7 +191,9 @@ def get_hexs(categ_name):
             "num": hex.num,
             "innerText": hex.inner_text,
             "chainId": hex.chain_id,
-            "userId": hex.user_id
+            "userId": hex.user_id,
+            "username": User.query.get(hex.user_id).username,
+            "creationDate": time.mktime(hex.created_at.timetuple())
         }, categ.hexs))
 
     return json.dumps({"body": hexs_to_send, "userId": userId, "userRole": userRole})

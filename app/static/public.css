@@ -3,7 +3,7 @@
     --webkit-scrollbar-width: none;
     user-select: none;
     transition: all .13s linear;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: var(--font), sans-serif;
 }
 *::-webkit-scrollbar{
     width: 0;
@@ -24,7 +24,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-
+    font-size: var(--font-size);
 }
 .main{
     overflow: hidden;
@@ -57,9 +57,6 @@ body {
   z-index: 11;
   display: none;
 }
-.modal *{
-  font-family: Arial, Helvetica, sans-serif;
-}
 .ask-content,
 .modal-content{
     background-color: var(--body-bgc);
@@ -89,6 +86,8 @@ button{
     padding: 5px 10px;
     cursor: pointer;
     margin-right: 5px;
+    font: unset;
+    font-size: .88em;
 }
 button:active{
     filter: brightness(80%);
@@ -120,10 +119,11 @@ h1{
 .contextmenu{
     position: fixed;
     z-index: 3;
-    padding: 10px;
+    padding: 7.5px;
+    font-size: .9em;
 }
 .contextmenu, button, input{
-    font-family: Arial, Helvetica, sans-serif;
+    
     background-color: var(--body-bgc);
     border-radius: 3px;
     border: 1px var(--main-c) solid;
@@ -131,9 +131,14 @@ h1{
 }
 .contextmenu * {
     cursor: pointer;
-
 }
-
+.contextmenu-info{
+    cursor: unset;
+}
+.contextmenu-line{
+    cursor: unset;
+    margin: 4px 0;
+}
 
 
 
@@ -194,6 +199,8 @@ h1{
     fill: var(--bgc);
     transition: inherit;
 }
+
+
 .hexagon-editedField{
     width: calc(var(--hexagon-width) - 2px);
     height: calc(var(--body-height) - 2px);
@@ -204,7 +211,7 @@ h1{
     overflow-y: scroll;
     position: absolute;
     bottom: var(--triangle-height);
-    font-family: Arial, Helvetica, sans-serif;
+    
     font-size: .94em;
     /* pointer-events: none; */
     transition: inherit;
@@ -241,7 +248,8 @@ h1{
 .categs-plus:hover{
     transform: scale(1.1);
 }
-.categ{
+.categ .polygon{
+    filter: drop-shadow(3px 3px 3px rgba(68, 68, 68, 0.3));
     cursor: pointer;
 }
 .categ:hover{
@@ -301,6 +309,7 @@ h1{
 }
 .header-img{
     height: 100%;
+    fill: var(--main-c);
 }
 .btns{
     display: flex;

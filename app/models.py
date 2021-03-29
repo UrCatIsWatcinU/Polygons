@@ -2,6 +2,8 @@ from app import db, login
 
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
+from datetime import datetime
+
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -39,6 +41,7 @@ class Hexagon(db.Model):
     about = db.Column(db.String(1000))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
     categ_id = db.Column(db.Integer, db.ForeignKey('categ.id'), index=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class Categ(db.Model):
     id = db.Column(db.Integer, primary_key=True)

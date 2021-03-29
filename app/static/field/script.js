@@ -24,6 +24,18 @@ const stringifyHexs = hexsArr => {
 
 let paramsRes = fetch(`/categ/${document.title}/params`);
 
+let otherSettings = {
+    rounded: false, 
+    bordered: false,
+    turned: false,
+    innerNum: false
+}
+const savedSettings = localStorage.getItem('otherSettings');
+if(savedSettings){
+    otherSettings = JSON.parse(savedSettings);
+}
+
+
 document.addEventListener('DOMContentLoaded', async () => {
     document.querySelector('.loading').style.opacity = 1;
     
@@ -38,7 +50,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         let main = document.querySelector('.loading').ontransitionend = async () => {
             if(isTransEnd) return   
             isTransEnd = true;
-
+            
+            if(otherSettings.turned){
+                document.body.style.setProperty('--hexagon-width', (HEXAGON_WIDTH -= 20) + 'px');
+            }
             let size = params.size.split(/[x\sх]/);
             const GRID_HEIGHT = size[0]; // измеряется в шестиугольниках
             const GRID_WIDTH = size[1]; // измеряется в шестиугольниках
@@ -148,12 +163,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         
             function parseHexsFromJson(savedHexs){    
-                if(!savedHexs.length) return []
+                if(!savedHexs.length) return [];
         
-                let parsedHexs = []
+                let parsedHexs = [];
                 for(let hex of savedHexs){
                     let hexagon = document.querySelector(hex.selector);
-                    if(hexagon.classList.contains('hexagon-visible')) continue
+                    if(hexagon.classList.contains('hexagon-visible')) continue;
                     hexagon.classList.add('hexagon-visible');
                     
                     
@@ -187,6 +202,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
         
                     hexagon.userId = hex.userId;
+                    hexagon.username = hex.username;
+                    hexagon.creationDate = hex.creationDate;
                     visibleHexs.push(hexagon);
                     parsedHexs.push(hexagon);   
                 }
@@ -206,10 +223,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             document.documentElement.style.width = (GRID_WIDTH * HEXAGON_WIDTH + HEXAGON_WIDTH/2) + 'px';
             // создание сетки
+            let hexPath = `M 0 ${TRIANGLE_HEIGHT} L ${HEXAGON_WIDTH/2} 0 L ${HEXAGON_WIDTH} ${TRIANGLE_HEIGHT} L ${HEXAGON_WIDTH} ${HEXAGON_HEIGHT-TRIANGLE_HEIGHT} L ${HEXAGON_WIDTH/2} ${HEXAGON_HEIGHT} L 0 ${HEXAGON_HEIGHT-TRIANGLE_HEIGHT} Z`;
+            // let hexPath = `M0,${TRIANGLE_HEIGHT} ${HEXAGON_WIDTH/2},0 ${HEXAGON_WIDTH},${TRIANGLE_HEIGHT} ${HEXAGON_WIDTH},${HEXAGON_HEIGHT-TRIANGLE_HEIGHT} ${HEXAGON_WIDTH/2},${HEXAGON_HEIGHT} 0,${HEXAGON_HEIGHT-TRIANGLE_HEIGHT} Z`;
+            if(otherSettings.rounded){
+                hexPath = roundPathCorners(hexPath, .05, true);
+            }
             for(let i = 1; i <= GRID_HEIGHT; i+=2){
                 let hexagonStr = `<div class="hexagon">
                 <svg class="polygon"> 
-                <polygon points="0,${TRIANGLE_HEIGHT} ${HEXAGON_WIDTH/2},0 ${HEXAGON_WIDTH},${TRIANGLE_HEIGHT} ${HEXAGON_WIDTH},${HEXAGON_HEIGHT-TRIANGLE_HEIGHT} ${HEXAGON_WIDTH/2},${HEXAGON_HEIGHT} 0,${HEXAGON_HEIGHT-TRIANGLE_HEIGHT}"></polygon>
+                <path d="${hexPath}"></path>
                 </svg>
                 <div class="hexagon-num">0</div>
                 </div>`.repeat(GRID_WIDTH);
@@ -219,9 +241,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <div id="r${i+1}" class="row row-moved" style="width:${GRID_WIDTH * HEXAGON_WIDTH}px">${hexagonStr}</div>
                 `
             }
+
             document.querySelectorAll(`#r1, #r${GRID_HEIGHT}, #h1, #h${GRID_WIDTH}`).forEach(elem => {
                 elem.style.pointerEvents = 'none';
             });
+
+            if(otherSettings.turned){
+                document.querySelector('.hexsCont').style.transform = 'rotate(90deg)';
+                document.documentElement.style.width = 'auto';
+                document.documentElement.style.height = (GRID_WIDTH * HEXAGON_WIDTH + HEXAGON_WIDTH/2) + 'px';
+            }
             
             let zoomIndex = 1;
             document.addEventListener('wheel', evt => {
@@ -395,9 +424,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
     
                 if(evt.code == 'Space'){
-                    console.log(document.activeElement);
                     if(document.activeElement == document.body)evt.preventDefault();
-                    console.log('space');
                 }
             }, {passive: false})
             
@@ -457,16 +484,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                         }
                     }
                     if(noCreate){
-                        contextmenu.innerHTML = 'not here';
+                        contextmenu.innerHTML = 'Not here';
                         contextmenu.style.color = 'red'
                     }else{
-                        contextmenu.innerHTML = 'create here';
+                        contextmenu.innerHTML = 'Create here';
                         
                         contextmenu.onclick = () => {
                             hexagon.classList.add('hexagon-visible');
-        
-        
+                            
                             hexagon.userId = user.userId;
+                            hexagon.creationDate = (new Date()).getTime() / 1000;
+                            hexagon.username = document.querySelector('.username').innerText;
                             
                             let chain;
                             let hexagonIdInChain = 0;
@@ -493,7 +521,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                             }
                             
                             hexagon.querySelector('.hexagon-num').innerText = hexagonIdInChain + 1;
-                            
         
                             let dataToEmit = {
                                 action: 'new',
@@ -514,25 +541,36 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                 }
                 else{
-                    if(hexagon.userId && !(user.userId == hexagon.userId) && user.userRole != 2) return false
-                    contextmenu.innerHTML = 'delete';
+                    let hexDate = new Date(hexagon.creationDate * 1000);
+                    contextmenu.innerHTML = `
+                    <div style="margin-bottom: 5px" class="contextmenu-item contextmenu-info">User: ${hexagon.username}</div>
+                    <div style="margin-bottom: 5px" class="contextmenu-item contextmenu-info">Date: ${hexDate.toLocaleDateString()}</div>`;
+                    
+                    if(user.userRole == 2){
+                        contextmenu.innerHTML += `<div class="contextmenu-item contextmenu-info">Chain: ${hexagon.chainId}</div>`;
+                    }
                     hexagon.isContextmenu = true;
-        
-                    contextmenu.onclick = () => {
-                        let virtualVisibleHexs = [...visibleHexs];
-                        let deletedHexs =  deleteHex(hexagon);
-        
-                        socket.emit('hexs', {
-                            action: 'delete',
-                            categ: document.title,
-                            data: JSON.stringify(virtualVisibleHexs.filter(hex => !visibleHexs.includes(hex)).map(giveHexSelector))
-                        })
-                        saveToHistory({
-                            action: 'delete',
-                            categ: document.title,
-                            data: JSON.stringify(deletedHexs)
-                        });
-                        
+                    
+                    if(hexagon.userId && (user.userId == hexagon.userId) && user.userRole == 2){
+                        let menuInfo = contextmenu.innerHTML;
+                        contextmenu.innerHTML = `<div class="contextmenu-item">Delete</div> <hr class="contextmenu-line">` + menuInfo;
+
+                        contextmenu.firstElementChild.onclick = () => {
+                            let virtualVisibleHexs = [...visibleHexs];
+                            let deletedHexs =  deleteHex(hexagon);
+            
+                            socket.emit('hexs', {
+                                action: 'delete',
+                                categ: document.title,
+                                data: JSON.stringify(virtualVisibleHexs.filter(hex => !visibleHexs.includes(hex)).map(giveHexSelector))
+                            })
+                            saveToHistory({
+                                action: 'delete',
+                                categ: document.title,
+                                data: JSON.stringify(deletedHexs)
+                            });
+                            
+                        }
                     }
                 }
                 contextmenu.style.top = evt.clientY + 'px';
@@ -547,10 +585,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // ид ряда и ид шестиугольника
                 let row = hexagon.parentElement;
                 hexagon.id = 'h' +  ([].indexOf.call(row.children, hexagon) + 1);
-                hexagon.querySelector('polygon').id = 'p' + ([].indexOf.call(row.children, hexagon) + 1)
+                // hexagon.querySelector('polygon').id = 'p' + ([].indexOf.call(row.children, hexagon) + 1)
                 hexagon.rowId = idToNum(row.id);
-                hexagon.text = ''
+                hexagon.text = '';
                 hexagon.userId = 0;
+                hexagon.username = '';
                 
                 hexagon.ondblclick = (evt) => {
                     evt.preventDefault()
@@ -733,6 +772,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                         document.addEventListener('mousedown', clearAbouts);
                     }
                 }
+
+                // применение настроек
+                for(let setting in otherSettings){
+                    if(otherSettings[setting]){
+                        hexagon.classList.add('hexagon-' + setting);
+                    }
+                }
             }
             document.querySelectorAll('.hexagon').forEach(setHexProps);
             
@@ -838,13 +884,36 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 settingsCont.innerHTML = `
                 <h1 class="settings-title">Settings</h1>
-                <div class="colors">
-                    <h2 class="colors-title">Theme colors</h2>
-                    <div class="colors-grid colors"></div>
+                <svg class="settings-close"><line x1="50%" y1="0%" x2="50%" y2="100%"></line><line x1="0%" y1="50%" x2="100%" y2="50%"></line></svg>
+                <div class="settings-cont">
+                    <div class="colors">
+                        <h2 class="settings-title">Theme colors</h2>
+                        <div class="settings-grid colors"></div>
                     </div>
-                <div class="hexs-dColors">
-                    <h2 class="colors-title">Hexagon colors</h2>
-                    <div class="colors-grid dColors"></div>
+                    <div class="hexs-dColors">
+                        <h2 class="settings-title">Hexagon colors</h2>
+                        <div class="settings-grid dColors"></div>
+                    </div>
+                    <div class="font">
+                        <h2 class="settings-title">Font</h2>
+                        <div class="font-cont">
+                            <span class="font-input-cont"><label for="font-family">Family from <a href="https://fonts.google.com/">Google</a></label>:&nbsp<input type="text" id="font-family" value="${font.family}"></span>
+                            <span class="font-input-cont"><label for="font-size">Size</label>:&nbsp<input type="text" id="font-size" value="${font.size.replace('em', '')}"></span>
+                        </div>
+                        <div class="font-preview">
+                        <h3 style="font-family: inherit; margin: 10px 0">Font settings example</h3>
+                        <p style="font-family: inherit; margin: 0; max-width: 500px;">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nulla consequatur ullam beatae laudantium eveniet voluptatum facere impedit repudiandae amet laboriosam.</p>
+                        </div>
+                    </div>
+                    <div class="other">
+                        <h2 class="settings-title">Other</h2>
+                        <div class="other-cont">
+                            <div class="rounded-cont check-cont"><label for="rounded">Rounded corners</label><input class="check-input" type="checkbox" id="rounded"></div>
+                            <div class="bordered-cont check-cont"><label for="bordered">Borders</label><input class="check-input" type="checkbox" id="bordered"></div>
+                            <div class="turned-cont check-cont"><label for="turned">Turned hexagons (beta)</label><input class="check-input" type="checkbox" id="turned"></div>
+                            <div class="innerNum-cont check-cont"><label for="innerNum">Inner numeration</label><input class="check-input" type="checkbox" id="innerNum"></div>
+                        </div>
+                    </div>
                 </div>
                 <div class="btn-cont" style="display: flex;">
                     <button class="save-button">Save</button>
@@ -854,7 +923,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
                 for(let color in colors){
-                    settingsCont.querySelector('.colors-grid.colors').innerHTML += `<div><label for="${color}">${color}: </label><br> <input id="${color}" class="color-input" value="${colors[color]}" data-jscolor="{}"></div>`
+                    settingsCont.querySelector('.settings-grid.colors').innerHTML += `<div><label for="${color}">${color}: </label><br> <input id="${color}" class="color-input" value="${colors[color]}" data-jscolor="{}"></div>`
                 }
                 settingsCont.querySelectorAll('.color-input').forEach(input => {
                     input.onchange = () => {
@@ -865,7 +934,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 })
 
                 for(let i = 0; i < hexsColors.length; i++){
-                    settingsCont.querySelector('.colors-grid.dColors').innerHTML += `
+                    settingsCont.querySelector('.settings-grid.dColors').innerHTML += `
                     <div class="dColor-cont">
                         <label class="dColor-label" for="dC${i+1}">${i+1}.</label> <input id="dC${i+1}" class="dColor-input" value="${hexsColors[i]}" data-jscolor="{}">
                         <svg class="settings-minus"><line x1="0%" y1="50%" x2="100%" y2="50%"></line></svg> 
@@ -907,7 +976,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 jscolor.install();
 
-                settingsCont.querySelector('.colors-grid.dColors').innerHTML += `<div class="plus-cont"></div>`;
+                settingsCont.querySelector('.settings-grid.dColors').innerHTML += `<div class="plus-cont"></div>`;
 
                 let plus = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
                 plus.classList.add('settings-plus');
@@ -953,12 +1022,54 @@ document.addEventListener('DOMContentLoaded', async () => {
                         showModal('An error occurred while changing the settings', err);
                     }
                 }
-                settingsCont.querySelector('.close-button').onclick = () => {
+                let closeSettings = settingsCont.querySelector('.close-button').onclick = () => {
                     document.querySelector('.modal').style.display = 'none';
                 }
+                settingsCont.querySelector('.settings-close').onclick = closeSettings;
                 
-
                 jscolor.install();
+
+                settingsCont.querySelectorAll('.check-input').forEach(input => {
+                    if(otherSettings[input.id]){
+                        input.setAttribute('checked', 'true');
+                    }
+
+                    input.onchange = () => {
+                        otherSettings[input.id] = input.checked;
+                        localStorage.setItem('otherSettings', JSON.stringify(otherSettings));
+                    }
+                })
+
+                settingsCont.querySelector('#font-family').onchange = (evt) => {
+                    const loadConf = {
+                        google: {
+                            families: [evt.target.value],
+                        },
+                        timeout: 300,
+                        inactive: () => {
+                            let wrongFontElem = document.createElement('span');
+                            wrongFontElem.innerText = 'Wrong font family';
+                            wrongFontElem.className = 'font-wrong';
+
+                            settingsCont.querySelector('.font-cont').append(wrongFontElem);
+                        }, 
+                        active: () => {
+                            settingsCont.querySelector('.font-preview').style.fontFamily = evt.target.value;
+
+                            localStorage.setItem('font', JSON.stringify({family: evt.target.value, size: settingsCont.querySelector('#font-size').value + 'em'}));
+                        }
+                    }
+                    try{
+                        WebFont.load(loadConf)
+                    }catch(err){
+                        console.log(err);
+                        loadConf.inactive();
+                    }
+                }
+                settingsCont.querySelector('#font-size').onchange = (evt) => {
+                    settingsCont.querySelector('.font-preview').style.fontSize = evt.target.value + 'em';
+                    localStorage.setItem('font', JSON.stringify({family: settingsCont.querySelector('#font-family').value, size: evt.target.value + 'em'}));
+                }
             }
 
             document.querySelector('.hexsCont').style.borderWidth = 'unset';

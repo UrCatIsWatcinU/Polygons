@@ -4,10 +4,12 @@ function getRand(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-const hexToRgb = (color, alpha = 1) =>  {
+function hexToRgb(color, alpha = 1){
     let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color);
     return result ? `rgb(${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}, ${alpha})` : null;
-}   
+}  
+
+
 
 const showAsk = (yesCallback, noCallback = () => {document.querySelector('.ask').remove()}, title = 'Are you sure?', body='You will not be able to cancel this action') => {
     let ask = document.createElement('div');
@@ -87,11 +89,31 @@ let colors = {
     BLACK_C:'#333333',
     MAIN_C:'#974E9E',
     DARK_MAIN_C: '#703868',
+    HEX_STROKE_C: '#333333'
 }
 
 let hexsColors = [
     '#00A9B6', '#82B034', '#FFCA56', '#FF7626', '#FB91AF'
 ]
+
+let font = {
+    family: 'Arial',
+    size: ".95em"
+};
+
+
+if(localStorage.getItem('font')){
+    font = JSON.parse(localStorage.getItem('font'));
+}
+
+if(font.family != 'Arial'){
+    WebFont.load({
+        google: {
+            families: [font.family],
+        }
+    })
+}
+
 if(localStorage.getItem('hexsColors')){
     hexsColors = JSON.parse(localStorage.getItem('hexsColors'))
 }
@@ -102,9 +124,9 @@ if(localStorage.getItem('colors')){
 const BODY_HEIGHT = 52;
 const TRIANGLE_HEIGHT = BODY_HEIGHT * (35 / 60);
 const HEXAGON_HEIGHT  = TRIANGLE_HEIGHT * 2 + BODY_HEIGHT;
-const HEXAGON_WIDTH = HEXAGON_HEIGHT
+let HEXAGON_WIDTH = HEXAGON_HEIGHT
 
-document.addEventListener('DOMContentLoaded', () => {
+const main = () => {
     document.body.style.setProperty('--body-height', BODY_HEIGHT + 'px');
     document.body.style.setProperty('--body-bgc', colors.BODY_BGC);
     document.body.style.setProperty('--about-bgc', colors.ABOUT_BGC);
@@ -112,7 +134,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.style.setProperty('--main-c', colors.MAIN_C);
     document.body.style.setProperty('--dark-main-c', colors.DARK_MAIN_C);
     document.body.style.setProperty('--black-c', colors.BLACK_C);
-
+    document.body.style.setProperty('--hex-stroke-c', colors.HEX_STROKE_C);
+    document.body.style.setProperty('--font', font.family);
+    document.body.style.setProperty('--font-size', font.size);
+    
     window.onerror = (msg) => {
         showModal('Произошла ошибка', msg);
     };
@@ -195,7 +220,8 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.style.height = window.innerHeight + 'px';
         }
     }
-})
+}
+document.addEventListener('DOMContentLoaded', main)
 
 socket.on('reload', () => {
     window.location.href = '/'
