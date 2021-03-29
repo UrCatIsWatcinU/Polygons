@@ -129,14 +129,19 @@ const HEXAGON_HEIGHT  = TRIANGLE_HEIGHT * 2 + BODY_HEIGHT;
 let HEXAGON_WIDTH = HEXAGON_HEIGHT
 
 const main = async () => {
-    document.body.style.setProperty('--body-height', BODY_HEIGHT + 'px');
-    document.body.style.setProperty('--body-bgc', colors.BODY_BGC);
-    document.body.style.setProperty('--about-bgc', colors.ABOUT_BGC);
-    document.body.style.setProperty('--grid-c', hexToRgb(colors.MAIN_C, 0.1));
-    document.body.style.setProperty('--main-c', colors.MAIN_C);
-    document.body.style.setProperty('--dark-main-c', colors.DARK_MAIN_C);
-    document.body.style.setProperty('--black-c', colors.BLACK_C);
-    document.body.style.setProperty('--hex-stroke-c', colors.HEX_STROKE_C);
+    const setCSSPropsVals = () => {
+        document.body.style.setProperty('--body-height', BODY_HEIGHT + 'px');
+        document.body.style.setProperty('--body-bgc', colors.BODY_BGC);
+        document.body.style.setProperty('--about-bgc', colors.ABOUT_BGC);
+        document.body.style.setProperty('--grid-c', hexToRgb(colors.MAIN_C, 0.1));
+        document.body.style.setProperty('--main-c', colors.MAIN_C);
+        document.body.style.setProperty('--dark-main-c', colors.DARK_MAIN_C);
+        document.body.style.setProperty('--black-c', colors.BLACK_C);
+        document.body.style.setProperty('--hex-stroke-c', colors.HEX_STROKE_C);
+        document.body.style.setProperty('--font', font.family);
+        document.body.style.setProperty('--font-size', font.size);
+    }
+    setCSSPropsVals();
     
     try{
         let user = await fetch('/users/i')
@@ -170,8 +175,7 @@ const main = async () => {
             }
         })
     }
-    document.body.style.setProperty('--font', font.family);
-    document.body.style.setProperty('--font-size', font.size);
+    setCSSPropsVals();
     
     window.onerror = (msg) => {
         showModal('Error', msg);
