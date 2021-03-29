@@ -129,6 +129,16 @@ const HEXAGON_HEIGHT  = TRIANGLE_HEIGHT * 2 + BODY_HEIGHT;
 let HEXAGON_WIDTH = HEXAGON_HEIGHT
 
 const main = async () => {
+    let mainLogo = document.querySelector('.header-img');
+    let smallLogo = document.querySelector('.header-img.small');
+    if(mainLogo && smallLogo){
+        if(window.innerWidth < 500){
+            mainLogo.remove();
+        }else{
+            smallLogo.remove();
+        }
+    }
+    
     const setCSSPropsVals = () => {
         document.body.style.setProperty('--body-height', BODY_HEIGHT + 'px');
         document.body.style.setProperty('--body-bgc', colors.BODY_BGC);
@@ -238,16 +248,6 @@ const main = async () => {
                     window.location.href = `/fields/${neededHex.categ}?${neededHex.selector.replace(/\s+/g, '')}`;
                 } 
             }
-        }
-    }
-    
-    let mainLogo = document.querySelector('.header-img');
-    let smallLogo = document.querySelector('.header-img.small');
-    if(mainLogo && smallLogo){
-        if(window.innerWidth < 500){
-            mainLogo.remove();
-        }else{
-            smallLogo.remove();
         }
     }
 
