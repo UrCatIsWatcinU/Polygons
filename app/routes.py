@@ -202,6 +202,10 @@ def get_hexs(categ_name):
         }, all_hexs))
     else:
         categ = Categ.query.filter_by(name=categ_name).first_or_404()
+        user = User.query.get(hex.user_id)
+        username = 'none'
+        if user:
+            username = user.username
         hexs_to_send = list(map(lambda hex: {
             "selector": hex.selector,
             "about": hex.about,
@@ -209,7 +213,7 @@ def get_hexs(categ_name):
             "innerText": hex.inner_text,
             "chainId": hex.chain_id,
             "userId": hex.user_id,
-            "username": User.query.get(hex.user_id).username,
+            "username": username,
             "creationDate": time.mktime(hex.created_at.timetuple())
         }, categ.hexs))
 
