@@ -250,19 +250,39 @@ document.addEventListener('DOMContentLoaded', async () => {
             if(otherSettings.rounded){
                 hexPath = roundPathCorners(hexPath, .05, true);
             }
-            for(let i = 1; i <= GRID_HEIGHT; i+=2){
+            // for(let i = 1; i <= GRID_HEIGHT; i+=2){
+            //     let hexagonStr = `<div class="hexagon">
+            //     <svg class="polygon"> 
+            //     <path d="${hexPath}"></path>
+            //     </svg>
+            //     <div class="hexagon-num">0</div>
+            //     </div>`.repeat(GRID_WIDTH);
+                
+            //     document.querySelector('.hexsCont').innerHTML += `
+            //     <div id="r${i}" class="row" style="width:${GRID_WIDTH * HEXAGON_WIDTH}px">${hexagonStr}</div>
+            //     <div id="r${i+1}" class="row row-moved" style="width:${GRID_WIDTH * HEXAGON_WIDTH}px">${hexagonStr}</div>
+            //     `
+            // }
+            for(let i = 1; i <= GRID_HEIGHT; i++){
                 let hexagonStr = `<div class="hexagon">
                 <svg class="polygon"> 
                 <path d="${hexPath}"></path>
                 </svg>
                 <div class="hexagon-num">0</div>
-                </div>`.repeat(GRID_WIDTH);
+                </div>`;
+                let hexagon = document.createElement('div');
                 
-                document.querySelector('.hexsCont').innerHTML += `
-                <div id="r${i}" class="row" style="width:${GRID_WIDTH * HEXAGON_WIDTH}px">${hexagonStr}</div>
-                <div id="r${i+1}" class="row row-moved" style="width:${GRID_WIDTH * HEXAGON_WIDTH}px">${hexagonStr}</div>
-                `
+                let row = setClassName(document.createElement('div'), 'row');
+                row.id = 'r' + i;
+                row.style.width = (GRID_WIDTH * HEXAGON_WIDTH) + 'px';
+                if(i % 2 == 0){
+                    row.classList.add('row-moved');
+                }
+                document.querySelector('.hexsCont').append(row);
+                
+                row.innerHTML = hexagonStr.repeat(GRID_WIDTH);
             }
+            
 
             document.querySelectorAll(`#r1, #r${GRID_HEIGHT}, #h1, #h${GRID_WIDTH}`).forEach(elem => {
                 elem.style.pointerEvents = 'none';
@@ -575,7 +595,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     
                     if(!hexagon.userId || (user.userId == hexagon.userId) || user.userRole == 2){
                         let menuInfo = contextmenu.innerHTML;
-                        contextmenu.innerHTML = `<div class="contextmenu-item">Delete</div> <hr class="contextmenu-line">` + menuInfo;
+                        contextmenu.innerHTML = `
+                        <div style="margin-bottom: 5px;" class="contextmenu-item">Delete</div> 
+                        <div class="contextmenu-item complain">Complain</div> 
+                        <hr class="contextmenu-line">
+                        ` + menuInfo;
 
                         contextmenu.firstElementChild.onclick = () => {
                             let virtualVisibleHexs = [...visibleHexs];
@@ -592,6 +616,54 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 data: JSON.stringify(deletedHexs)
                             });
                             
+                        }
+                        contextmenu.querySelector('.complain').onclick = () => {
+                            let complaint = showModal('','', true);
+                            complaint.onclick = null;
+                            complaint = complaint.firstElementChild;
+                            complaint.classList.add('complaint');
+
+                            complaint.innerHTML = `
+                            <h1 class="complaint-title">Complaint</h1>
+                            <svg class="complaint-close"><line x1="50%" y1="0%" x2="50%" y2="100%"></line><line x1="0%" y1="50%" x2="100%" y2="50%"></line></svg>
+                            <div class="complaint-textarea">
+                                <label for="complaint-text">Text</label> 
+                                <br> 
+                                <textarea id="complaint-text" autofocus maxlength="400" spellcheck="true" wrap="soft"></textarea>
+                            </div>
+                            <div class="btn-cont" style="display: flex;">
+                                <button class="send-button">Send</button>
+                                <button class="close-button">Close</button>
+                            </div>
+                            `;
+
+                            complaint.querySelector('.send-button').onclick = async () => {
+                                try{
+                                    let res = await fetch('/complaints/new', {
+                                        method: 'POST',
+                                        body:JSON.stringify({
+                                            hexagon: {
+                                                selector: giveHexSelector(hexagon),
+                                                categ: document.title
+                                            },
+                                            text: complaint.querySelector('#complaint-text').value
+                                        })
+                                    })
+    
+                                    if(res.ok){
+                                        res = await res.json();
+    
+                                        if(res.success) showModal('Your complaint has been successfully recorded', 'It will soon be reviewed by the administration');
+                                        else showModal('An error occurred while recording the complaint', 'Try later');
+                                    }else{
+                                        showModal('An error occurred while recording the complaint', 'Try later');
+                                    }
+                                }catch(err){
+                                    showModal('An error occurred while sending the complaint', err);
+                                }
+                            };
+                            complaint.querySelector('.close-button').onclick = hideModal;
+                            complaint.querySelector('.complaint-close').onclick = hideModal;
                         }
                     }
                 }
@@ -1118,10 +1190,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                         showModal('An error occurred while changing the settings', err);
                     }
                 }
-                let closeSettings = settingsCont.querySelector('.close-button').onclick = () => {
-                    document.querySelector('.modal').style.display = 'none';
-                }
-                settingsCont.querySelector('.settings-close').onclick = closeSettings;
+                settingsCont.querySelector('.close-button').onclick = hideModal
+                settingsCont.querySelector('.settings-close').onclick = hideModal;
                 
                 jscolor.install();
             }

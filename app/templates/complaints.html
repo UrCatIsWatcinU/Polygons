@@ -1,0 +1,58 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <h1>Complaints</h1>
+    <div class="complaints">
+        {% for complaint in complaints %}
+            <div class="complaint" id='{{complaint.id}}'>
+                <span class="complaint-num">{{complaint.id}}.</span>
+                <div class="complaint-author">
+                    <span>Author:</span>&nbsp;
+                    <b>{{complaint.author.username}}</b>&nbsp;
+                    <span>{{complaint.author.email}}</span>
+                </div>
+
+                <span>Hex:</span>&nbsp;
+                <div class="complaint-hex">
+                    <h4 class="complaint-hex-title"><a href="/fields/{{complaint.hex.categ.name}}?{{complaint.hex.selector}}">{{complaint.hex.inner_text}}</a></h3>
+                    <div class="complaint-hex-about">{{complaint.hex.about}}</div>
+                </div>
+
+                <span>Text:</span>&nbsp;
+                <div class="complaint-text">{{complaint.body}}</div>
+                <button class="complaint-delete">Delete</button>
+            </div>
+        {% endfor %}  
+    </div>
+    <style>
+        .app{
+            width: 100%;
+            padding: 0 15vw;
+            overflow-y: auto;
+            height: calc(100% - 40px);
+        }
+        </style>
+    <script>
+        document.querySelectorAll('.complaint-delete').forEach(btn => {
+            btn.onclick = (evt) => {
+                fetch('/complaints/delete/' + evt.target.parentElement.id, {
+                    method: 'DELETE'
+                });
+
+                evt.target.parentElement.remove();
+            }
+        });
+    </script>
+{% endblock %}
+
+{% block btns %}
+    <button class="back" onclick="window.location.href = `{{ url_for('index') }}`">Back</button>
+    <button class="deleteAll">Delete all</button>
+    <script>
+        document.querySelector('.deleteAll').onclick = () => {
+            showAsk(() => {
+                window.location.href = '{{url_for("delete_all_complaints")}}'
+            });
+        }    
+    </script>
+{% endblock %}

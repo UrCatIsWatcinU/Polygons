@@ -1,12 +1,7 @@
 *{
-    scrollbar-width: none;
-    --webkit-scrollbar-width: none;
     user-select: none;
     transition: all .13s linear;
     font-family: var(--font), sans-serif;
-}
-*::-webkit-scrollbar{
-    width: 0;
 }
 html{
     padding: 0;
@@ -92,6 +87,7 @@ button{
 button:active{
     filter: brightness(80%);
 }
+textarea,
 input:focus,
 button:focus{
     outline: none;
@@ -99,6 +95,7 @@ button:focus{
 button:hover{
     filter: brightness(95%);
 }
+textarea,
 input{
     padding: 4px 8px;
     box-shadow: none;
@@ -122,8 +119,7 @@ h1{
     padding: 7.5px;
     font-size: .9em;
 }
-.contextmenu, button, input{
-    
+.contextmenu, button, input, textarea{
     background-color: var(--body-bgc);
     border-radius: 3px;
     border: 1px var(--main-c) solid;
@@ -192,6 +188,19 @@ h1{
     z-index: 2;
     overflow: visible;
     transform: scale(.9);
+
+    scrollbar-width: none;
+    --webkit-scrollbar-width: none;
+}
+.hexagon *{
+    scrollbar-width: none;
+    --webkit-scrollbar-width: none;
+}
+.hexagon::-webkit-scrollbar{
+    display: none;
+}
+.hexagon *::-webkit-scrollbar{
+    display: none;
 }
 .polygon{
     width: var(--hexagon-width);
@@ -247,6 +256,9 @@ h1{
 }
 .categs-plus:hover{
     transform: scale(1.1);
+}
+.categ .hexagon-editedField{
+    cursor: pointer;
 }
 .categ .polygon{
     filter: drop-shadow(3px 3px 3px rgba(68, 68, 68, 0.3));
@@ -361,6 +373,45 @@ h1{
 .username{
     text-decoration: underline;
 }
+.complaint{
+    position: relative;
+    padding-left: 30px;
+    margin-bottom: 10px;
+}
+.complaint-num{
+    position: absolute;
+    left: 0;
+}
+.complaint-author{
+    margin-bottom: 10px;
+}
+.complaint-hex{
+    border-radius: 3px;
+    border: 1px var(--main-c) solid;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+.complaint-hex{
+    width: max-content;
+    min-width: 100px;
+    max-width: 100vh;
+}
+.complaint-hex-title{
+    margin-top: 0;
+    margin-bottom: 12.5px;
+}
+.complaint-hex-title *{
+    color: var(--main-c);
+}
+.complaint-hex-about{
+    margin: 10px 0 0 0 ;
+    max-height: 120px;
+    overflow-y: auto;
+}
+
+.complaint-text{
+    margin: 10px 0;
+}
 
 
 
@@ -368,7 +419,6 @@ h1{
     opacity: 0;
     transition: opacity .4s linear;
 }
-
 .loading-svg{
     height: 100px;
     fill: var(--dark-main-c);

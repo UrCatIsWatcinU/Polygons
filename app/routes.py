@@ -1,6 +1,6 @@
 from app import app, socketio, db
 from app.forms import LoginForm, RegistrationForm
-from app.models import Change, Hexagon, User, Categ, Role
+from app.models import Change, Complaint, Hexagon, User, Categ, Role
 
 from flask import render_template, redirect, url_for, request
 from flask_socketio import send, emit
@@ -282,3 +282,58 @@ def handle_hexs(data):
     db.session.commit()
     
     emit('hexs', data_to_send, broadcast=True)
+
+
+@app.route('/complaints')
+@login_required
+def get_complaints():
+    if current_user.role_id != 2:
+        return "<h1>You don't have access</h1"
+
+    return render_template('complaints.html', complaints=Complaint.query.all())
+
+@app.route('/complaints/new', methods=['POST'])
+@login_required
+def create_complaint():
+    raw_complaint = request.get_json(True)
+    raw_hex = raw_complaint['hexagon']
+    hex_id = Hexagon.query.filter(Hexagon.selector == raw_hex['selector'], Hexagon.categ_id == Categ.query.filter_by(name=raw_hex['categ']).first_or_404().id).first().id
+
+    if not hex_id:
+        return json.dumps({'success': False, 'message': 'No such hexagon'})
+
+    complaint = Complaint(
+        body=raw_complaint['text'],
+        hex_id=hex_id, 
+        user_id=current_user.id
+    )
+
+    db.session.add(complaint)
+    db.session.commit()
+
+    return json.dumps({'success': True})
+
+@app.route('/complaints/delete/<id>', methods=['DELETE'])
+@login_required
+def delete_complaint(id):
+    if current_user.role_id != 2:
+        return json.dumps({'success': False, "message": 'You don\'t have access'})
+
+    complaint = Complaint.query.get_or_404(id)
+
+    db.session.delete(complaint)
+    db.session.commit()
+
+    return json.dumps({'success': True})
+
+@app.route('/complaints/delete/all')
+@login_required
+def delete_all_complaints():
+    if current_user.role_id != 2:
+        return json.dumps({'success': False, "message": 'You don\'t have access'})
+
+    delete_q = Complaint.__table__.delete().where(Complaint.id > 0)
+    db.session.execute(delete_q)
+    db.session.commit()
+
+    return redirect(url_for('get_complaints'))

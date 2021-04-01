@@ -33,6 +33,7 @@
     <button class="auth logout">Logout</button>
         {% if user.role.name == 'admin' %}
             <button class="auth" onclick="window.location.href = `{{ url_for('users_all') }}`">Users</button>
+            <button class="auth" onclick="window.location.href = `{{ url_for('get_complaints') }}`">Complaints</button>
         {% endif %}
     {% else %}
     <button class="auth" onclick="window.location.href = `{{ url_for('login') }}`">Login</button>
@@ -40,6 +41,6 @@
     {% endif %}
 {% endblock %}
 
-{% block head%}
+{% block head %}
     <script src="{{ url_for('static', filename='index/script.js') }}"></script>
 {% endblock %}

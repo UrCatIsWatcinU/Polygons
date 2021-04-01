@@ -65,21 +65,32 @@ function showModal(title, body, empty = false){
         }else{
             let clickCount = 0;
             modal.onclick = () => {
-                if(clickCount++ >= 1){
+                if(++clickCount >= 1){
                     clickCount = 0;
-                    modal.style.display = 'none';
-                
-                    modal.querySelector('.modal-title').innerText = '';
-                    modal.querySelector('.modal-body').innerText = '';
+
+                    hideModal();
                 }
             }
         }
-    
+        
         modal.querySelector('.modal-title').innerText = title;
         modal.querySelector('.modal-body').innerText = body;
     }
-
+    
     return modal;
+}
+
+function hideModal(){
+    modal = document.querySelector('.modal');
+    
+    if(!modal) return
+
+    modal.style.display = 'none';
+
+    if(modal.querySelector('.modal-title') && modal.querySelector('.modal-body')){
+        modal.querySelector('.modal-title').innerText = '';
+        modal.querySelector('.modal-body').innerText = '';
+    }
 }
 
 let otherSettings = {
@@ -139,20 +150,6 @@ const main = async () => {
         }
     }
     
-    const setCSSPropsVals = () => {
-        document.body.style.setProperty('--body-height', BODY_HEIGHT + 'px');
-        document.body.style.setProperty('--body-bgc', colors.BODY_BGC);
-        document.body.style.setProperty('--about-bgc', colors.ABOUT_BGC);
-        document.body.style.setProperty('--grid-c', hexToRgb(colors.MAIN_C, 0.1));
-        document.body.style.setProperty('--main-c', colors.MAIN_C);
-        document.body.style.setProperty('--dark-main-c', colors.DARK_MAIN_C);
-        document.body.style.setProperty('--black-c', colors.BLACK_C);
-        document.body.style.setProperty('--hex-stroke-c', colors.HEX_STROKE_C);
-        document.body.style.setProperty('--font', font.family);
-        document.body.style.setProperty('--font-size', font.size);
-    }
-    setCSSPropsVals();
-    
     try{
         let user = await fetch('/users/i')
         if(user.ok){
@@ -185,7 +182,21 @@ const main = async () => {
             }
         })
     }
+    
+    const setCSSPropsVals = () => {
+        document.body.style.setProperty('--body-height', BODY_HEIGHT + 'px');
+        document.body.style.setProperty('--body-bgc', colors.BODY_BGC);
+        document.body.style.setProperty('--about-bgc', colors.ABOUT_BGC);
+        document.body.style.setProperty('--grid-c', hexToRgb(colors.MAIN_C, 0.1));
+        document.body.style.setProperty('--main-c', colors.MAIN_C);
+        document.body.style.setProperty('--dark-main-c', colors.DARK_MAIN_C);
+        document.body.style.setProperty('--black-c', colors.BLACK_C);
+        document.body.style.setProperty('--hex-stroke-c', colors.HEX_STROKE_C);
+        document.body.style.setProperty('--font', font.family);
+        document.body.style.setProperty('--font-size', font.size);
+    }
     setCSSPropsVals();
+    
     
     window.onerror = (msg) => {
         showModal('Error', msg);

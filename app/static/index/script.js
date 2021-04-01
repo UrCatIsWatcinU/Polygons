@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         let user = JSON.parse(sessionStorage.getItem('user'));
         if(user.userRole != 2) return false
-        contextmenu.innerHTML = '<div style="margin-bottom: 5px" class="contextmenu-item">Delete</div>';
+        contextmenu.innerHTML = '<div class="contextmenu-item">Delete</div>';
 
         contextmenu.firstElementChild.onclick = () => {
             showAsk(() => {     
