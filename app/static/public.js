@@ -242,12 +242,10 @@ const main = async () => {
             }
             
             if(neededHex){
-                console.log(neededHex);
                 if(window.location.pathname.replace(/\/?fields\//, '') == neededHex.categ){
                     let foundedHex = document.querySelector(neededHex.selector);
             
                     window.scrollTo(foundedHex.offsetLeft-(window.innerWidth - foundedHex.offsetWidth/2) / 2, 0);
-                    foundedHex.scrollIntoView(true)
                     window.scrollBy(0, -(window.innerHeight - foundedHex.offsetHeight/2)/2);
                 
                     foundedHex.classList.add('founded-polygon');
@@ -278,9 +276,20 @@ const main = async () => {
             localStorage.clear();
         }
     }
+
+    document.body.classList.remove('while-loading');
+
+    let loading = document.querySelector('.loading');
+    if(loading){
+        loading.style.opacity = 0;
+        
+        loading.ontransitionend = () => {
+            loading.remove()
+        }
+    }
 }
-document.addEventListener('DOMContentLoaded', main)
+window.addEventListener('load', main);
 
 socket.on('reload', () => {
     window.location.href = '/'
-})
+});

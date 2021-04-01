@@ -9,7 +9,7 @@ function rgbToHex(r, g, b) {
     return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
+window.addEventListener('load', async () => {
     const createEditedField = (hexagon, needToSend = true) => {
         let editedField = hexagon.querySelector('.hexagon-editedField');
         if(!editedField){
@@ -148,7 +148,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // отрисовка плюса для создания категорий
-    console.log(user);
     if(user && user.userRole == 2){
         let isNewCateg = false;
 
@@ -233,8 +232,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     params[param.id] = param.value;
                 })
 
-                if(!params.size.match(/\d{1,3}[xх\s]\d{1,3}/) || !params.maxWords.match(/\d+/) ) return
-                console.log('ok');
+                if(!params.size.match(/\d{1,3}[xх\s]\d{1,3}/) || !params.maxWords.match(/\d+/) ) return;
 
                 newCateg.querySelector('.newCategPieces').remove();
                 let res = await fetch('/categ/new', {

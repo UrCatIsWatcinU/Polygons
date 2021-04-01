@@ -220,6 +220,8 @@ h1{
     overflow-y: scroll;
     position: absolute;
     bottom: var(--triangle-height);
+    border-radius: 3px;
+    left: 1;
     
     font-size: .94em;
     /* pointer-events: none; */
@@ -230,8 +232,8 @@ h1{
     z-index: 5;
     width: calc(var(--hexagon-width));
     height: calc(var(--body-height) + var(--triangle-height) * 2);
-    border-radius: 3px;
     bottom: 0;
+    left: 0;
 }
 .color-picker{
     position: absolute;
@@ -411,15 +413,4 @@ h1{
 
 .complaint-text{
     margin: 10px 0;
-}
-
-
-
-.loading{
-    opacity: 0;
-    transition: opacity .4s linear;
-}
-.loading-svg{
-    height: 100px;
-    fill: var(--dark-main-c);
 }

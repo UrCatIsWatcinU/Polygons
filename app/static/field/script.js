@@ -34,7 +34,7 @@ const stringifyHexs = hexsArr => {
 
 let paramsRes = fetch(`/categ/${document.title}/params`);
 
-document.addEventListener('DOMContentLoaded', async () => {
+window.addEventListener('load', async () => {
     document.querySelector('.loading').style.opacity = 1;
     
     paramsRes.then(async params => {

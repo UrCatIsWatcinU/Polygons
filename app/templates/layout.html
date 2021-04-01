@@ -4,6 +4,55 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+      let loadingColors = JSON.parse(localStorage.getItem('colors'));
+      if(!loadingColors){
+        loadingColors = {
+          BODY_BGC:'#f0f0f0',
+          ABOUT_BGC: '#dfdfdf',
+          BLACK_C:'#333333',
+          MAIN_C:'#974E9E',
+          DARK_MAIN_C: '#703868',
+          HEX_STROKE_C: '#333333'
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        document.body.style.setProperty('--body-bgc', loadingColors.BODY_BGC);
+        document.body.style.setProperty('--dark-main-c', loadingColors.DARK_MAIN_C);
+      });
+    </script>
+    <style>
+      body{
+        height: 100vh;
+      }
+      .while-loading *{
+        visibility: hidden;
+      }
+      .loading{
+        opacity: 1;
+        transition: opacity .4s linear;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: var(--body-bgc);
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        z-index: 100;
+        visibility: visible;
+      }
+      .loading *{
+        visibility: inherit;
+      }
+      .loading-svg{
+        visibility: visible;
+        height: 100px;
+        fill: var(--dark-main-c);
+      }
+    </style>
     <link rel="stylesheet" href="{{url_for('static', filename='public.css')}}">
     <script src="{{url_for('static', filename='jscolor.js')}}"></script>
     <script src="{{url_for('static', filename='socketio.js')}}"></script>
@@ -14,7 +63,36 @@
     {% endblock %}
     <title>Library Hexagon | {{title}}</title>
 </head>
-<body class="main">
+<body class="main while-loading">
+  <div class="loading">
+    <svg class='loading-svg' version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+      viewBox="0 0 52 100" enable-background="new 0 0 0 0" xml:space="preserve">
+      <circle stroke="none" cx="6" cy="50" r="6">
+        <animate
+          attributeName="opacity"
+          dur="1s"
+          values="0;1;0"
+          repeatCount="indefinite"
+          begin="0.1"/>    
+      </circle>
+      <circle stroke="none" cx="26" cy="50" r="6">
+        <animate
+          attributeName="opacity"
+          dur="1s"
+          values="0;1;0"
+          repeatCount="indefinite" 
+          begin="0.2"/>       
+      </circle>
+      <circle stroke="none" cx="46" cy="50" r="6">
+        <animate
+          attributeName="opacity"
+          dur="1s"
+          values="0;1;0"
+          repeatCount="indefinite" 
+          begin="0.3"/>     
+      </circle>
+    </svg>
+  </div>
     <div class="modal">
         <div class="modal-content">
           <h2 class="modal-title"></h2>

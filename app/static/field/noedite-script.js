@@ -25,8 +25,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             showModal('Critical error', 'the administrator has been notified, please try again in later');
             return
         }
-        // setTimeout(() => {
-        // }, 5000)
         document.querySelector('.loading').style.opacity = 0;
         let isTransEnd = false;
         let main = document.querySelector('.loading').ontransitionend = async () => {
