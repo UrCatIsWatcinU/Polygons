@@ -166,6 +166,8 @@ const main = async () => {
                         hexsColors = settings.hexsColors;
                         font = settings.font;
                     }
+
+                    localStorage.setItem('colors', JSON.stringify(settings.colors || '{}'));
                 }else{
                     showModal('An error occurred while loading the settings', 'Please try later. The settings are set to default');
                 }

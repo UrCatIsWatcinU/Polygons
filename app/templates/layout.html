@@ -53,12 +53,12 @@
         fill: var(--dark-main-c);
       }
     </style>
-    <link rel="stylesheet" href="{{url_for('static', filename='public.css')}}">
     <script src="{{url_for('static', filename='jscolor.js')}}"></script>
     <script src="{{url_for('static', filename='socketio.js')}}"></script>
     <script src="{{url_for('static', filename='fontsloader.js')}}"></script>
     <script src="{{url_for('static', filename='public.js')}}"></script>
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.png') }}" type="image/png">
+    <link rel="stylesheet" href="{{url_for('static', filename='public.css')}}">
     {% block head%}
     {% endblock %}
     <title>Library Hexagon | {{title}}</title>

@@ -15,7 +15,7 @@ const stringifyHexs = hexsArr => {
 }
 
 
-document.addEventListener('DOMContentLoaded', async () => {
+window.addEventListener('load', async () => {
     let paramsRes = fetch(`/categ/${document.title}/params`);
     document.querySelector('.loading').style.opacity = 1;
     
@@ -140,10 +140,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
     
             
-            if(!document.querySelector('.loading')) return
+            if(!document.querySelector('.loading')) return;
             document.body.className = 'field';
             document.body.style.width = '';
             document.body.style.height = '';
+
             document.querySelector('.loading').innerHTML = '';
             document.querySelector('.loading').className = 'hexsCont';
             document.querySelector('.hexsCont').style.opacity = 1;

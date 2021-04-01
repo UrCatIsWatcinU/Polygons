@@ -1182,6 +1182,7 @@ window.addEventListener('load', async () => {
                                 showModal('An error occurred while changing the settings');
                             }else{
                                 window.location.reload();
+                                localStorage.setItem('colors', JSON.stringify(colors || '{}'));
                             } 
                         }else{
                             showModal('An error occurred while changing the settings');
