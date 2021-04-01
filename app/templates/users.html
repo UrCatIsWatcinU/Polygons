@@ -16,8 +16,13 @@
 
     <style>
         .app{
-            margin-top: 30px;
-            height: 100%;
+            width: 100%;
+            padding: 0 15vw;
+            overflow-y: auto;
+            height: calc(100% - 40px);   
+        }
+        *{
+            user-select: unset;
         }
     </style>
     <script>
@@ -25,9 +30,11 @@
             btn.onclick = (evt) => {
                 fetch('/users/delete/' + evt.target.parentElement.id, {
                     method: 'DELETE'
-                })
+                });
+
+                evt.target.parentElement.remove();
             }
-        })
+        });
     </script>
 {% endblock %}
 
