@@ -290,7 +290,7 @@ def get_complaints():
     if current_user.role_id != 2:
         return "<h1>You don't have access</h1"
 
-    return render_template('complaints.html', complaints=Complaint.query.all())
+    return render_template('complaints.html', complaints=Complaint.query.all(), title="Complaints")
 
 @app.route('/complaints/new', methods=['POST'])
 @login_required
