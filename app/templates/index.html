@@ -32,12 +32,12 @@
     </div>
     <button class="auth logout">Logout</button>
         {% if user.role.name == 'admin' %}
-            <button class="auth" onclick="window.location.href = `{{ url_for('users_all') }}`">Users</button>
-            <button class="auth" onclick="window.location.href = `{{ url_for('get_complaints') }}`">Complaints</button>
+            <button class="users" onclick="window.location.href = `{{ url_for('users_all') }}`">Users</button>
+            <button class="complaints" onclick="window.location.href = `{{ url_for('get_complaints') }}`">Complaints</button>
         {% endif %}
     {% else %}
     <button class="auth" onclick="window.location.href = `{{ url_for('login') }}`">Login</button>
-    <button class="auth" onclick="window.location.href = `{{ url_for('registration') }}`">Register</button>
+    <button class="reg" onclick="window.location.href = `{{ url_for('registration') }}`">Register</button>
     {% endif %}
 {% endblock %}
 

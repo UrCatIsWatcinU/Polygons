@@ -93,11 +93,87 @@ function hideModal(){
     }
 }
 
+function createDropMenu(btns){
+    if(btns && btns.length){
+        btns = Array.from(btns);
+
+        let dropMenu = document.createElement('div');
+        dropMenu.className = 'drop-menu';
+
+        dropMenu.innerHTML = `<svg class="drop-menu-svg" viewBox="0 0 384 277.5">
+        <path
+            d="m368 32h-352c-8.832031 0-16-7.167969-16-16s7.167969-16 16-16h352c8.832031 0 16 7.167969 16 16s-7.167969 16-16 16zm0 0" />
+        <path id="middle-path"
+            d="m368 154.667969h-352c-8.832031 0-16-7.167969-16-16s7.167969-16 16-16h352c8.832031 0 16 7.167969 16 16s-7.167969 16-16 16zm0 0" />
+            <path
+                d="m368 277.332031h-352c-8.832031 0-16-7.167969-16-16s7.167969-16 16-16h352c8.832031 0 16 7.167969 16 16s-7.167969 16-16 16zm0 0" />
+        </svg>
+        <div class="drop-menu-cont"></div>`;
+        let isDropMenu = false;
+
+        dropMenu.addEventListener('click', (evt) => {
+            evt.stopPropagation();
+
+            let cont = dropMenu.querySelector('.drop-menu-cont');
+
+            if(!isDropMenu){
+                isDropMenu = true;
+                let svg = dropMenu.querySelector('.drop-menu-svg'); 
+
+                svg.firstElementChild.style.transform = `rotate(45deg) translateY(${(277.5 - svg.firstElementChild.getBoundingClientRect().height * (384 / svg.getBoundingClientRect().height) / 2) / 2}px) scaleX(.9)`;    
+                svg.lastElementChild.style.transform = `rotate(-45deg) translateY(-${(277.5 - svg.lastElementChild.getBoundingClientRect().height * (384 / svg.getBoundingClientRect().height) / 2) / 2}px) scaleX(.9)`;
+
+                svg.lastElementChild.previousElementSibling.style.opacity = 0;
+                
+                cont.append(...btns);
+                cont.style.opacity = 1;
+                btns.forEach(btn => {
+                    btn.classList.add('drop-menu-button');
+                    if(btn.getBoundingClientRect().height > 30){
+                        btn.style.width = 'max-content';
+                    }
+                });
+
+                document.addEventListener('click', closeDropMenu);
+            }else{
+                closeDropMenu();
+            }
+            
+            function closeDropMenu(){
+                if(isDropMenu){
+                    isDropMenu = false;
+                    dropMenu.querySelectorAll('path').forEach(elem => {
+                        elem.style = ''
+                    })
+                    cont.style.opacity = 0;
+    
+                    btns.forEach(btn => {
+                        btn.remove();
+                    });
+                    document.removeEventListener('click', closeDropMenu);
+                }
+            }
+
+            dropMenu.querySelector('.drop-menu-cont').style.top = (dropMenu.parentElement.getBoundingClientRect().height + 5) + 'px'
+        }, {passive: false});
+
+
+        btns[0].parentElement.append(dropMenu);
+        btns.forEach(btn => {
+            setTimeout(() => {btn.remove()}, 10)
+        });
+
+
+        return dropMenu;
+    }
+}
+
 let otherSettings = {
     rounded: false, 
     bordered: false,
     turned: false,
-    innerNum: false
+    innerNum: false,
+    hideBtns: false
 }
 
 let colors = {
@@ -276,7 +352,12 @@ const main = async () => {
         document.querySelector('.logout').onclick = () => {
             window.location.href = '/logout';
             localStorage.clear();
+            sessionStorage.clear();
         }
+    }
+
+    if(document.documentElement.offsetWidth < 800 || otherSettings.hideBtns){
+        createDropMenu(document.querySelectorAll('.btns button'))
     }
 
     document.body.classList.remove('while-loading');

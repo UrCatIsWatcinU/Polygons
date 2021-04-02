@@ -140,11 +140,43 @@ h1{
 
 
 .controls{
+    max-width: 95vw;
     position: fixed;
     top: 10px;
     right: 5px;
     z-index: 5;
     display: flex;
+}
+.drop-menu{
+    position: relative;
+}
+.drop-menu-svg{
+    width: 27px;
+    fill: var(--main-c);
+    stroke-linecap: round;
+    cursor: pointer;
+}
+.drop-menu-svg *{
+    transition: .2s linear;
+    transform-origin: center;
+}
+.drop-menu-svg:hover{
+    filter: brightness(.8);
+}
+.drop-menu-cont{
+    position: absolute;
+    top: 27px;
+    right: 0;
+    background-color: var(--body-bgc);
+    border-radius: 3px;
+    border: 1px var(--main-c) solid;
+    opacity: 0;
+    overflow: hidden;
+}
+.drop-menu-button{
+    width: 100%;
+    border-width: 0px;
+    margin: 0;
 }
 
 

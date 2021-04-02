@@ -2,6 +2,8 @@
 <html lang="ru" >
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <!-- <meta name="viewport" content="user-scalable=no" /> -->
   <title>{{ field_name }}</title>
   <script>
     let loadingColors = JSON.parse(localStorage.getItem('colors'));
@@ -106,9 +108,11 @@
       <input type="text" class="find-input">
       <button class="find-button">Search</button>
     </div>
-    <button class="clear clear-histoty">Clear history</button>
-    <button class="back" onclick="window.location.href = `{{ url_for('index') }}`">Back</button>
-    <button class="settings-button">Settings</button>
+    <div class="field-btns">
+      <button class="clear clear-histoty">Clear history</button>
+      <button class="back" onclick="window.location.href = `{{ url_for('index') }}`">Back</button>
+      <button class="settings-button">Settings</button>
+    </div>
     <div class="user-cont">
       <span class="username"> {{ username }}</span>
     </div>

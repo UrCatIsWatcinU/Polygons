@@ -1012,6 +1012,7 @@ window.addEventListener('load', async () => {
                             <div class="bordered-cont check-cont"><label for="bordered">Borders</label><input class="check-input" type="checkbox" id="bordered"></div>
                             <div class="turned-cont check-cont"><label for="turned">Turned hexagons (beta)</label><input class="check-input" type="checkbox" id="turned"></div>
                             <div class="innerNum-cont check-cont"><label for="innerNum">Inner numeration</label><input class="check-input" type="checkbox" id="innerNum"></div>
+                            <div class="hideBtns-cont check-cont"><label for="hideBtns">Always hide buttons</label><input class="check-input" type="checkbox" id="hideBtns"></div>
                         </div>
                     </div>
                 </div>
@@ -1195,6 +1196,22 @@ window.addEventListener('load', async () => {
                 settingsCont.querySelector('.settings-close').onclick = hideModal;
                 
                 jscolor.install();
+            }
+            if(window.innerWidth < 700){
+                document.querySelector('.settings-button').remove()
+            }
+
+            if(window.innerWidth < 800 || otherSettings.hideBtns){
+                let userCont = document.querySelector('.user-cont');
+
+                if(userCont){
+                    userCont.remove();
+                    
+                    document.querySelector('.field-btns').before(userCont);
+                }
+
+                createDropMenu(document.querySelectorAll('.field-btns button'));
+
             }
 
             document.querySelector('.hexsCont').style.borderWidth = 'unset';
