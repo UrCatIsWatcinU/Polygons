@@ -12,11 +12,6 @@ const scrollTo = (element, to, duration) => {
     }, 10);
 }
 
-const setClassName = (elem, classList) => {
-    elem.classList.add(classList);
-    return elem
-}
-
 const idToNum = (id) => +(id.replace(/\w/, ''));
 
 const giveHexSelector = (h) => `#r${h.rowId} #${h.id}`;
@@ -270,7 +265,7 @@ window.addEventListener('load', async () => {
                 </svg>
                 <div class="hexagon-num">0</div>
                 </div>`;
-                let hexagon = document.createElement('div');
+                // let hexagon = document.createElement('div');
                 
                 let row = setClassName(document.createElement('div'), 'row');
                 row.id = 'r' + i;
@@ -1211,7 +1206,6 @@ window.addEventListener('load', async () => {
                 }
 
                 createDropMenu(document.querySelectorAll('.field-btns button'));
-
             }
 
             document.querySelector('.hexsCont').style.borderWidth = 'unset';

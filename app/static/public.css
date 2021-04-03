@@ -447,7 +447,47 @@ h1{
     max-height: 120px;
     overflow-y: auto;
 }
-
 .complaint-text{
     margin: 10px 0;
+}
+
+
+
+
+@media (max-width: 580px){
+    .descript{
+        width: 100%;
+    }
+    .main{
+        padding-left: 10vw;
+        padding-right: 10vw;
+        
+    }
+    .app{
+        padding: 0;
+    }
+    .complaint, .modal-content{
+        width: 80vw;
+    }
+    .complaint-num{
+        left: 3px;
+    }
+}
+@media (max-width: 430px){
+    html{
+        font-size: .9em;
+    }
+    .main{
+        padding-left: 7vw;
+        padding-right: 7vw;
+    }
+}
+@media (max-width: 365px){
+    html{
+        font-size: .81em;
+    }
+    .main{
+        padding-left: 5vw;
+        padding-right: 5vw;
+    }
 }

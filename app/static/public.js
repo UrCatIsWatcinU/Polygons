@@ -7,7 +7,11 @@ function getRand(min, max) {
 function hexToRgb(color, alpha = 1){
     let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color);
     return result ? `rgb(${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}, ${alpha})` : null;
-}  
+} 
+function setClassName(elem, classList){
+    elem.classList.add(classList);
+    return elem
+} 
 
 
 
@@ -94,7 +98,7 @@ function hideModal(){
 }
 
 function createDropMenu(btns){
-    if(btns && btns.length){
+    if(btns && btns.length >= 2){
         btns = Array.from(btns);
 
         let dropMenu = document.createElement('div');
@@ -210,18 +214,20 @@ let font = {
 // if(localStorage.getItem('colors')){
 //     colors = JSON.parse(localStorage.getItem('colors'));
 // }
-const BODY_HEIGHT = 52;
+let BODY_HEIGHT = 52;
 const TRIANGLE_HEIGHT = BODY_HEIGHT * (35 / 60);
 const HEXAGON_HEIGHT  = TRIANGLE_HEIGHT * 2 + BODY_HEIGHT;
 let HEXAGON_WIDTH = HEXAGON_HEIGHT
 
 const main = async () => {
-    let mainLogo = document.querySelector('.header-img');
+    let mainLogo = document.querySelector('.header-img.big');
     let smallLogo = document.querySelector('.header-img.small');
+    console.log(window.innerWidth);
     if(mainLogo && smallLogo){
-        if(window.innerWidth < 500){
+        if(window.innerWidth < 470){
             mainLogo.remove();
         }else{
+            console.log('remove');
             smallLogo.remove();
         }
     }

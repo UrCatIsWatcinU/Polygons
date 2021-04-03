@@ -224,6 +224,7 @@ window.addEventListener('load', async () => {
                     isNewCateg = false;
                 })
             })
+
             newCateg.querySelector('.create-categ').onclick = async () => {
                 if(!editedField.innerText) return;
 
@@ -255,6 +256,47 @@ window.addEventListener('load', async () => {
                 }
                 window.location.reload()
             }
+
         })
+    }
+
+    const splitCateg = hexsInRow => {
+        let categs = document.querySelectorAll('.categ');
+        if(categs && categs.length >= hexsInRow){
+            categs = Array.from(categs);
+    
+            let splitedCategs = [];
+            
+            for(let i = 0; i < categs.length; i+=hexsInRow){
+                splitedCategs.push(categs.slice(i, i+hexsInRow));
+            }
+    
+            let plus = document.querySelector('.categs-plus');
+            if(plus) plus.remove()
+    
+            document.querySelectorAll('.row').forEach(row => {row.remove()});
+    
+            for(let i = 0; i < splitedCategs.length; i++){
+                if(!splitedCategs[i].length) continue
+
+                let row = setClassName(document.createElement('div'), 'row');
+                if(i % 2 == 0){
+                    row.classList.add('row-moved');
+                }else{
+                    if(splitedCategs[i+1] && splitedCategs[i+1].length){
+                        splitedCategs[i].push(splitedCategs[splitedCategs.length-1].shift());
+                    }
+                    
+                }
+                row.append(...splitedCategs[i]);
+    
+                document.querySelector('.categs').append(row)
+            }
+        }
+    }
+    if(window.innerWidth < 490){
+        splitCateg(2)
+    }else if(window.innerWidth < 600){
+        splitCateg(3)
     }
 })
