@@ -758,20 +758,48 @@ window.addEventListener('load', async () => {
                             hexagon.dispatchEvent(new Event('dblclick'));
                         }
                         contextmenu.querySelector('.copy').onclick = () => {
-                            window.navigator.clipboard.writeText(window.location.href + '?' + giveHexSelector(hexagon).replace(/\s+/, ''))
-                            .then(() => {
+                            let link = window.location.href + '?' + giveHexSelector(hexagon).replace(/\s+/, '');
+                            const ifCopySuccess = () => {
                                 let flash = setClassName(document.createElement('div'), 'flash');
                                 flash.innerText = 'Copied';
 
                                 document.body.append(flash);
-                                flash.style.opacity = 1;
+                                setTimeout(() => {
+                                    flash.style.opacity = 1;
+                                }, 0)
                                 setTimeout(() => {
                                     flash.style.opacity = 0;
                                 }, 3000)
-                            })
-                            .catch(err => {
-                                console.log('Something went wrong', err);
-                            });
+                            }
+                            if (!navigator.clipboard) {
+                                let textArea = document.createElement("textarea");
+                                textArea.value = link;
+
+                                textArea.style.position = "fixed";
+                                textArea.style.visibility = "hidden";
+
+                                document.body.appendChild(textArea);
+
+                                textArea.focus();
+                                textArea.select();
+                            
+                                try {
+                                    let success = document.execCommand('copy');
+                                    if(success){
+                                        ifCopySuccess();
+                                    }
+                                } catch (err) {
+                                    showModal('Was not possible to copy the link: ', err);
+                                }
+                            
+                                document.body.removeChild(textArea);            
+                            }else{
+                                window.navigator.clipboard.writeText(link)
+                                .then(ifCopySuccess)
+                                .catch(err => {
+                                    console.log('Something went wrong', err);
+                                });
+                            }
 
                         }
                     }
