@@ -777,7 +777,7 @@ window.addEventListener('load', async () => {
                                 textArea.value = link;
 
                                 textArea.style.position = "fixed";
-                                textArea.style.visibility = "hidden";
+                                // textArea.style.visibility = "hidden";
 
                                 document.body.appendChild(textArea);
 
@@ -797,7 +797,7 @@ window.addEventListener('load', async () => {
                                         showModal('Was not possible to copy the link: ', err);
                                     }
                                 
-                                    // document.body.removeChild(textArea); 
+                                    document.body.removeChild(textArea); 
                                 }, 10)           
                             }else{
                                 window.navigator.clipboard.writeText(link)
