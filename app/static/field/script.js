@@ -773,7 +773,7 @@ window.addEventListener('load', async () => {
                             }
                             if (!navigator.clipboard) {
                                 let textArea = document.createElement("textarea");
-                                textArea.value = link;
+                                textArea.setAttribute('value', link);
 
                                 textArea.style.position = "fixed";
                                 textArea.style.visibility = "hidden";
