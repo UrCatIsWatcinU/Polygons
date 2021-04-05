@@ -784,11 +784,12 @@ window.addEventListener('load', async () => {
                                 textArea.select();
                             
                                 try {
+                                    console.log(textArea, window.getSelection());
                                     let success = document.execCommand('copy');
+                                    console.log(success);
                                     if(success){
                                         ifCopySuccess();
                                     }else{
-                                        console.log(textArea, window.getSelection());
                                     }
                                 } catch (err) {
                                     showModal('Was not possible to copy the link: ', err);
