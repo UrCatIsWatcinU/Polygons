@@ -141,7 +141,7 @@ h1{
 }
 
 
-
+.flash,
 .controls{
     max-width: 95vw;
     position: fixed;
@@ -453,6 +453,21 @@ h1{
 }
 .complaint-text{
     margin: 10px 0;
+}
+
+
+
+
+.flash{
+    justify-content: center;
+    align-items: center;
+    padding: 5px 10px;
+    font: unset;
+    font-size: .88em;
+    opacity: 0;
+    top: unset;
+    bottom: 10px;
+    height: max-content;
 }
 
 

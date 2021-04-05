@@ -685,6 +685,7 @@ window.addEventListener('load', async () => {
                         contextmenu.innerHTML = `
                         <div style="margin-bottom: 5px;" class="contextmenu-item">Delete</div> 
                         <div style="margin-bottom: 5px;" class="contextmenu-item edit">Edit</div> 
+                        <div style="margin-bottom: 5px;" class="contextmenu-item copy">Copy link</div> 
                         <div class="contextmenu-item complain">Complain</div> 
                         <hr class="contextmenu-line">
                         ` + menuInfo;
@@ -755,6 +756,23 @@ window.addEventListener('load', async () => {
                         }
                         contextmenu.querySelector('.edit').onclick = () => {
                             hexagon.dispatchEvent(new Event('dblclick'));
+                        }
+                        contextmenu.querySelector('.copy').onclick = (evt) => {
+                            navigator.clipboard.writeText(window.location.href + '?' + giveHexSelector(hexagon).replace(/\s+/, ''))
+                            .then(() => {
+                                let flash = setClassName(document.createElement('div'), 'flash');
+                                flash.innerText = 'Copied';
+
+                                document.body.append(flash);
+                                flash.style.opacity = 1;
+                                setTimeout(() => {
+                                    flash.style.opacity = 0;
+                                }, 3000)
+                            })
+                            .catch(err => {
+                                console.log('Something went wrong', err);
+                            });
+
                         }
                     }
                 }
@@ -976,7 +994,8 @@ window.addEventListener('load', async () => {
             document.querySelectorAll('.hexagon').forEach(setHexProps);
             
             const backup = () => {
-                localStorage.setItem('userScroll', JSON.stringify({x: document.body.scrollLeft, y: document.body.scrollTop}));
+                localStorage.setItem('userScroll-' + document.title, JSON.stringify({x: document.body.scrollLeft, y: document.body.scrollTop}));
+                
             }
             window.onunload = backup;
             window.addEventListener('beforeunload', (evt) => {
@@ -1069,7 +1088,7 @@ window.addEventListener('load', async () => {
                 }, 4000)
                 
             }else{
-                let scrollCoords = JSON.parse(localStorage.getItem('userScroll') || `{"x": ${document.body.scrollWidth / 2}, "y":  ${document.body.scrollHeight / 2}}`)
+                let scrollCoords = JSON.parse(localStorage.getItem('userScroll-' + document.title) || `{"x": ${document.body.scrollWidth / 2}, "y":  ${document.body.scrollHeight / 2}}`);
                 document.body.scrollLeft = scrollCoords.x;
                 document.body.scrollTop = scrollCoords.y;
             }

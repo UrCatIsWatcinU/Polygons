@@ -395,7 +395,7 @@ window.addEventListener('load', async () => {
             document.querySelectorAll('.hexagon').forEach(setHexProps);
             
             const backup = () => {
-                localStorage.setItem('userScroll', JSON.stringify({x: document.body.scrollLeft, y: document.body.scrollTop}));
+                localStorage.setItem('userScroll-' + document.title, JSON.stringify({x: document.body.scrollLeft, y: document.body.scrollTop}));
             }
             window.onunload = backup;
             window.onerror = (msg) => {
@@ -463,7 +463,7 @@ window.addEventListener('load', async () => {
                 }, 4000)
                 
             }else{
-                let scrollCoords = JSON.parse(localStorage.getItem('userScroll') || `{"x": ${document.body.scrollWidth / 2}, "y":  ${document.body.scrollHeight / 2}}`)
+                let scrollCoords = JSON.parse(localStorage.getItem('userScroll-' + document.title) || `{"x": ${document.body.scrollWidth / 2}, "y":  ${document.body.scrollHeight / 2}}`);
                 document.body.scrollLeft = scrollCoords.x;
                 document.body.scrollTop = scrollCoords.y;
             }
