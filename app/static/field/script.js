@@ -774,28 +774,31 @@ window.addEventListener('load', async () => {
                             if (!navigator.clipboard) {
                                 let textArea = document.createElement("textarea");
                                 textArea.setAttribute('value', link);
+                                textArea.value = link;
 
                                 textArea.style.position = "fixed";
                                 textArea.style.visibility = "hidden";
 
                                 document.body.appendChild(textArea);
 
-                                textArea.focus();
-                                textArea.select();
-                            
-                                try {
-                                    console.log(textArea, window.getSelection().toString());
-                                    let success = document.execCommand('copy');
-                                    console.log(success);
-                                    if(success){
-                                        ifCopySuccess();
-                                    }else{
+                                setTimeout(() => {
+                                    textArea.focus();
+                                    textArea.select();
+                                
+                                    try {
+                                        console.log(textArea, window.getSelection().toString());
+                                        let success = document.execCommand('copy');
+                                        console.log(success);
+                                        if(success){
+                                            ifCopySuccess();
+                                        }else{
+                                        }
+                                    } catch (err) {
+                                        showModal('Was not possible to copy the link: ', err);
                                     }
-                                } catch (err) {
-                                    showModal('Was not possible to copy the link: ', err);
-                                }
-                            
-                                document.body.removeChild(textArea);            
+                                
+                                    // document.body.removeChild(textArea); 
+                                }, 10)           
                             }else{
                                 window.navigator.clipboard.writeText(link)
                                 .then(ifCopySuccess)
