@@ -30,7 +30,7 @@ const stringifyHexs = hexsArr => {
 let paramsRes = fetch(`/categ/${document.title}/params`);
 
 window.addEventListener('load', async () => {
-    document.querySelector('.loading').style.opacity = 1;
+    // document.querySelector('.loading').style.opacity = 1;
     
     paramsRes.then(async params => {
         if(params.ok) params = await params.json()
@@ -38,6 +38,7 @@ window.addEventListener('load', async () => {
             showModal('Critical error', 'the administrator has been notified, please try again in later');
             return
         }
+
         try{
             let user = await fetch('/users/i')
             if(user.ok){
@@ -62,9 +63,9 @@ window.addEventListener('load', async () => {
         }catch(err){
             showModal('An error occurred while loading the settings', err)
         }
-        document.querySelector('.loading').style.opacity = 0;
+
         let isTransEnd = false;
-        let main = document.querySelector('.loading').ontransitionend = async () => {
+        let main = async () => {
             if(isTransEnd) return   
             isTransEnd = true;
             
@@ -231,33 +232,18 @@ window.addEventListener('load', async () => {
             document.body.className = 'field';
             document.body.style.width = '';
             document.body.style.height = '';
-            let loadingElem = document.querySelector('.loading'); 
-            if(loadingElem){ 
-                loadingElem.className = 'hexsCont';
-                loadingElem.innerHTML = '';
-            }
-            document.querySelector('.hexsCont').style.opacity = 1;
+
+            let hexsCont = document.querySelector('.hexsCont');
+
+            hexsCont.style.opacity = 1;
             
-            document.documentElement.style.width = (GRID_WIDTH * HEXAGON_WIDTH + HEXAGON_WIDTH/2) + 'px';
+            // document.body.style.width = (GRID_WIDTH * HEXAGON_WIDTH + HEXAGON_WIDTH/2) + 'px';
             // создание сетки
             let hexPath = `M 0 ${TRIANGLE_HEIGHT} L ${HEXAGON_WIDTH/2} 0 L ${HEXAGON_WIDTH} ${TRIANGLE_HEIGHT} L ${HEXAGON_WIDTH} ${HEXAGON_HEIGHT-TRIANGLE_HEIGHT} L ${HEXAGON_WIDTH/2} ${HEXAGON_HEIGHT} L 0 ${HEXAGON_HEIGHT-TRIANGLE_HEIGHT} Z`;
             // let hexPath = `M0,${TRIANGLE_HEIGHT} ${HEXAGON_WIDTH/2},0 ${HEXAGON_WIDTH},${TRIANGLE_HEIGHT} ${HEXAGON_WIDTH},${HEXAGON_HEIGHT-TRIANGLE_HEIGHT} ${HEXAGON_WIDTH/2},${HEXAGON_HEIGHT} 0,${HEXAGON_HEIGHT-TRIANGLE_HEIGHT} Z`;
             if(otherSettings.rounded){
                 hexPath = roundPathCorners(hexPath, .05, true);
             }
-            // for(let i = 1; i <= GRID_HEIGHT; i+=2){
-            //     let hexagonStr = `<div class="hexagon">
-            //     <svg class="polygon"> 
-            //     <path d="${hexPath}"></path>
-            //     </svg>
-            //     <div class="hexagon-num">0</div>
-            //     </div>`.repeat(GRID_WIDTH);
-                
-            //     document.querySelector('.hexsCont').innerHTML += `
-            //     <div id="r${i}" class="row" style="width:${GRID_WIDTH * HEXAGON_WIDTH}px">${hexagonStr}</div>
-            //     <div id="r${i+1}" class="row row-moved" style="width:${GRID_WIDTH * HEXAGON_WIDTH}px">${hexagonStr}</div>
-            //     `
-            // }
             for(let i = 1; i <= GRID_HEIGHT; i++){
                 let hexagonStr = `<div class="hexagon">
                 <svg class="polygon"> 
@@ -265,18 +251,20 @@ window.addEventListener('load', async () => {
                 </svg>
                 <div class="hexagon-num">0</div>
                 </div>`;
-                // let hexagon = document.createElement('div');
                 
                 let row = setClassName(document.createElement('div'), 'row');
                 row.id = 'r' + i;
-                row.style.width = (GRID_WIDTH * HEXAGON_WIDTH) + 'px';
+                // row.style.width = (GRID_WIDTH * HEXAGON_WIDTH) + 'px';
                 if(i % 2 == 0){
                     row.classList.add('row-moved');
                 }
-                document.querySelector('.hexsCont').append(row);
+                hexsCont.append(row);
                 
                 row.innerHTML = hexagonStr.repeat(GRID_WIDTH);
             }
+
+            document.querySelector('#r2').classList.add('row-first');
+            document.querySelector('#r' + GRID_HEIGHT).classList.add('row-last');
             
 
             document.querySelectorAll(`#r1, #r${GRID_HEIGHT}, #h1, #h${GRID_WIDTH}`).forEach(elem => {
@@ -284,28 +272,85 @@ window.addEventListener('load', async () => {
             });
 
             if(otherSettings.turned){
-                document.querySelector('.hexsCont').style.transform = 'rotate(90deg)';
+                hexsCont.style.transform = 'rotate(90deg)';
                 document.documentElement.style.width = 'auto';
                 document.documentElement.style.height = (GRID_WIDTH * HEXAGON_WIDTH + HEXAGON_WIDTH/2) + 'px';
+            }
+
+            if(!isTouchDevice()){
+                const SLIDE_SPEED = otherSettings.slideSpeed || 2.1;
+                const MIN_CHANGE = 20;
+                const slider = document.body;
+                let isDown = false;
+    
+                let startX;
+                let scrollLeft;
+    
+                let startY;
+                let scrollTop;
+    
+                slider.addEventListener('mousedown', (e) => {
+                    isDown = true;
+                    setTimeout(() => {
+                        if(isDown){
+                            slider.classList.add('active');
+                        }
+                    }, 500)
+                    startX = e.pageX - slider.offsetLeft;
+                    scrollLeft = slider.scrollLeft;
+                    
+                    startY = e.pageY - slider.offsetTop;
+                    scrollTop = slider.scrollTop;
+                });
+                slider.addEventListener('mouseleave', () => {
+                    isDown = false;
+                    slider.classList.remove('active');
+                });
+                slider.addEventListener('mouseup', () => {
+                    isDown = false;
+                    slider.classList.remove('active');
+                });
+                slider.addEventListener('mousemove', (e) => {
+                    if(!isDown) return;
+                    e.preventDefault();
+                    const x = e.pageX - slider.offsetLeft;
+                    const walkX = (x - startX) * SLIDE_SPEED; //scroll-fast
+                    
+                    const y = e.pageY - slider.offsetTop;
+                    const walkY = (y - startY) * SLIDE_SPEED; //scroll-fast
+                    if(Math.abs(walkX) > MIN_CHANGE || Math.abs(walkY) > MIN_CHANGE){
+                        slider.classList.add('active');
+                    } 
+                    requestAnimationFrame(function scroll(){
+
+                        slider.scrollLeft = scrollLeft - walkX;
+                        slider.scrollTop = scrollTop - walkY;
+                        if(isDown) requestAnimationFrame(scroll);
+                    })
+                });
             }
             
             let zoomIndex = 1;
             document.addEventListener('wheel', evt => {
+                document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});
+                evt.preventDefault();
+
+                console.log('zoom');
+                
+                zoomIndex += -(evt.deltaY/1260);
+                
+                if(zoomIndex <= 0) zoomIndex = 0.01;
+
+                let user = JSON.parse(sessionStorage.getItem('user') || '{}');
+                if(user.userRole != 2 && zoomIndex < 0.5) return;
+
+                hexsCont.style.top = -(hexsCont.offsetHeight - (hexsCont.offsetHeight * zoomIndex)) + 'px';
+                hexsCont.style.left = -(hexsCont.offsetWidth - (hexsCont.offsetWidth * zoomIndex)) + 'px';
+                hexsCont.style.transform = `scale(${zoomIndex})`;
                 if(evt.metaKey || evt.ctrlKey){
-                    evt.preventDefault();
-    
-                    console.log('zoom');
-                    
-                    zoomIndex += -(evt.deltaY/1260);
-                    
-                    if(zoomIndex <= 0) zoomIndex = 0.01;
-    
-                    let user = JSON.parse(sessionStorage.getItem('user') || '{}');
-                    if(user.userRole != 2 && zoomIndex < 0.5) return;
-    
-                    document.querySelector('.hexsCont').style.transform = `scale(${zoomIndex})`
                 }
-            }, {passive: false})
+            }, {passive: false});
+
         
             let visibleHexs = [];
             let chains = [];
@@ -386,9 +431,7 @@ window.addEventListener('load', async () => {
                         if(currentHistoryStepIndex < -1) currentHistoryStepIndex++;
                     }
                     if(((evt.code == 'KeyY' || evt.key == 'y') && (evt.ctrlKey || evt.metaKey)) || ((evt.code == 'KeyZ' || evt.key == 'z') && (evt.ctrlKey || evt.metaKey) && evt.shiftKey)){
-                        if(currentHistoryStepIndex >= history.length - 1) currentHistoryStepIndex = history.length - 2
-        
-        
+                        if(currentHistoryStepIndex >= history.length - 1) currentHistoryStepIndex = history.length - 2;
                         
                         let change = history[++currentHistoryStepIndex];
                         while(change.categ != document.title){
@@ -446,7 +489,7 @@ window.addEventListener('load', async () => {
                 if(evt.key == '=' && (evt.ctrlKey || evt.metaKey)){
                     evt.preventDefault();
                     
-                    document.querySelector('.hexsCont').style.transform = `scale(${zoomIndex += (0.1)})`
+                    hexsCont.style.transform = `scale(${zoomIndex += (0.1)})`
                 }
                 if(evt.key == '-' && (evt.ctrlKey || evt.metaKey)){
                     evt.preventDefault();
@@ -457,21 +500,71 @@ window.addEventListener('load', async () => {
                     let user = JSON.parse(sessionStorage.getItem('user') || '{}');
                     if(user.role != 2 && zoomIndex < 0.3) return;
     
-                    document.querySelector('.hexsCont').style.transform = `scale(${zoomIndex})`
+                    hexsCont.style.transform = `scale(${zoomIndex})`
                 }
     
                 if(evt.code == 'Space'){
                     if(document.activeElement == document.body)evt.preventDefault();
                 }
-            }, {passive: false})
+            }, {passive: false});
+
+
+            if(isTouchDevice()){
+                const MAX_CHANGE = 5;
+                let touchIsDown = false;
+                let contextMenuOpen = false;
+                let startMoveX;
+                let startMoveY;
+                document.body.ontouchstart = (evt) => {
+                    touchIsDown = true;
+                    startMoveX = evt.changedTouches[0].clientX;
+                    startMoveY = evt.changedTouches[0].clientY;
+                    setTimeout(() => {
+                        if(touchIsDown){
+                            let contextMenuEvt = new Event('contextmenu', {
+                                clientX: evt.changedTouches[0].clientX,
+                                clientY: evt.changedTouches[0].clientY,
+                            });
+                            contextMenuEvt.clientX = evt.changedTouches[0].clientX;
+                            contextMenuEvt.clientY = evt.changedTouches[0].clientY;
+                            document.body.dispatchEvent(contextMenuEvt);
+    
+                            contextMenuOpen = true;
+                        }
+                    }, 400)
+                }
+                document.body.addEventListener('touchmove', (evt) => {
+                    if(startMoveX - evt.changedTouches[0].clientX > MAX_CHANGE || startMoveY - evt.changedTouches[0].clientY > MAX_CHANGE){
+                        document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});
+                        touchIsDown = false;
+                    }
+                });
+    
+                let touchEnd = evt => {
+                    if(contextMenuOpen){
+                        if(evt.cancelable){
+                            evt.preventDefault();
+                        } 
+                        contextMenuOpen = false;
+                    }else{
+    
+                    }
+                    touchIsDown = false;
+                }
+                addEventListener('touchend', touchEnd, {
+                    passive: false,
+                });
+                addEventListener('touchcancel', touchEnd, {
+                    passive: false,
+                });
+            }
             
             document.addEventListener('click', evt => {
                 document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});
-            })
-            
+            });
+
             document.body.oncontextmenu = (evt) => {
                 document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});
-                window.onscroll = () => {document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});}
         
                 
                 let hexagon = document.elementFromPoint(evt.clientX, evt.clientY);
@@ -522,7 +615,6 @@ window.addEventListener('load', async () => {
                     }
                     if(noCreate){
                         contextmenu.innerHTML = 'Not here';
-                        contextmenu.style.color = 'red'
                     }else{
                         contextmenu.innerHTML = 'Create here';
                         
@@ -592,6 +684,7 @@ window.addEventListener('load', async () => {
                         let menuInfo = contextmenu.innerHTML;
                         contextmenu.innerHTML = `
                         <div style="margin-bottom: 5px;" class="contextmenu-item">Delete</div> 
+                        <div style="margin-bottom: 5px;" class="contextmenu-item edit">Edit</div> 
                         <div class="contextmenu-item complain">Complain</div> 
                         <hr class="contextmenu-line">
                         ` + menuInfo;
@@ -660,6 +753,9 @@ window.addEventListener('load', async () => {
                             complaint.querySelector('.close-button').onclick = hideModal;
                             complaint.querySelector('.complaint-close').onclick = hideModal;
                         }
+                        contextmenu.querySelector('.edit').onclick = () => {
+                            hexagon.dispatchEvent(new Event('dblclick'));
+                        }
                     }
                 }
                 contextmenu.style.top = evt.clientY + 'px';
@@ -711,9 +807,10 @@ window.addEventListener('load', async () => {
                             behavior: 'smooth',
                             block: 'center',
                             inline: 'center'
-                        })
+                        });
+
                         // window.scrollTo(hexagon.offsetLeft - (document.documentElement.clientWidth - hexagon.offsetWidth/2) / 2, 0);
-                        // window.scrollBy(0, -(window.innerHeight - hexagon.offsetHeight/2)/2);
+                        // window.scrollBy(0, -(document.documentElement.clientHeight - hexagon.offsetHeight/2)/2);
                         if(hexagon.classList.contains('hexagon-active')) return
                         hexagon.classList.add('hexagon-active');
                         const clearAbouts = evt => {
@@ -879,7 +976,7 @@ window.addEventListener('load', async () => {
             document.querySelectorAll('.hexagon').forEach(setHexProps);
             
             const backup = () => {
-                localStorage.setItem('userScroll', JSON.stringify({x: window.pageXOffset, y: window.pageYOffset}));
+                localStorage.setItem('userScroll', JSON.stringify({x: document.body.scrollLeft, y: document.body.scrollTop}));
             }
             window.onunload = backup;
             window.addEventListener('beforeunload', (evt) => {
@@ -955,9 +1052,14 @@ window.addEventListener('load', async () => {
 
                 let foundedHex = document.querySelector(`#${selector[0]} #${selector[1]}`);
                 
-                window.scrollTo(foundedHex.offsetLeft - (document.documentElement.clientWidth - foundedHex.offsetWidth/2) / 2, 0);
-                foundedHex.scrollIntoView(true)
-                window.scrollBy(0, -(window.innerHeight - foundedHex.offsetHeight/2)/2);
+                // window.scrollTo(foundedHex.offsetLeft - (document.documentElement.clientWidth - foundedHex.offsetWidth/2) / 2, 0);
+                // foundedHex.scrollIntoView(true)
+                // window.scrollBy(0, -(document.documentElement.clientHeight - foundedHex.offsetHeight/2)/2);
+
+                foundedHex.scrollIntoView({
+                    block: 'center',
+                    inline: 'center'
+                })
                 
                 foundedHex.classList.add('founded-polygon');
                 
@@ -968,7 +1070,8 @@ window.addEventListener('load', async () => {
                 
             }else{
                 let scrollCoords = JSON.parse(localStorage.getItem('userScroll') || `{"x": ${document.body.scrollWidth / 2}, "y":  ${document.body.scrollHeight / 2}}`)
-                window.scrollTo(scrollCoords.x, scrollCoords.y);
+                document.body.scrollLeft = scrollCoords.x;
+                document.body.scrollTop = scrollCoords.y;
             }
 
             // настройки  
@@ -1192,11 +1295,11 @@ window.addEventListener('load', async () => {
                 
                 jscolor.install();
             }
-            if(window.innerWidth < 700){
+            if(document.documentElement.clientWidth < 700){
                 document.querySelector('.settings-button').remove()
             }
 
-            if(window.innerWidth < 800 || otherSettings.hideBtns){
+            if(document.documentElement.clientWidth < 800 || otherSettings.hideBtns){
                 let userCont = document.querySelector('.user-cont');
 
                 if(userCont){
@@ -1208,9 +1311,9 @@ window.addEventListener('load', async () => {
                 createDropMenu(document.querySelectorAll('.field-btns button'));
             }
 
-            document.querySelector('.hexsCont').style.borderWidth = 'unset';
+            hexsCont.style.borderWidth = 'unset';
         }
-
+        if(document.querySelector('.loading')) document.querySelector('.loading').ontransitionend = main
         if(!isTransEnd) main();
         
     })

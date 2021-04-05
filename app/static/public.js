@@ -11,6 +11,9 @@ function hexToRgb(color, alpha = 1){
 function setClassName(elem, classList){
     elem.classList.add(classList);
     return elem
+}
+function isTouchDevice() {
+    return ('ontouchstart' in window);
 } 
 
 
@@ -222,12 +225,10 @@ let HEXAGON_WIDTH = HEXAGON_HEIGHT
 const main = async () => {
     let mainLogo = document.querySelector('.header-img.big');
     let smallLogo = document.querySelector('.header-img.small');
-    console.log(window.innerWidth);
     if(mainLogo && smallLogo){
-        if(window.innerWidth < 470){
+        if(document.documentElement.clientWidth < 470){
             mainLogo.remove();
         }else{
-            console.log('remove');
             smallLogo.remove();
         }
     }
@@ -329,8 +330,13 @@ const main = async () => {
                 if(window.location.pathname.replace(/\/?fields\//, '') == neededHex.categ){
                     let foundedHex = document.querySelector(neededHex.selector);
             
-                    window.scrollTo(foundedHex.offsetLeft-(window.innerWidth - foundedHex.offsetWidth/2) / 2, 0);
-                    window.scrollBy(0, -(window.innerHeight - foundedHex.offsetHeight/2)/2);
+                    // window.scrollTo(foundedHex.offsetLeft-(document.documentElement.clientWidth - foundedHex.offsetWidth/2) / 2, 0);
+                    // window.scrollBy(0, -(document.documentElement.clientHeight - foundedHex.offsetHeight/2)/2);
+                    foundedHex.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center',
+                        inline: 'center'
+                    });
                 
                     foundedHex.classList.add('founded-polygon');
                     
@@ -345,11 +351,11 @@ const main = async () => {
     }
 
     if(document.body){
-        document.body.style.width = window.innerWidth + 'px';
-        document.body.style.height = window.innerHeight + 'px';
+        document.body.style.width = document.documentElement.clientWidth + 'px';
+        document.body.style.height = document.documentElement.clientHeight + 'px';
         window.onresize = () => {
-            document.body.style.width = window.innerWidth + 'px';
-            document.body.style.height = window.innerHeight + 'px';
+            document.body.style.width = document.documentElement.clientWidth + 'px';
+            document.body.style.height = document.documentElement.clientHeight + 'px';
         }
     }
 
@@ -370,11 +376,20 @@ const main = async () => {
 
     let loading = document.querySelector('.loading');
     if(loading){
-        loading.style.opacity = 0;
-        
-        loading.ontransitionend = () => {
+        loading.style.opacity = 0; 
+
+        let transEnd = false;        
+        let deleteLoading = loading.ontransitionend = () => {
+            transEnd = true;        
+            
             loading.remove()
         }
+
+        setTimeout(() => {
+            if(!transEnd){
+                deleteLoading()
+            }
+        }, 100)
     }
 }
 window.addEventListener('load', main);

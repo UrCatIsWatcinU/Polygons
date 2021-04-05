@@ -66,6 +66,9 @@ body {
 .modal-title{
     margin-top: 0;
 }
+.modal-body{
+    width: max-content;
+}
 .new-categ-modal{
     display: flex;
     justify-content: center;
@@ -206,8 +209,9 @@ h1{
 }
   
 .row.row-moved {
-    margin-left: calc(var(--hexagon-width) / 2);
+    padding-left: calc(var(--hexagon-width) / 2);
 }
+
   
 .hexagon {
     --bgc: transparent;

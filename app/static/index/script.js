@@ -294,9 +294,9 @@ window.addEventListener('load', async () => {
             }
         }
     }
-    if(window.innerWidth < 490){
+    if(document.documentElement.clientWidth < 490){
         splitCateg(2)
-    }else if(window.innerWidth < 600){
+    }else if(document.documentElement.clientWidth < 600){
         splitCateg(3)
     }
 })
