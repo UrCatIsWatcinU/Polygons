@@ -757,8 +757,8 @@ window.addEventListener('load', async () => {
                         contextmenu.querySelector('.edit').onclick = () => {
                             hexagon.dispatchEvent(new Event('dblclick'));
                         }
-                        contextmenu.querySelector('.copy').onclick = (evt) => {
-                            navigator.clipboard.writeText(window.location.href + '?' + giveHexSelector(hexagon).replace(/\s+/, ''))
+                        contextmenu.querySelector('.copy').onclick = () => {
+                            window.navigator.clipboard.writeText(window.location.href + '?' + giveHexSelector(hexagon).replace(/\s+/, ''))
                             .then(() => {
                                 let flash = setClassName(document.createElement('div'), 'flash');
                                 flash.innerText = 'Copied';
