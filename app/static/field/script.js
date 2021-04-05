@@ -784,7 +784,7 @@ window.addEventListener('load', async () => {
                                 textArea.select();
                             
                                 try {
-                                    console.log(textArea, window.getSelection());
+                                    console.log(textArea, window.getSelection().toString());
                                     let success = document.execCommand('copy');
                                     console.log(success);
                                     if(success){
