@@ -156,23 +156,31 @@ html{
 .hexagon-about{
   background: var(--about-bgc);
   color: var(--black-c);
-  width: 380px;
+  min-width: 380px;
   min-height: 100px;
-  max-height: 450px;
+  /* max-height: 450px; */
   position: absolute;
   top: calc(var(--triangle-height) + 5px);
   z-index: 10;
-  overflow-y: auto;
+  overflow: auto;
   border-radius: 5px;
   padding: 10px;
   font-size: 1em;
   box-sizing: border-box;
   transition: inherit;
   user-select: text;
+
+  resize: horizontal;
 }
 .hexagon-about:focus{
   outline: none;
   border: none;
+}
+.hexagon-about-drag{
+  filter: brightness(1.2);
+}
+.hexagon-about img{
+  width: 100%;
 }
 
 
@@ -286,6 +294,15 @@ html{
   align-items: center;
   flex: none;
   padding-right: 10px;
+  position: relative;
+}
+.check-cont::after{
+  content: '';
+  width: calc(100% - 10px);
+  border-top: 1px solid var(--main-c);
+  position: absolute;
+  bottom: 0;
+  left: 0;
 }
 .check-cont *{
   cursor: pointer;

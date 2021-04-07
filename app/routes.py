@@ -1,9 +1,9 @@
 from app import app, socketio, db
 from app.forms import LoginForm, RegistrationForm
-from app.models import Change, Complaint, Hexagon, User, Categ, Role
+from app.models import Change, Complaint, Hexagon, User, Categ
 
 from flask import render_template, redirect, url_for, request
-from flask_socketio import send, emit
+from flask_socketio import emit
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 from flask_sqlalchemy import sqlalchemy

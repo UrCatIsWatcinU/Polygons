@@ -40,7 +40,7 @@ class Hexagon(db.Model):
     chain_id = db.Column(db.Integer, index=True)
     num = db.Column(db.Integer)
     inner_text = db.Column(db.String(64), index=True)
-    about = db.Column(db.String(2000))
+    about = db.Column(db.Text)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
     categ_id = db.Column(db.Integer, db.ForeignKey('categ.id'), index=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)

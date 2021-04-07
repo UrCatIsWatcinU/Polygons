@@ -93,6 +93,7 @@ function hideModal(){
     if(!modal) return
 
     modal.style.display = 'none';
+    modal.querySelector('.modal-content').className = 'modal-content';
 
     if(modal.querySelector('.modal-title') && modal.querySelector('.modal-body')){
         modal.querySelector('.modal-title').innerText = '';
@@ -180,7 +181,8 @@ let otherSettings = {
     bordered: false,
     turned: false,
     innerNum: false,
-    hideBtns: false
+    hideBtns: false,
+    ctrlZoom: false
 }
 
 let colors = {

@@ -332,8 +332,11 @@ window.addEventListener('load', async () => {
             
             let zoomIndex = 1;
             document.addEventListener('wheel', evt => {
-                document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});
+                if(otherSettings.ctrlZoom && !(evt.metaKey || evt.ctrlKey)) return;
                 evt.preventDefault();
+                if((document.querySelector('.settings') && document.querySelector('.settings')) || 
+                    document.querySelector('.hexagon-about')) return;
+                document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});
 
                 console.log('zoom');
                 
@@ -412,7 +415,7 @@ window.addEventListener('load', async () => {
         
                             let hexagonAbout = hexagon.querySelector('.hexagon-about')
                             if(hexagonAbout){
-                                hexagonAbout.innerText = changeData.was.about;
+                                hexagonAbout.innerHTML = changeData.was.about;
         
                                 const range = document.createRange();
                                 range.selectNodeContents(hexagonAbout);
@@ -465,7 +468,7 @@ window.addEventListener('load', async () => {
         
                             let hexagonAbout = hexagon.querySelector('.hexagon-about')
                             if(hexagonAbout){
-                                hexagonAbout.innerText = changeData.became.about;
+                                hexagonAbout.innerHTML = changeData.became.about;
         
                                 const range = document.createRange();
                                 range.selectNodeContents(hexagonAbout);
@@ -827,6 +830,7 @@ window.addEventListener('load', async () => {
                 hexagon.userId = 0;
                 hexagon.username = '';
                 
+                let editedField = createEditedField(hexagon);
                 hexagon.ondblclick = (evt) => {
                     evt.preventDefault()
                     if(!hexagon.classList.contains('hexagon-visible')){
@@ -835,7 +839,6 @@ window.addEventListener('load', async () => {
                     hexagon.isFocused = true;
                     hexagon.classList.add('hexagon-active');   
                     
-                    let editedField = createEditedField(hexagon);
                     
                     editedField.setAttribute('contenteditable','true');
                     editedField.focus();
@@ -844,26 +847,20 @@ window.addEventListener('load', async () => {
         
                 // окно подробнее
                 hexagon.about = '';
-        
-                hexagon.onclick = evt => {
-                    if(!hexagon.classList.contains('hexagon-visible')){
-                        return
-                    }
-        
-                    if(evt.metaKey || evt.ctrlKey){
+                
+                if(editedField){
+                    editedField.onclick = evt => {
+                        if(!hexagon.classList.contains('hexagon-visible') || !editedField.innerText){
+                            return
+                        }
+            
                         document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});
                         
                         evt.stopPropagation();
-                        hexagon.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'center',
-                            inline: 'center'
-                        });
 
-                        // window.scrollTo(hexagon.offsetLeft - (document.documentElement.clientWidth - hexagon.offsetWidth/2) / 2, 0);
-                        // window.scrollBy(0, -(document.documentElement.clientHeight - hexagon.offsetHeight/2)/2);
                         if(hexagon.classList.contains('hexagon-active')) return
                         hexagon.classList.add('hexagon-active');
+
                         const clearAbouts = evt => {
                             document.querySelectorAll('.hexagon-about').forEach(elem => {
                                 elem.remove();
@@ -871,19 +868,112 @@ window.addEventListener('load', async () => {
                             document.removeEventListener('mousedown', clearAbouts);
                         }
                         clearAbouts();
+                        let dataToHistory;
+                        const uploadChanges = () => {
+                            if(dataToHistory) {
+                                hexagon.about = hexagonAbout.innerHTML;
+            
+                                dataToHistory.data.became = {
+                                    innerHTML: hexagon.text,
+                                    about: hexagon.about
+                                }
+        
+                                socket.emit('hexs', {
+                                    action: 'change',
+                                    categ: document.title,
+                                    data: stringifyHexs([hexagon])
+                                })
+    
+                                dataToHistory.data = JSON.stringify(dataToHistory.data);
+                                saveToHistory(dataToHistory);
+                                dataToHistory.data = JSON.parse(dataToHistory.data);
+                            }
+                        }   
         
                         let hexagonAbout = document.createElement('div');
                         hexagonAbout.className = 'hexagon-about';
+
+                        hexagonAbout.addEventListener('dragover', (evt) => {
+                            evt.preventDefault();
+                            hexagonAbout.classList.add('hexagon-about-drag');
+                        })
+                        
+                        hexagonAbout.addEventListener('drop', (evt) => {
+                            console.log('drop');
+                            hexagonAbout.classList.remove('hexagon-about-drag');
+                            if(!window.FileReader){
+                                showModal('Cannot upload file', 'Your browser don\'t support files uploads');
+                                return;
+                            }
+                            const MAX_SIZE = 3000000;
+                            const EXTENTIONS = ['png', 'jpg', 'jpeg', 'gif'];
+
+                            evt.preventDefault();
+
+                            if(evt.dataTransfer.files.length > 1){
+                                showModal('Drag one file');
+                                return
+                            }
+                            
+                            let file = evt.dataTransfer.files[0];
+                            
+                            if(!EXTENTIONS.map(ext => `image/${ext}`).includes(file.type)){
+                                showModal('Wrong file format', `Please drag file with one of these extentions:\n ${EXTENTIONS.map(ext => ext.toUpperCase()).join(', ')}`);
+                                return;
+                            }
+                            if(file.size > MAX_SIZE){
+                                showModal('Big file', 'Max file size is ' + MAX_SIZE / 1000000 + 'MB')
+                            }
+
+                            // let image = setClassName(document.createElement('img'), 'hexagon-about-image');
+                            let image = document.createElement('img')
+
+                            const reader = new FileReader();
+                            reader.readAsDataURL(file)
+                            reader.onload = (evt) => {
+                                image.setAttribute('src', evt.target.result);
+                            }
+                            
+                            hexagonAbout.append(image);
+
+                            hexagonAbout.setAttribute('contenteditable','true');
+                            hexagonAbout.focus();
+                        }, {passive: false});
+                        
+                        hexagonAbout.ondragleave = () => {
+                            console.log('leave');
+                            hexagonAbout.classList.remove('hexagon-about-drag');
+                        }
         
                         hexagonAbout.addEventListener('DOMNodeRemoved', () => {
-                            hexagonAbout.blur()
+                            // uploadChanges();
                             hexagon.classList.remove('hexagon-active');
                         });
                         
                         hexagonAbout.addEventListener('mousedown', evt => {
                             evt.stopPropagation();
-                        })
-        
+                        });
+
+                        hexagonAbout.onfocus = () => {
+                            console.log('focus');
+                            dataToHistory = {
+                                action: 'change',
+                                categ: document.title,
+                                data: {
+                                    hex: giveHexSelector(hexagon),
+                                    was: {
+                                        innerHTML: hexagon.text,
+                                        about: hexagon.about
+                                    }
+                                }
+                            }
+                        
+                            hexagonAbout.onblur = () => {
+                                hexagonAbout.setAttribute('contenteditable','false');
+                                uploadChanges();
+                            }
+                        }
+                        
                         hexagonAbout.addEventListener('dblclick', evt => {
                             evt.preventDefault();
                             evt.stopPropagation();
@@ -895,53 +985,21 @@ window.addEventListener('load', async () => {
                             sel.removeAllRanges();
                             sel.addRange(range);
         
-                            hexagonAbout.onfocus = () => {
-        
-                                let dataToHistory = {
-                                    action: 'change',
-                                    categ: document.title,
-                                    data: {
-                                        hex: giveHexSelector(hexagon),
-                                        was: {
-                                            innerText: hexagon.text,
-                                            about: hexagon.about
-                                        }
-                                    }
-                                }
-                            
-                                hexagonAbout.onblur = () => {
-                                    hexagonAbout.setAttribute('contenteditable','false');
-                                    hexagon.about = hexagonAbout.innerText;
-        
-                                    dataToHistory.data.became = {
-                                        innerText: hexagon.text,
-                                        about: hexagon.about
-                                    }
-            
-                                    socket.emit('hexs', {
-                                        action: 'change',
-                                        categ: document.title,
-                                        data: stringifyHexs([hexagon])
-                                    })
-        
-                                    dataToHistory.data = JSON.stringify(dataToHistory.data);
-                                    saveToHistory(dataToHistory);
-                                }
-                            }
         
                             hexagonAbout.setAttribute('contenteditable','true');
                             
                             hexagonAbout.focus();
                         })
                         // hexagonAbout.oninput = evt => {
-                        //     hexagon.about = hexagonAbout.innerText;
+                        //     hexagon.about = hexagonAbout.innerHTML;
                         // }
                         hexagonAbout.onkeypress = evt => {
                             if(evt.key == 'enter' && evt.metaKey || evt.ctrlKey){
                                 hexagonAbout.blur();
                             }
                         } 
-                        hexagonAbout.innerText = hexagon.about;
+
+                        hexagonAbout.innerHTML = hexagon.about;
                         hexagon.append(hexagonAbout);
         
                         const checkHexVisibility = (r, h) => document.querySelector(`#r${r} #h${h}`) ? document.querySelector(`#r${r} #h${h}`).classList.contains('hexagon-visible') : false;
@@ -1014,6 +1072,12 @@ window.addEventListener('load', async () => {
         
                         
                         document.addEventListener('mousedown', clearAbouts);
+                        
+                        hexagonAbout.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center',
+                            inline: 'center'
+                        });
                     }
                 }
 
@@ -1082,7 +1146,7 @@ window.addEventListener('load', async () => {
                         
                         let hexagonAbout = hexagon.querySelector('.hexagon-about')
                         if(hexagonAbout){
-                            hexagonAbout.innerText = hex.about;
+                            hexagonAbout.innerHTML = hex.about;
                             
                             const range = document.createRange();
                             range.selectNodeContents(hexagonAbout);
@@ -1147,7 +1211,7 @@ window.addEventListener('load', async () => {
                     <div class="font">
                         <h2 class="settings-title">Font</h2>
                         <div class="font-cont">
-                            <span class="font-input-cont"><label for="font-family">Family from <a href="https://fonts.google.com/">Google</a></label>:&nbsp<input type="text" id="font-family" value="${font.family}"></span>
+                            <span class="font-input-cont"><label for="font-family">Family from <a target="_blank" href="https://fonts.google.com/">Google</a></label>:&nbsp<input type="text" id="font-family" value="${font.family}"></span>
                             <span class="font-input-cont"><label for="font-size">Size</label>:&nbsp<input type="text" id="font-size" value="${font.size.replace('em', '')}"></span>
                         </div>
                         <div class="font-preview">
@@ -1163,6 +1227,7 @@ window.addEventListener('load', async () => {
                             <div class="turned-cont check-cont"><label for="turned">Turned hexagons (beta)</label><input class="check-input" type="checkbox" id="turned"></div>
                             <div class="innerNum-cont check-cont"><label for="innerNum">Inner numeration</label><input class="check-input" type="checkbox" id="innerNum"></div>
                             <div class="hideBtns-cont check-cont"><label for="hideBtns">Always hide buttons</label><input class="check-input" type="checkbox" id="hideBtns"></div>
+                            <div class="ctrlZoom-cont check-cont"><label for="ctrlZoom">Zoom with ctrl button</label><input class="check-input" type="checkbox" id="ctrlZoom"></div>
                         </div>
                     </div>
                 </div>
