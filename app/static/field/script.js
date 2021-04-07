@@ -131,6 +131,7 @@ window.addEventListener('load', async () => {
                 if(!editedField){
                     editedField = document.createElement('div');
                     editedField.className = 'hexagon-editedField';
+                    if(isTouchDevice()) editedField.style.textDecoration = 'underline';
                     
                     editedField.onfocus = () => {    
                         editedField.innerText = editedField.innerText.trim();
@@ -675,22 +676,124 @@ window.addEventListener('load', async () => {
                 else{
                     let hexDate = new Date(hexagon.creationDate * 1000);
                     contextmenu.innerHTML = `
+                    <div style="margin-bottom: 5px;" class="contextmenu-item copy">Copy link</div> 
+                    <div class="contextmenu-item complain">Complain</div> 
+                    <hr class="contextmenu-line">
                     <div style="margin-bottom: 5px" class="contextmenu-item contextmenu-info">User: ${hexagon.username}</div>
-                    <div style="margin-bottom: 5px" class="contextmenu-item contextmenu-info">Date: ${hexDate.toLocaleDateString()}</div>`;
+                    <div style="" class="contextmenu-item contextmenu-info">Date: ${hexDate.toLocaleDateString()}</div>`;
                     
                     if(user.userRole == 2){
                         contextmenu.innerHTML += `<div class="contextmenu-item contextmenu-info">Chain: ${hexagon.chainId}</div>`;
                     }
                     hexagon.isContextmenu = true;
                     
+                    contextmenu.querySelector('.complain').onclick = () => {
+                        let complaint = showModal('','', true);
+                        complaint.onclick = null;
+                        complaint = complaint.firstElementChild;
+                        complaint.classList.add('complaint');
+
+                        complaint.innerHTML = `
+                        <h1 class="complaint-title">Complaint</h1>
+                        <svg class="complaint-close"><line x1="50%" y1="0%" x2="50%" y2="100%"></line><line x1="0%" y1="50%" x2="100%" y2="50%"></line></svg>
+                        <div class="complaint-textarea">
+                            <label for="complaint-text">Text</label> 
+                            <br> 
+                            <textarea id="complaint-text" autofocus maxlength="400" spellcheck="true" wrap="soft"></textarea>
+                        </div>
+                        <div class="btn-cont" style="display: flex;">
+                            <button class="send-button">Send</button>
+                            <button class="close-button">Close</button>
+                        </div>
+                        `;
+
+                        complaint.querySelector('.send-button').onclick = async () => {
+                            try{
+                                let res = await fetch('/complaints/new', {
+                                    method: 'POST',
+                                    body:JSON.stringify({
+                                        hexagon: {
+                                            selector: giveHexSelector(hexagon),
+                                            categ: document.title
+                                        },
+                                        text: complaint.querySelector('#complaint-text').value
+                                    })
+                                })
+
+                                if(res.ok){
+                                    res = await res.json();
+
+                                    if(res.success) showModal('Your complaint has been successfully recorded', 'It will soon be reviewed by the administration');
+                                    else showModal('An error occurred while recording the complaint', 'Try later');
+                                }else{
+                                    showModal('An error occurred while recording the complaint', 'Try later');
+                                }
+                            }catch(err){
+                                showModal('An error occurred while sending the complaint', err);
+                            }
+                        };
+                        complaint.querySelector('.close-button').onclick = hideModal;
+                        complaint.querySelector('.complaint-close').onclick = hideModal;
+                    }
+                    contextmenu.querySelector('.edit').onclick = () => {
+                        hexagon.dispatchEvent(new Event('dblclick'));
+                    }
+                    contextmenu.querySelector('.copy').onclick = () => {
+                        let link = window.location.href + '?' + giveHexSelector(hexagon).replace(/\s+/, '');
+                        const ifCopySuccess = () => {
+                            let flash = setClassName(document.createElement('div'), 'flash');
+                            flash.innerText = 'Copied';
+
+                            document.body.append(flash);
+                            setTimeout(() => {
+                                flash.style.opacity = 1;
+                            }, 0)
+                            setTimeout(() => {
+                                flash.style.opacity = 0;
+                            }, 3000)
+                        }
+                        if (!navigator.clipboard) {
+                            let textArea = document.createElement("textarea");
+                            textArea.setAttribute('value', link);
+                            textArea.value = link;
+
+                            textArea.style.position = "fixed";
+                            // textArea.style.visibility = "hidden";
+
+                            document.body.appendChild(textArea);
+
+                            setTimeout(() => {
+                                textArea.focus();
+                                textArea.select();
+                            
+                                try {
+                                    let success = document.execCommand('copy');
+                                    if(success){
+                                        ifCopySuccess();
+                                    }else{
+                                        showModal('Was not possible to copy the link');
+                                    }
+                                } catch (err) {
+                                    showModal('Was not possible to copy the link', err);
+                                }
+                            
+                                document.body.removeChild(textArea); 
+                            }, 10)           
+                        }else{
+                            window.navigator.clipboard.writeText(link)
+                            .then(ifCopySuccess)
+                            .catch(err => {
+                                console.log('Something went wrong', err);
+                            });
+                        }
+
+                    }
+
                     if(!hexagon.userId || (user.userId == hexagon.userId) || user.userRole == 2){
                         let menuInfo = contextmenu.innerHTML;
                         contextmenu.innerHTML = `
                         <div style="margin-bottom: 5px;" class="contextmenu-item">Delete</div> 
                         <div style="margin-bottom: 5px;" class="contextmenu-item edit">Edit</div> 
-                        <div style="margin-bottom: 5px;" class="contextmenu-item copy">Copy link</div> 
-                        <div class="contextmenu-item complain">Complain</div> 
-                        <hr class="contextmenu-line">
                         ` + menuInfo;
 
                         contextmenu.firstElementChild.onclick = () => {
@@ -708,107 +811,6 @@ window.addEventListener('load', async () => {
                                 data: JSON.stringify(deletedHexs)
                             });
                             
-                        }
-                        contextmenu.querySelector('.complain').onclick = () => {
-                            let complaint = showModal('','', true);
-                            complaint.onclick = null;
-                            complaint = complaint.firstElementChild;
-                            complaint.classList.add('complaint');
-
-                            complaint.innerHTML = `
-                            <h1 class="complaint-title">Complaint</h1>
-                            <svg class="complaint-close"><line x1="50%" y1="0%" x2="50%" y2="100%"></line><line x1="0%" y1="50%" x2="100%" y2="50%"></line></svg>
-                            <div class="complaint-textarea">
-                                <label for="complaint-text">Text</label> 
-                                <br> 
-                                <textarea id="complaint-text" autofocus maxlength="400" spellcheck="true" wrap="soft"></textarea>
-                            </div>
-                            <div class="btn-cont" style="display: flex;">
-                                <button class="send-button">Send</button>
-                                <button class="close-button">Close</button>
-                            </div>
-                            `;
-
-                            complaint.querySelector('.send-button').onclick = async () => {
-                                try{
-                                    let res = await fetch('/complaints/new', {
-                                        method: 'POST',
-                                        body:JSON.stringify({
-                                            hexagon: {
-                                                selector: giveHexSelector(hexagon),
-                                                categ: document.title
-                                            },
-                                            text: complaint.querySelector('#complaint-text').value
-                                        })
-                                    })
-    
-                                    if(res.ok){
-                                        res = await res.json();
-    
-                                        if(res.success) showModal('Your complaint has been successfully recorded', 'It will soon be reviewed by the administration');
-                                        else showModal('An error occurred while recording the complaint', 'Try later');
-                                    }else{
-                                        showModal('An error occurred while recording the complaint', 'Try later');
-                                    }
-                                }catch(err){
-                                    showModal('An error occurred while sending the complaint', err);
-                                }
-                            };
-                            complaint.querySelector('.close-button').onclick = hideModal;
-                            complaint.querySelector('.complaint-close').onclick = hideModal;
-                        }
-                        contextmenu.querySelector('.edit').onclick = () => {
-                            hexagon.dispatchEvent(new Event('dblclick'));
-                        }
-                        contextmenu.querySelector('.copy').onclick = () => {
-                            let link = window.location.href + '?' + giveHexSelector(hexagon).replace(/\s+/, '');
-                            const ifCopySuccess = () => {
-                                let flash = setClassName(document.createElement('div'), 'flash');
-                                flash.innerText = 'Copied';
-
-                                document.body.append(flash);
-                                setTimeout(() => {
-                                    flash.style.opacity = 1;
-                                }, 0)
-                                setTimeout(() => {
-                                    flash.style.opacity = 0;
-                                }, 3000)
-                            }
-                            if (!navigator.clipboard) {
-                                let textArea = document.createElement("textarea");
-                                textArea.setAttribute('value', link);
-                                textArea.value = link;
-
-                                textArea.style.position = "fixed";
-                                // textArea.style.visibility = "hidden";
-
-                                document.body.appendChild(textArea);
-
-                                setTimeout(() => {
-                                    textArea.focus();
-                                    textArea.select();
-                                
-                                    try {
-                                        let success = document.execCommand('copy');
-                                        if(success){
-                                            ifCopySuccess();
-                                        }else{
-                                            showModal('Was not possible to copy the link');
-                                        }
-                                    } catch (err) {
-                                        showModal('Was not possible to copy the link', err);
-                                    }
-                                
-                                    document.body.removeChild(textArea); 
-                                }, 10)           
-                            }else{
-                                window.navigator.clipboard.writeText(link)
-                                .then(ifCopySuccess)
-                                .catch(err => {
-                                    console.log('Something went wrong', err);
-                                });
-                            }
-
                         }
                     }
                 }

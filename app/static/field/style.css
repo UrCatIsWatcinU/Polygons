@@ -153,6 +153,16 @@ html{
   border-radius: 20px;
 }
 
+.hexagon-editedField{
+  height: unset;
+  width: unset;
+  max-width: calc(var(--hexagon-width) - 2px);
+  max-height: calc(var(--body-height) - 2px);
+}
+.hexagon-editedField:hover{
+  text-decoration: underline;
+}
+
 .hexagon-about{
   background: var(--about-bgc);
   color: var(--black-c);
