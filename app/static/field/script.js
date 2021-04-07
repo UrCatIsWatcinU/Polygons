@@ -676,8 +676,9 @@ window.addEventListener('load', async () => {
                 else{
                     let hexDate = new Date(hexagon.creationDate * 1000);
                     contextmenu.innerHTML = `
+                    <div style="margin-bottom: 5px;" class="contextmenu-item edit">Edit</div> 
                     <div style="margin-bottom: 5px;" class="contextmenu-item copy">Copy link</div> 
-                    <div class="contextmenu-item complain">Complain</div> 
+                    <div class="contextmenu-item complain">Complain</div>
                     <hr class="contextmenu-line">
                     <div style="margin-bottom: 5px" class="contextmenu-item contextmenu-info">User: ${hexagon.username}</div>
                     <div style="" class="contextmenu-item contextmenu-info">Date: ${hexDate.toLocaleDateString()}</div>`;
@@ -792,8 +793,7 @@ window.addEventListener('load', async () => {
                     if(!hexagon.userId || (user.userId == hexagon.userId) || user.userRole == 2){
                         let menuInfo = contextmenu.innerHTML;
                         contextmenu.innerHTML = `
-                        <div style="margin-bottom: 5px;" class="contextmenu-item">Delete</div> 
-                        <div style="margin-bottom: 5px;" class="contextmenu-item edit">Edit</div> 
+                        <div style="margin-bottom: 5px;" class="contextmenu-item">Delete</div>  
                         ` + menuInfo;
 
                         contextmenu.firstElementChild.onclick = () => {
