@@ -6,7 +6,6 @@ const giveHexSelector = (h) => `#r${h.rowId} #${h.id}`;
 const prepareHex = hex => ({
     selector: giveHexSelector(hex),
     innerText: hex.querySelector('.hexagon-editedField') ? hex.querySelector('.hexagon-editedField').innerText : '',
-    about: hex.about,
     num: +hex.querySelector('.hexagon-num').innerText,
     chainId: hex.chainId,
 })
@@ -106,10 +105,6 @@ window.addEventListener('load', async () => {
                         
                         editedField.innerText = hex.innerText;
                     }
-        
-                    if(hex.about){
-                        hexagon.about = hex.about
-                    }
                     
                     hexagon.querySelector('.hexagon-num').innerText = hex.num;
                     hexagon.style.setProperty('--bgc', hexsColors[((hex.num-1) - hexsColors.length * (Math.ceil((hex.num-1) / hexsColors.length) - 1)) - 1])
@@ -129,6 +124,9 @@ window.addEventListener('load', async () => {
                         hexagon.classList.add('hexagon-first');
                         hexagon.style.setProperty('--bgc', colors.MAIN_C);
                     }
+
+                    hexagon.uuid = hex.uuid;
+                    
                     visibleHexs.push(hexagon);
                     parsedHexs.push(hexagon);   
                 }
@@ -275,121 +273,186 @@ window.addEventListener('load', async () => {
                 hexagon.id = 'h' +  ([].indexOf.call(row.children, hexagon) + 1);
                 hexagon.querySelector('polygon').id = 'p' + ([].indexOf.call(row.children, hexagon) + 1)
                 hexagon.rowId = idToNum(row.id);
+
+                const editedField = createEditedField();
             
         
                 // окно подробнее
                 hexagon.about = '';
-        
-                hexagon.onclick = evt => {
+                
+                if(!editedField) return;
+                hexeditedFieldagon.onclick = evt => {
                     if(!hexagon.classList.contains('hexagon-visible')){
                         return
                     }
         
-                    if(evt.metaKey || evt.ctrlKey){
-                        document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});
-                        
-                        evt.stopPropagation();
-                        hexagon.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'center',
-                            inline: 'center'
-                        })
+                    document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});
+                    
+                    evt.stopPropagation();
+                    hexagon.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center',
+                        inline: 'center'
+                    })
 
-                        if(hexagon.classList.contains('hexagon-active')) return
-                        hexagon.classList.add('hexagon-active');
-                        const clearAbouts = evt => {
-                            document.querySelectorAll('.hexagon-about').forEach(elem => {
-                                elem.remove();
-                            });
-                            document.removeEventListener('mousedown', clearAbouts);
-                        }
-                        clearAbouts();
-        
-                        let hexagonAbout = document.createElement('div');
-                        hexagonAbout.className = 'hexagon-about';
-        
-                        hexagonAbout.addEventListener('DOMNodeRemoved', () => {
-                            hexagon.classList.remove('hexagon-active');
+                    if(hexagon.classList.contains('hexagon-active')) return
+                    hexagon.classList.add('hexagon-active');
+                    const clearAbouts = evt => {
+                        document.querySelectorAll('.hexagon-about').forEach(elem => {
+                            elem.remove();
                         });
-                        
-                        hexagonAbout.addEventListener('mousedown', evt => {
-                            evt.stopPropagation();
-                        })
-        
-                        hexagonAbout.innerText = hexagon.about;
-                        hexagon.append(hexagonAbout);
-        
-                        const checkHexVisibility = (r, h) => document.querySelector(`#r${r} #h${h}`) ? document.querySelector(`#r${r} #h${h}`).classList.contains('hexagon-visible') : false;
-                        let rId = hexagon.rowId;
-                        let hId = +hexagon.id.replace('h', '');
-        
-                        if(checkHexVisibility(rId, hId + 1) && checkHexVisibility(rId, hId - 1)){
-                            if(hexagon.parentElement.classList.contains('row-moved')){
-                                if(checkHexVisibility(rId - 1 , hId) || checkHexVisibility(rId - 1, hId + 1)){
-                                    hexagonAbout.style.top = (HEXAGON_HEIGHT + 5) + 'px';
-                                }else if(checkHexVisibility(rId + 1, hId) || checkHexVisibility(rId + 1, hId + 1)){
-                                    hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5) + 'px';
-                                }else{
-                                    hexagonAbout.style.top = (HEXAGON_HEIGHT + 5) + 'px';
-                                }
-                            }else{
-                                if(checkHexVisibility(rId - 1 , hId) || checkHexVisibility(rId - 1, hId - 1)){
-                                    hexagonAbout.style.top = (HEXAGON_HEIGHT + 5) + 'px';
-                                }else if(checkHexVisibility(rId + 1, hId) || checkHexVisibility(rId + 1, hId - 1)){
-                                    hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5) + 'px';
-                                }else{
-                                    hexagonAbout.style.top = (HEXAGON_HEIGHT + 5) + 'px';
-                                }
+                        document.removeEventListener('mousedown', clearAbouts);
+                    }
+                    clearAbouts();
+    
+                    let hexagonAbout = document.createElement('div');
+                    hexagonAbout.className = 'hexagon-about';
+    
+                    const deleteObserver = new MutationObserver((mList) => {
+                        mList.forEach(mutation => {
+                            if(Array.from(mutation.removedNodes).includes(hexagonAbout)){
+                                hexagon.classList.remove('hexagon-active');
                             }
-                        }else if(checkHexVisibility(rId, hId + 1)){
-                            hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
-                        }else if(checkHexVisibility(rId, hId - 1)){
-                            hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
-                        }else{
-                            if(hexagon.parentElement.classList.contains('row-moved')){
-                                if(checkHexVisibility(rId + 1, hId) && checkHexVisibility(rId + 1, hId+ 1)){
-                                    hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5 - TRIANGLE_HEIGHT) + 'px';
-                                    if(checkHexVisibility(rId - 1, hId)){
-                                        hexagonAbout.style.bottom = 0
-                                        hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
-                                    }else if(checkHexVisibility(rId - 1, hId + 1)){
-                                        hexagonAbout.style.bottom = 0
-                                        hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
-                                    }else{
-                                        hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
-                                    }
-                                }else if(checkHexVisibility(rId + 1, hId)){
-                                    hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
-                                }else if(checkHexVisibility(rId + 1, hId + 1)){
-                                    hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
-                                }else{
-                                    hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
+                        });
+                    });
+                    deleteObserver.observe(hexagon, {
+                        childList: true
+                    });
+                    
+                    hexagonAbout.addEventListener('mousedown', evt => {
+                        evt.stopPropagation();
+                    })
+    
+                    if(!hexagon.about){
+                        const loadAbout = () => {
+                            hexagonAbout.innerHTML += `<div class="loading about-loading">
+                            <svg class='loading-svg about-loading-svg' version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                              viewBox="0 0 52 100" enable-background="new 0 0 0 0" xml:space="preserve">
+                              <circle stroke="none" cx="6" cy="50" r="6">
+                                <animate
+                                  attributeName="opacity"
+                                  dur="1s"
+                                  values="0;1;0"
+                                  repeatCount="indefinite"
+                                  begin="0.1"/>    
+                              </circle>
+                              <circle stroke="none" cx="26" cy="50" r="6">
+                                <animate
+                                  attributeName="opacity"
+                                  dur="1s"
+                                  values="0;1;0"
+                                  repeatCount="indefinite" 
+                                  begin="0.2"/>       
+                              </circle>
+                              <circle stroke="none" cx="46" cy="50" r="6">
+                                <animate
+                                  attributeName="opacity"
+                                  dur="1s"
+                                  values="0;1;0"
+                                  repeatCount="indefinite" 
+                                  begin="0.3"/>     
+                              </circle>
+                            </svg>
+                          </div>`;
+
+                            fetch(`/hexs/${hexagon.uuid}/about`).then(aboutRes => {
+                                if(aboutRes.ok){
+                                    aboutRes.text().then(aboutContent => {
+                                        content.innerHTML = hexagon.about = aboutContent;
+                                        hexagonAbout.append(content);
+                                        // content.innerHTML = aboutContent;
+
+                                        const loading = hexagonAbout.querySelector('.loading');
+                                        loading.style.opacity = 0;
+                                        
+                                        loading.ontransitionend = () => {
+                                            loading.remove();
+                                        }
+                                    });
                                 }
+                            });
+                        }
+                        loadAbout();
+
+                        socket.on('changeAbout' + hexagon.uuid, () => {
+                            loadAbout();
+                        });
+                    }else{
+                        content.innerHTML = hexagon.about;
+                        hexagonAbout.append(content);
+                    }
+                    
+                    hexagon.append(hexagonAbout);
+    
+                    const checkHexVisibility = (r, h) => document.querySelector(`#r${r} #h${h}`) ? document.querySelector(`#r${r} #h${h}`).classList.contains('hexagon-visible') : false;
+                    let rId = hexagon.rowId;
+                    let hId = +hexagon.id.replace('h', '');
+    
+                    if(checkHexVisibility(rId, hId + 1) && checkHexVisibility(rId, hId - 1)){
+                        if(hexagon.parentElement.classList.contains('row-moved')){
+                            if(checkHexVisibility(rId - 1 , hId) || checkHexVisibility(rId - 1, hId + 1)){
+                                hexagonAbout.style.top = (HEXAGON_HEIGHT + 5) + 'px';
+                            }else if(checkHexVisibility(rId + 1, hId) || checkHexVisibility(rId + 1, hId + 1)){
+                                hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5) + 'px';
                             }else{
-                                if(checkHexVisibility(rId + 1, hId - 1) && checkHexVisibility(rId + 1, hId)){
-                                    hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5 - TRIANGLE_HEIGHT) + 'px';
-                                    if(checkHexVisibility(rId - 1, hId)){
-                                        hexagonAbout.style.bottom = 0
-                                        hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
-                                    }else if(checkHexVisibility(rId - 1, hId + 1)){
-                                        hexagonAbout.style.bottom = 0
-                                        hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
-                                    }else{
-                                        hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
-                                    }
-                                }else if(checkHexVisibility(rId + 1, hId - 1)){
-                                    hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
-                                }else if(checkHexVisibility(rId + 1, hId)){
-                                    hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
-                                }else{
-                                    hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
-                                }
+                                hexagonAbout.style.top = (HEXAGON_HEIGHT + 5) + 'px';
+                            }
+                        }else{
+                            if(checkHexVisibility(rId - 1 , hId) || checkHexVisibility(rId - 1, hId - 1)){
+                                hexagonAbout.style.top = (HEXAGON_HEIGHT + 5) + 'px';
+                            }else if(checkHexVisibility(rId + 1, hId) || checkHexVisibility(rId + 1, hId - 1)){
+                                hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5) + 'px';
+                            }else{
+                                hexagonAbout.style.top = (HEXAGON_HEIGHT + 5) + 'px';
                             }
                         }
-        
-                        
-                        document.addEventListener('mousedown', clearAbouts);
+                    }else if(checkHexVisibility(rId, hId + 1)){
+                        hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
+                    }else if(checkHexVisibility(rId, hId - 1)){
+                        hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
+                    }else{
+                        if(hexagon.parentElement.classList.contains('row-moved')){
+                            if(checkHexVisibility(rId + 1, hId) && checkHexVisibility(rId + 1, hId+ 1)){
+                                hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5 - TRIANGLE_HEIGHT) + 'px';
+                                if(checkHexVisibility(rId - 1, hId)){
+                                    hexagonAbout.style.bottom = 0
+                                    hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
+                                }else if(checkHexVisibility(rId - 1, hId + 1)){
+                                    hexagonAbout.style.bottom = 0
+                                    hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
+                                }else{
+                                    hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
+                                }
+                            }else if(checkHexVisibility(rId + 1, hId)){
+                                hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
+                            }else if(checkHexVisibility(rId + 1, hId + 1)){
+                                hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
+                            }else{
+                                hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
+                            }
+                        }else{
+                            if(checkHexVisibility(rId + 1, hId - 1) && checkHexVisibility(rId + 1, hId)){
+                                hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5 - TRIANGLE_HEIGHT) + 'px';
+                                if(checkHexVisibility(rId - 1, hId)){
+                                    hexagonAbout.style.bottom = 0
+                                    hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
+                                }else if(checkHexVisibility(rId - 1, hId + 1)){
+                                    hexagonAbout.style.bottom = 0
+                                    hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
+                                }else{
+                                    hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
+                                }
+                            }else if(checkHexVisibility(rId + 1, hId - 1)){
+                                hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
+                            }else if(checkHexVisibility(rId + 1, hId)){
+                                hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
+                            }else{
+                                hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
+                            }
+                        }
                     }
+                    
+                    document.addEventListener('mousedown', clearAbouts);
                 }
             }
             document.querySelectorAll('.hexagon').forEach(setHexProps);
@@ -427,19 +490,6 @@ window.addEventListener('load', async () => {
                         let editedField = createEditedField(hexagon);
                         
                         editedField.innerText = hex.innerText;
-        
-                        let hexagonAbout = hexagon.querySelector('.hexagon-about')
-                        if(hexagonAbout){
-                            hexagonAbout.innerText = hex.about;
-        
-                            const range = document.createRange();
-                            range.selectNodeContents(hexagonAbout);
-                            range.collapse(false);
-                            const sel = window.getSelection();
-                            sel.removeAllRanges();
-                            sel.addRange(range);
-                        }
-                        hexagon.about = hex.about;
                     })
                 }
             })

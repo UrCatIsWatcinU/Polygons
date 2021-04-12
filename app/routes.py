@@ -182,7 +182,6 @@ def fields(categ_name):
 
 @app.route('/hexs/<categ_name>')
 def get_hexs(categ_name):
-    
     userId = 0
     userRole = 0
     if current_user.is_authenticated:
@@ -203,8 +202,8 @@ def get_hexs(categ_name):
     else:
         categ = Categ.query.filter_by(name=categ_name).first_or_404()
         hexs_to_send = list(map(lambda hex: {
+            "uuid": hex.id,
             "selector": hex.selector,
-            "about": hex.about,
             "num": hex.num,
             "innerText": hex.inner_text,
             "chainId": hex.chain_id,
@@ -215,6 +214,22 @@ def get_hexs(categ_name):
 
     return json.dumps({"body": hexs_to_send, "userId": userId, "userRole": userRole})
 
+@app.route('/hexs/<id>/about')
+def get_hex_about(id): 
+    return Hexagon.query.get_or_404(id).about if Hexagon.query.get_or_404(id).about else ''
+
+@app.route('/hexs/<id>/about/change', methods=['POST'])
+@login_required
+def change_hex_about(id):
+    hexagon = Hexagon.query.get_or_404(id)
+    hexagon.about = request.get_data(as_text=True)
+
+    db.session.add(hexagon)
+    db.session.commit()
+
+    socketio.emit('changeAbout' + id, json.dumps({'userId': current_user.id}))
+    return json.dumps({'success': True})
+
 @app.route('/hexs/<categ_name>/new', methods=['POST'])
 @login_required
 def new_hex(categ_name):
@@ -222,19 +237,23 @@ def new_hex(categ_name):
     new_hexs = request.get_json(True)
     categ = Categ.query.filter_by(name=categ_name).first_or_404()
 
+    uuids = []
     for raw_hex in new_hexs:
         hex = Hexagon(
             selector=raw_hex['selector'],
             chain_id=raw_hex['chainId'],
             num=raw_hex['num'],
             inner_text=raw_hex['innerText'],
-            about=raw_hex['about'],
             author=current_user,
             categ=categ
         )
         db.session.add(hex)
+        db.session.commit()
+
+        raw_hex['id'] = hex.id
+        uuids.append({'selector': raw_hex['selector'], "uuid": hex.id})
+
     
-    db.session.commit()
 
     if(categ):
         socketio.emit('hexs', {
@@ -242,7 +261,7 @@ def new_hex(categ_name):
             "categ": categ.name,
             "body": json.dumps(new_hexs)
         })
-        return json.dumps({"success": True, "userId": current_user.id})
+        return json.dumps({"success": True, "userId": current_user.id, 'uuids': uuids})
     else:
         return json.dumps({"success": False})
 
@@ -262,7 +281,6 @@ def handle_hexs(data):
 
             if hex:
                 hex.inner_text = changed_hex['innerText']
-                hex.about = changed_hex['about']
                 db.session.add(hex)
 
         

@@ -206,7 +206,9 @@ a{
 
 
 .row {
+    --pad: 8px;
     height: calc(var(--triangle-height) * 2 + var(--body-height));
+    padding: var(--pad);
     overflow: visible;
     display: flex;
     align-items: center;
@@ -215,13 +217,13 @@ a{
 }
   
 .row.row-moved {
-    padding-left: calc(var(--hexagon-width) / 2);
+    padding-left: calc(var(--hexagon-width) / 2 + var(--pad) * 2);
 }
 
   
 .hexagon {
     --bgc: transparent;
-    /* box-sizing: border-box; */
+    box-sizing: content-box;
     position: relative;
     width: var(--hexagon-width);
     height: 100%;
@@ -234,10 +236,12 @@ a{
     color: var(--body-bgc);
     z-index: 2;
     overflow: visible;
-    transform: scale(.9);
+    padding: var(--pad);
+
 
     scrollbar-width: none;
     --webkit-scrollbar-width: none;
+    filter: drop-shadow(3px 3px 3px rgba(68, 68, 68, 0.3));
 }
 .hexagon *{
     scrollbar-width: none;
@@ -258,16 +262,15 @@ a{
 
 
 .hexagon-editedField{
-    width: calc(var(--hexagon-width) - 2px);
-    height: calc(var(--body-height) - 2px);
+    width: calc(var(--hexagon-width));
+    height: calc(var(--body-height));
     box-sizing: border-box;
     background: var(--bgc);
     padding: 4px;
     color: var(--body-bgc);
     position: absolute;
-    top: var(--triangle-height);
+    top: calc(var(--triangle-height) + var(--pad));
     border-radius: 3px;
-    left: 1;
     
     font-size: .94em;
     transition: inherit;
@@ -276,10 +279,8 @@ a{
 .hexagon-editedField:focus{
     outline: none;
     z-index: 5;
-    width: calc(var(--hexagon-width));
+    width: var(--hexagon-width);
     height: calc(var(--body-height) + var(--triangle-height) * 2);
-    bottom: 0;
-    left: 0;
 }
 .color-picker{
     position: absolute;
@@ -308,15 +309,14 @@ a{
 .categ .hexagon-editedField{
     cursor: pointer;
 }
+.categ .hexagon-editedField:focus{
+    top: 0;
+}
 .categ .polygon{
-    filter: drop-shadow(3px 3px 3px rgba(68, 68, 68, 0.3));
     cursor: pointer;
 }
-.categ:hover{
-    transform: scale(.92);
-}
-.categ.new:hover{
-    transform: scale(.9);
+.categ:hover .polygon{
+    transform: scale(1.03);
 }
 .categ.new{
     position: relative;
@@ -326,9 +326,12 @@ a{
 }
 .categ .hexagon-editedField{
     text-align: center;
-    vertical-align: middle;
-    font-size: 1.2em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.05em;
     color: inherit;
+    height: calc(var(--body-height) - 10px);
 }
 
 

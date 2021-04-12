@@ -182,7 +182,8 @@ let otherSettings = {
     turned: false,
     innerNum: false,
     hideBtns: false,
-    ctrlZoom: false
+    ctrlZoom: false,
+    slideSpeed: 2.1
 }
 
 let colors = {
@@ -269,20 +270,24 @@ const main = async () => {
             }
         })
     }
-    
-    const setCSSPropsVals = () => {
-        document.body.style.setProperty('--body-height', BODY_HEIGHT + 'px');
-        document.body.style.setProperty('--body-bgc', colors.BODY_BGC);
-        document.body.style.setProperty('--about-bgc', colors.ABOUT_BGC);
-        document.body.style.setProperty('--grid-c', hexToRgb(colors.MAIN_C, 0.1));
-        document.body.style.setProperty('--main-c', colors.MAIN_C);
-        document.body.style.setProperty('--dark-main-c', colors.DARK_MAIN_C);
-        document.body.style.setProperty('--black-c', colors.BLACK_C);
-        document.body.style.setProperty('--hex-stroke-c', colors.HEX_STROKE_C);
-        document.body.style.setProperty('--font', font.family);
-        document.body.style.setProperty('--font-size', font.size);
+
+    const cssProps = {
+        'body-height': BODY_HEIGHT + 'px',
+        'max-about-height': (document.documentElement.clientHeight - 100) + 'px',
+        'body-bgc': colors.BODY_BGC,
+        'about-bgc': colors.ABOUT_BGC,
+        'grid-c': hexToRgb(colors.MAIN_C, 0.1),
+        'main-c': colors.MAIN_C,
+        'dark-main-c': colors.DARK_MAIN_C,
+        'black-c': colors.BLACK_C,
+        'hex-stroke-c': colors.HEX_STROKE_C,
+        'font': font.family,
+        'font-size': font.size,
     }
-    setCSSPropsVals();
+
+    for(let prop in cssProps){
+        document.body.style.setProperty('--' + prop, cssProps[prop])
+    }
     
     
     window.onerror = (msg) => {

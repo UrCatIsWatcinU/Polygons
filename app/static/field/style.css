@@ -1,6 +1,10 @@
 *{
   scrollbar-width: none;
   --webkit-scrollbar-width: none;
+  outline: none;
+}
+*:focus{
+  outline: none;
 }
 *::-webkit-scrollbar{
   display: none;
@@ -43,37 +47,16 @@ html{
   z-index: 10;
 }
 .hexagon-first{
-  transform: scale(.98);
+  /* transform: scale(.98); */
 }
 .hexagon-visible:hover, .hexagon-active{
   /* transform: scale(.92); */
   filter: drop-shadow(6px 6px 3px rgba(68, 68, 68, 0.4));
-  transform: scale(.9) translate(-1px, -1px);
+  /* transform: scale(.9) translate(-1px, -1px); */
 }
 .hexagon-first:hover, .hexagon-first.hexagon-active{
-  transform: scale(.98) translate(-1px, -1px);
+  /* transform: scale(.98) translate(-1px, -1px); */
   /* transform: scale(1.02); */
-}
-.hexagon-lineCont{
-  height: calc(var(--triangle-height) * 2 + var(--body-height));
-  width: var(--hexagon-width);
-  position: absolute;
-  /* bottom: calc(0px - var(--triangle-height)); */
-  bottom: 0;
-  right: 0;
-  z-index: 4;
-  pointer-events: none;
-  transition: inherit;
-  overflow: visible;
-}
-.hexagon-line{
-  stroke-width: 2.5px;
-  stroke: var(--highlight-line-c);
-  transition: inherit;
-  opacity: 0;
-}
-.hexagon-line#l6, .hexagon-line#l3{
-  stroke-width: 2.5px;
 }
 .hexagon-num{
   border-radius: 50%;
@@ -84,8 +67,8 @@ html{
   color: var(--black-c);
   border: 1px var(--main-c) solid;
   position: absolute;
-  top: calc(var(--triangle-height) - 8px);
-  right: -4px;
+  top: calc(var(--triangle-height) - 8px + var(--pad));
+  right: calc(-4px + var(--pad));
   opacity: 0;
   display: flex;
   justify-content: center;
@@ -121,13 +104,13 @@ html{
 }
 .hexagon-turned .hexagon-num{
   transform: rotate(-90deg);
-  left: calc(var(--hexagon-width) / 2 - 18px / 2);
-  top: 0;
+  left: calc(var(--hexagon-width) / 2 - 18px / 2 + var(--pad));
+  top: var(--pad);
   right: unset;
 }
 .hexagon-turned.hexagon-innerNum .hexagon-num{
   top: unset;
-  bottom: calc(var(--triangle-height) + 4px);
+  bottom: calc(var(--triangle-height) + 4px + var(--pad));
   left: 6px;
 }
 .hexagon-innerNum .hexagon-num{
@@ -136,18 +119,15 @@ html{
   border: none;
   background-color: transparent;
   color: var(--body-bgc);
-  top: calc(var(--triangle-height) + 6px);
-  left: 4px;
+  top: calc(var(--triangle-height) + 6px + var(--pad) / 2);
+  left: calc(4px + var(--pad));
   font-size: .94em;
 }
 .hexagon-innerNum .hexagon-num::after{
   content: '.';
 }
 .hexagon-innerNum .hexagon-editedField{
-  text-indent: 22px
-}
-.hexagon-innerNum .hexagon-editedField:focus{
-  text-indent: 0;
+  text-indent: 22px;
 }
 .hexagon-rounded polygon{
   border-radius: 20px;
@@ -159,6 +139,10 @@ html{
   max-width: calc(var(--hexagon-width) - 2px);
   max-height: calc(var(--body-height) - 2px);
 }
+.hexagon-editedField:focus{
+  height: unset;
+  width: unset;
+}
 .hexagon-editedField:hover{
   text-decoration: underline;
 }
@@ -168,7 +152,7 @@ html{
   color: var(--black-c);
   min-width: 380px;
   min-height: 100px;
-  /* max-height: 450px; */
+  max-height: var(--max-about-height);
   position: absolute;
   top: calc(var(--triangle-height) + 5px);
   z-index: 10;
@@ -179,8 +163,6 @@ html{
   box-sizing: border-box;
   transition: inherit;
   user-select: text;
-
-  resize: horizontal;
 }
 .hexagon-about:focus{
   outline: none;
@@ -189,8 +171,27 @@ html{
 .hexagon-about-drag{
   filter: brightness(1.2);
 }
-.hexagon-about img{
+.hexagon-about-content{
   width: 100%;
+  height: 100%;  
+  min-height: 50px;
+}
+.hexagon-about-content *{
+  background-color: transparent;
+  color: var(--black-c);
+}
+.hexagon-about-content img{
+  width: 100%;
+}
+
+.about-loading{
+  background-color: var(--about-bgc);
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.about-loading-svg{
+  width: 50px;
 }
 
 
@@ -297,6 +298,9 @@ html{
 .settings-plus:hover{
   transform: scale(1.04);
 }
+.check-cont{
+  margin-bottom: 5px;
+}
 .font-input-cont,
 .check-cont{
   /* padding-top: 5px; */
@@ -318,12 +322,59 @@ html{
   cursor: pointer;
 }
 .check-input{
+  opacity: 0;
   width: 20px;
   height: 20px;
+  position: absolute;
+}
+.check-custom{
+  width: 20px;
+  height: 20px;
+  margin: 4px;
   margin-left: 7.5px;
+  background-color: var(--body-bgc);
+  border: 1px solid var(--main-c);
+  box-sizing: border-box;
+  border-radius: 3px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.check-svg{
+  fill: none;
+  stroke: var(--dark-main-c);
+  stroke-width: 200px;
+  fill-rule: evenodd;
+  stroke-dasharray: 3000;
+  stroke-dashoffset: 3000;
+  animation: check .13s ease forwards;
+}
+.check-svg-beforeDelete{
+  animation: checkDelete .13s ease forwards;
+  stroke-dasharray: 3000;
+  stroke-dashoffset: 3000;
+}
+.short-text-cont *{
+  cursor: unset;
+}
+.short-text-input{
+  margin: 4px;
+  margin-left: 7.5px;
+  width: 3em;
+}
+@keyframes check {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes checkDelete {
+  to {
+    stroke-dashoffset: 3000;
+  }
 }
 
-@media(max-width: 800px){
+
+@media(max-width: 960px){
   .settings-grid{
     grid-template-columns: 1fr 1fr;
   }
@@ -349,6 +400,7 @@ html{
 .row{
   border-left: 5px var(--grid-c) solid;
   border-right: 5px var(--grid-c) solid;
+  --pad: 5px;
 }
 .row-first{
   border-top: 5px var(--grid-c) solid;
