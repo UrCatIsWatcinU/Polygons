@@ -584,7 +584,7 @@ window.addEventListener('load', async () => {
                                             b.style.pointerEvents = 'auto';
                                         });
                                     }
-                                    num.innerText = res.num
+                                    num.innerText = res.num ? res.num : '0'
                                 }else{
                                     change = 0;
                                 }
