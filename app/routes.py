@@ -1,12 +1,14 @@
 from app import app, socketio, db
 from app.forms import LoginForm, RegistrationForm
-from app.models import Change, Complaint, Hexagon, User, Categ
+from app.models import Chain, Change, Comment, Complaint, Hexagon, RatingChange, User, Categ
 
 from flask import render_template, redirect, url_for, request
 from flask_socketio import emit
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 from flask_sqlalchemy import sqlalchemy
+from sqlalchemy import engine, func
+from sqlalchemy.sql import select
 
 import json
 import time
@@ -27,6 +29,9 @@ def index():
             rows[i // 5].append(categs[i])
 
     return render_template('index.html', rows=rows, title='Main', is_auth=current_user.is_authenticated, user=user)
+
+
+
 
 @app.route('/categ/new', methods=['POST'])
 @login_required
@@ -89,6 +94,8 @@ def give_categ_params(categ_name):
     return Categ.query.filter_by(name=categ_name).first_or_404().params
 
 
+
+
 @app.route('/registration', methods=['GET', 'POST'])
 def registration():
     if current_user.is_authenticated:
@@ -131,7 +138,6 @@ def users_all():
     
     return render_template('users.html', users=User.query.all())
 
-
 @app.route('/users/i')
 def give_current_user():
     if(current_user and current_user.is_authenticated):
@@ -151,6 +157,8 @@ def delete_user(id):
     return json.dumps({"success":True})
 
 
+
+
 @app.route('/settings')
 @login_required
 def get_settings():
@@ -168,6 +176,8 @@ def set_settings():
     return json.dumps({"success": "true"})
 
 
+
+
 @app.route('/fields/<categ_name>')
 def fields(categ_name):
     categ = Categ.query.filter_by(name=categ_name).first_or_404()
@@ -180,11 +190,14 @@ def fields(categ_name):
     else:
         return render_template('no-field.html')
 
+
+
+
 @app.route('/hexs/<categ_name>')
 def get_hexs(categ_name):
     userId = 0
     userRole = 0
-    if current_user.is_authenticated:
+    if current_user and current_user.is_authenticated:
         userId = current_user.id
         userRole = current_user.role_id
 
@@ -227,7 +240,7 @@ def change_hex_about(id):
     db.session.add(hexagon)
     db.session.commit()
 
-    socketio.emit('changeAbout' + id, json.dumps({'userId': current_user.id}))
+    socketio.emit(f'changeAbout{hexagon.id}', json.dumps({'userId': current_user.id}))
     return json.dumps({'success': True})
 
 @app.route('/hexs/<categ_name>/new', methods=['POST'])
@@ -237,11 +250,20 @@ def new_hex(categ_name):
     new_hexs = request.get_json(True)
     categ = Categ.query.filter_by(name=categ_name).first_or_404()
 
-    uuids = []
+    hexs_to_send = []
+    
     for raw_hex in new_hexs:
+        chain = None
+        chain = Chain.query.get(raw_hex['chainId'])
+
+        if not chain:
+            chain = Chain(categ_id=categ.id, user_id = current_user.id)
+            db.session.add(chain)
+            db.session.commit()
+
         hex = Hexagon(
             selector=raw_hex['selector'],
-            chain_id=raw_hex['chainId'],
+            chain_id=chain.id,
             num=raw_hex['num'],
             inner_text=raw_hex['innerText'],
             author=current_user,
@@ -250,18 +272,24 @@ def new_hex(categ_name):
         db.session.add(hex)
         db.session.commit()
 
-        raw_hex['id'] = hex.id
-        uuids.append({'selector': raw_hex['selector'], "uuid": hex.id})
-
-    
+        hexs_to_send.append({
+            "uuid": hex.id,
+            "selector": hex.selector,
+            "num": hex.num,
+            "innerText": hex.inner_text,
+            "chainId": hex.chain_id,
+            "userId": hex.user_id,
+            "username": User.query.get(hex.user_id).username if User.query.get(hex.user_id) else 'none',
+            "creationDate": time.mktime(hex.created_at.timetuple())
+        })
 
     if(categ):
         socketio.emit('hexs', {
             "action": 'new',
             "categ": categ.name,
-            "body": json.dumps(new_hexs)
+            "body": json.dumps(hexs_to_send)
         })
-        return json.dumps({"success": True, "userId": current_user.id, 'uuids': uuids})
+        return json.dumps({"success": True, "userId": current_user.id, 'hexs': hexs_to_send})
     else:
         return json.dumps({"success": False})
 
@@ -269,7 +297,8 @@ def new_hex(categ_name):
 def handle_hexs(data):
     categ_name = data['categ']
     categ = Categ.query.filter_by(name=categ_name).first_or_404()
-    change = Change(body=json.dumps(data))
+    # change = Change(body=json.dumps(data))
+    # db.session.add(change)
 
     data_to_send = {'action':'', "categ": categ_name}
 
@@ -290,7 +319,9 @@ def handle_hexs(data):
         hexs_to_delete_selectors = json.loads(data['data'])
         for hex_to_delete_selector in hexs_to_delete_selectors:
             hex = Hexagon.query.filter(Hexagon.selector == hex_to_delete_selector, Hexagon.categ_id == categ.id).first()
-            if(hex):
+            if hex:
+                if hex.num == 1:
+                    db.session.delete(hex.chain)
                 db.session.delete(hex)
         
         data_to_send = {'action': 'delete','body': json.dumps(hexs_to_delete_selectors)}
@@ -300,6 +331,131 @@ def handle_hexs(data):
     db.session.commit()
     
     emit('hexs', data_to_send, broadcast=True)
+
+
+
+
+@app.route('/chains/<categ_name>')
+def get_chains(categ_name):
+    userId = 0
+    userRole = 0
+    if current_user.is_authenticated:
+        userId = current_user.id
+        userRole = current_user.role_id
+
+    categ = Categ.query.filter_by(name=categ_name).first_or_404()
+    
+    chains_to_send = []
+    for chain in Chain.query.filter_by(categ_id=categ.id).all():
+        chains_to_send.append({
+            'id': chain.id,
+            'userId': chain.user_id,
+            'hexs': list(map(lambda hex: {
+                "uuid": hex.id,
+                "selector": hex.selector,
+                "num": hex.num,
+                "innerText": hex.inner_text,
+                "chainId": hex.chain_id,
+                "userId": hex.user_id,
+                "username": User.query.get(hex.user_id).username if User.query.get(hex.user_id) else 'none',
+                "creationDate": time.mktime(hex.created_at.timetuple())
+            }, chain.hexs))
+        })
+
+    return json.dumps({"body": chains_to_send, "userId": userId, "userRole": userRole})
+
+@app.route('/chains/<categ_name>/new')
+@login_required
+def create_chain(categ_name):
+    categ = Categ.query.filter_by(name=categ_name).first_or_404()
+
+    chain = Chain(categ_id=categ.id, user_id=current_user.id)
+    db.session.add(chain)
+    db.session.commit()
+
+    return json.dumps({'success': True, 'chainId': chain.id, 'userId': chain.user_id}) 
+@app.route('/chains/<id>/comments')
+def get_comments(id):
+    return json.dumps(list(map(lambda comment: {
+        'id': comment.id,
+        'body': comment.body,
+        'userId': comment.user_id,
+        'username': comment.author.username
+    }, Chain.query.get_or_404(id).comments)))
+@app.route('/chains/<id>/comments/new', methods=['POST'])
+@login_required
+def create_comment(id):
+    chain = Chain.query.get_or_404(id)
+    
+    raw_comment = request.get_json(True)
+    comment = Comment(
+        body=raw_comment['body'],
+        user_id=current_user.id,
+        chain_id=chain.id
+    )
+    db.session.add(comment)
+    db.session.commit()
+
+    socketio.emit(f'newComment{chain.id}', json.dumps({'id': comment.id, 'body': comment.body, 'userId': current_user.id, 'username': current_user.username}))
+    return json.dumps({'success': True})
+
+@app.route('/chains/comments/delete/<id>', methods=['DELETE'])
+@login_required
+def delete_comment(id):
+    comment = Comment.query.get_or_404(id)
+    if not (comment.user_id == current_user.id) and current_user.role_id != 2:
+        return json.dumps({'success': False})
+        
+    db.session.delete(comment)
+    db.session.commit()
+
+    socketio.emit(f'deleteComment{comment.chain_id}', id)
+    return json.dumps({'success': True})
+@app.route('/chains/<id>/rating')
+def get_rating(id):
+    rating = db.session.execute(func.sum(RatingChange.change)).first().values()[0]
+    allowed_change = 0
+
+    if current_user.is_authenticated and current_user.id:
+        user_change = RatingChange.query.filter_by(user_id=current_user.id).first()
+        if user_change:
+            allowed_change = -user_change.change
+    
+    return json.dumps({'num': rating, 'allowedChange': allowed_change})
+
+@app.route('/chains/<id>/rating/change', methods=['POST'])
+@login_required
+def change_rating(id):
+    user_rating_change = RatingChange.query.filter_by(user_id=current_user.id).first()
+
+    change_num = 0
+    if not user_rating_change:
+        change = RatingChange(change=request.get_json(True)['change'], user_id=current_user.id, chain_id=id)
+        change_num = request.get_json(True)['change']
+        db.session.add(change)
+    else:
+        if user_rating_change.change == request.get_json(True)['change']:
+            return json.dumps({'success': False})
+        else:
+            db.session.delete(user_rating_change)
+    
+    db.session.commit()
+    
+    rating = db.session.execute(func.sum(RatingChange.change)).first().values()[0]
+
+    return json.dumps({'success': True, 'num': rating, 'change': change_num})
+
+# @app.route('/chains/<id>/delete', methods=['DELETE'])
+# def delete_chain(id):
+#     chain = Chain.query.get_or_404(id)
+#     db.session.delete(chain)
+#     db.session.commit()
+
+#     socketio.emit('hexs', {'categ': chain.categ.name, 'action': 'delete','body': json.dumps(chain.hexs)})
+    
+#     return json.dumps({'success': True})
+
+
 
 
 @app.route('/complaints')
@@ -350,8 +506,7 @@ def delete_all_complaints():
     if current_user.role_id != 2:
         return json.dumps({'success': False, "message": 'You don\'t have access'})
 
-    delete_q = Complaint.__table__.delete().where(Complaint.id > 0)
-    db.session.execute(delete_q)
+    db.session.execute(Complaint.__table__.delete().where(Complaint.id > 0))
     db.session.commit()
 
     return redirect(url_for('get_complaints'))

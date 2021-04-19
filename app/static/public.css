@@ -231,13 +231,13 @@ a{
     background-clip: content-box;
     /* padding:  var(--triangle-height) 0px; */
     display: block;
-    transition: inherit;
+    transition: none;
     cursor: default;
     color: var(--body-bgc);
     z-index: 2;
     overflow: visible;
     padding: var(--pad);
-
+    opacity: 0;
 
     scrollbar-width: none;
     --webkit-scrollbar-width: none;
@@ -246,6 +246,8 @@ a{
 .hexagon *{
     scrollbar-width: none;
     --webkit-scrollbar-width: none;
+    transition: inherit;
+    opacity: inherit;
 }
 .hexagon::-webkit-scrollbar{
     display: none;
@@ -306,6 +308,10 @@ a{
 .categs-plus:hover{
     transform: scale(1.1);
 }
+.categ{
+    opacity: 1;
+    transition: inherit;
+}
 .categ .hexagon-editedField{
     cursor: pointer;
 }
@@ -335,17 +341,6 @@ a{
 }
 
 
-
-.icon{
-    position: fixed;
-    bottom: 10px;
-    left: 10px;
-    z-index: 10;
-    opacity: .2;
-    pointer-events: none;
-  }
-
-
 .footer{
     height: 25px;
     width: calc(100% - 30vw);
@@ -358,6 +353,7 @@ a{
     left: 0;
     background-color: var(--dark-main-c);
     color: var(--body-bgc);
+    font-size: .9em;
 }
 .header{
     height: 80px;

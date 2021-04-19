@@ -18,7 +18,7 @@ function isTouchDevice() {
 
 
 
-const showAsk = (yesCallback, noCallback = () => {document.querySelector('.ask').remove()}, title = 'Are you sure?', body='You will not be able to cancel this action') => {
+const showAsk = (yesCallback, body='You will not be able to cancel this action', title = 'Are you sure?', noCallback = () => {document.querySelector('.ask').remove()}) => {
     let ask = document.createElement('div');
     ask.className = 'ask';
     ask.innerHTML = `
@@ -182,8 +182,8 @@ let otherSettings = {
     turned: false,
     innerNum: false,
     hideBtns: false,
-    ctrlZoom: false,
-    slideSpeed: 2.1
+    ctrlZoom: true,
+    slideSpeed: 1.6
 }
 
 let colors = {
@@ -295,14 +295,13 @@ const main = async () => {
     };
 
     if(document.querySelector('.find-button')){
-        document.querySelector('.find-button').onclick = async (evt) => {
+        const search = document.querySelector('.find-button').onclick = async (evt) => {
             let input = document.querySelector('.find-input').value.trim().toLowerCase();
             
             let keywords = input.split(/[,-\.:]/).filter(word => word);
             let hexs = await fetch('/hexs/all');
             
             let hexsFound = []; 
-            
             let neededHex;
             
             if(hexs.ok){
@@ -353,6 +352,12 @@ const main = async () => {
                 }else{ 
                     window.location.href = `/fields/${neededHex.categ}?${neededHex.selector.replace(/\s+/g, '')}`;
                 } 
+            }
+        }
+
+        document.querySelector('.find-input').onkeypress = (evt) => {
+            if(evt.key == 'Enter'){
+                search();
             }
         }
     }

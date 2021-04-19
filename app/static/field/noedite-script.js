@@ -20,7 +20,7 @@ window.addEventListener('load', async () => {
     paramsRes.then(async params => {
         if(params.ok) params = await params.json()
         else{
-            showModal('Critical error', 'the administrator has been notified, please try again in later');
+            showModal('Critical error', 'The administrator has been notified, please try again in later');
             return
         }
         let isTransEnd = false;
@@ -86,217 +86,17 @@ window.addEventListener('load', async () => {
         
                     hexagon.append(editedField);
                 }
-        
-                return editedField;
-            }
-        
-            function parseHexsFromJson(savedHexs){  
-        
-                if(!savedHexs.length) return []
-                let parsedHexs = []
-                for(let hex of savedHexs){
-                    let hexagon = document.querySelector(hex.selector);
-                    if(hexagon.classList.contains('hexagon-visible')) continue
-                    hexagon.classList.add('hexagon-visible');
-                    
-                    
-                    if(hex.innerText){
-                        let editedField = createEditedField(hexagon); 
-                        
-                        editedField.innerText = hex.innerText;
-                    }
-                    
-                    hexagon.querySelector('.hexagon-num').innerText = hex.num;
-                    hexagon.style.setProperty('--bgc', hexsColors[((hex.num-1) - hexsColors.length * (Math.ceil((hex.num-1) / hexsColors.length) - 1)) - 1])
-                    hexagon.chainId = hex.chainId;
-                    let hexChain = getChain(hex.chainId);
-                    if(!hexChain){
-                        if(hex.chainId > lastChainId) lastChainId = hex.chainId;
-                        hexChain = {
-                            id: lastChainId,
-                            hexs:[],
-                        }
-                        chains.push(hexChain);
-                    }
-                    hexChain.hexs[hex.num-1] = hexagon;
-                    
-                    if(hex.num == 1){
-                        hexagon.classList.add('hexagon-first');
-                        hexagon.style.setProperty('--bgc', colors.MAIN_C);
-                    }
 
-                    hexagon.uuid = hex.uuid;
-                    
-                    visibleHexs.push(hexagon);
-                    parsedHexs.push(hexagon);   
-                }
-        
-        
-                return parsedHexs
-            }
-    
-            
-            if(!document.querySelector('.loading')) return;
-            document.body.className = 'field';
-            document.body.style.width = '';
-            document.body.style.height = '';
+                editedField.onclick = evt => {
+                    if(!hexagon.classList.contains('hexagon-visible') || !editedField.innerText) return;
 
-            let hexsCont = document.querySelector('.hexsCont');
-            hexsCont.style.opacity = 1;
-            
-            // document.documentElement.style.width = (GRID_WIDTH * HEXAGON_WIDTH + HEXAGON_WIDTH/2) + 'px';
-            
-            // создание сетки
-            for(let i = 1; i <= GRID_HEIGHT; i+=2){
-                let hexagonStr = `<div class="hexagon">
-                <svg class="polygon"> 
-                <polygon points="0,${TRIANGLE_HEIGHT} ${HEXAGON_WIDTH/2},0 ${HEXAGON_WIDTH},${TRIANGLE_HEIGHT} ${HEXAGON_WIDTH},${HEXAGON_HEIGHT-TRIANGLE_HEIGHT} ${HEXAGON_WIDTH/2},${HEXAGON_HEIGHT} 0,${HEXAGON_HEIGHT-TRIANGLE_HEIGHT}"></polygon>
-                </svg>
-                <div class="hexagon-num">0</div>
-                </div>`.repeat(GRID_WIDTH);
-                
-                hexsCont.innerHTML += `
-                <div id="r${i}" class="row">${hexagonStr}</div>
-                <div id="r${i+1}" class="row row-moved">${hexagonStr}</div>
-                `
-            }
-
-            document.querySelector('#r2').classList.add('row-first');
-            document.querySelector('#r' + GRID_HEIGHT).classList.add('row-last');
-            document.querySelectorAll(`#r1, #r${GRID_HEIGHT}, #h1, #h${GRID_WIDTH}`).forEach(elem => {
-                elem.style.pointerEvents = 'none';
-            });
-
-            if(!isTouchDevice()){
-                const SLIDE_SPEED = otherSettings.slideSpeed || 2.1;
-                const MIN_CHANGE = 20;
-                const slider = document.body;
-                let isDown = false;
-    
-                let startX;
-                let scrollLeft;
-    
-                let startY;
-                let scrollTop;
-    
-                slider.addEventListener('mousedown', (e) => {
-                    isDown = true;
-                    setTimeout(() => {
-                        if(isDown){
-                            slider.classList.add('active');
-                        }
-                    }, 500)
-                    startX = e.pageX - slider.offsetLeft;
-                    scrollLeft = slider.scrollLeft;
-                    
-                    startY = e.pageY - slider.offsetTop;
-                    scrollTop = slider.scrollTop;
-                });
-                slider.addEventListener('mouseleave', () => {
-                    isDown = false;
-                    slider.classList.remove('active');
-                });
-                slider.addEventListener('mouseup', () => {
-                    isDown = false;
-                    slider.classList.remove('active');
-                });
-                slider.addEventListener('mousemove', (e) => {
-                    if(!isDown) return;
-                    e.preventDefault();
-                    const x = e.pageX - slider.offsetLeft;
-                    const walkX = (x - startX) * SLIDE_SPEED; //scroll-fast
-                    
-                    const y = e.pageY - slider.offsetTop;
-                    const walkY = (y - startY) * SLIDE_SPEED; //scroll-fast
-                    if(Math.abs(walkX) > MIN_CHANGE || Math.abs(walkY) > MIN_CHANGE){
-                        slider.classList.add('active');
-                    } 
-                    requestAnimationFrame(function scroll(){
-
-                        slider.scrollLeft = scrollLeft - walkX;
-                        slider.scrollTop = scrollTop - walkY;
-                        if(isDown) requestAnimationFrame(scroll);
-                    })
-                });
-            }
-            
-            let zoomIndex = 1;
-            document.addEventListener('wheel', evt => {
-                evt.preventDefault()
-                zoomIndex += -(evt.deltaY/1260)
-
-                if(zoomIndex < 0.5) zoomIndex = 0.5;
-                
-                hexsCont.style.top = -(hexsCont.offsetHeight - (hexsCont.offsetHeight * zoomIndex)) + 'px';
-                hexsCont.style.left = -(hexsCont.offsetWidth - (hexsCont.offsetWidth * zoomIndex)) + 'px';
-
-                hexsCont.style.transform = `scale(${zoomIndex})`
-            }, {passive: false})
-        
-            let visibleHexs = [];
-            let chains = [];
-            const getChain = id => {
-                for(let chain of chains){
-                    if(chain && chain.id == id) return chain
-                }
-            }
-            let lastChainId = 0;
-            
-            document.documentElement.addEventListener('keydown', evt => {
-                if(evt.key == '=' && (evt.ctrlKey || evt.metaKey)){
-                    evt.preventDefault();
-                    
-                    hexsCont.style.transform = `scale(${zoomIndex += (0.1)})`
-                }
-                if(evt.key == '-' && (evt.ctrlKey || evt.metaKey)){
-                    evt.preventDefault();
-        
-                    hexsCont.style.transform = `scale(${zoomIndex += -(0.1)})`
-                }
-            }, {passive: false})
-            
-            document.addEventListener('click', evt => {
-                document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});
-            })
-            
-            document.body.oncontextmenu = (evt) => {
-                document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});
-                window.onscroll = () => {document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});}
-        
-                return false
-            }
-        
-            // определение свойст шестиугольника
-            const setHexProps = hexagon => {
-                // ид ряда и ид шестиугольника
-                let row = hexagon.parentElement;
-                hexagon.id = 'h' +  ([].indexOf.call(row.children, hexagon) + 1);
-                hexagon.querySelector('polygon').id = 'p' + ([].indexOf.call(row.children, hexagon) + 1)
-                hexagon.rowId = idToNum(row.id);
-
-                const editedField = createEditedField();
-            
-        
-                // окно подробнее
-                hexagon.about = '';
-                
-                if(!editedField) return;
-                hexeditedFieldagon.onclick = evt => {
-                    if(!hexagon.classList.contains('hexagon-visible')){
-                        return
-                    }
-        
                     document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});
                     
                     evt.stopPropagation();
-                    hexagon.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'center',
-                        inline: 'center'
-                    })
 
-                    if(hexagon.classList.contains('hexagon-active')) return
+                    if(hexagon.classList.contains('hexagon-active')) return;
                     hexagon.classList.add('hexagon-active');
+
                     const clearAbouts = evt => {
                         document.querySelectorAll('.hexagon-about').forEach(elem => {
                             elem.remove();
@@ -304,25 +104,112 @@ window.addEventListener('load', async () => {
                         document.removeEventListener('mousedown', clearAbouts);
                     }
                     clearAbouts();
-    
+
                     let hexagonAbout = document.createElement('div');
                     hexagonAbout.className = 'hexagon-about';
+                    hexagonAbout.innerHTML = `
+                    <div class="hexagon-about-controls">
+                        <div>
+                            <span class="hexagon-about-btn contentBtn">Content</span>
+                            <span class="hexagon-about-btn imagesBtn">Images</span>
+                            <span class="hexagon-about-btn commentsBtn">Comments</span>
+                        </div>
+                        <div class="hexagon-about-rating"> 
+                            <span class="hexagon-about-rating-num">0</span>
+                        </div>
+                    </div>
+                    <div id='slidr-img' class="hexagon-about-images"></div>
+                    <div class="hexagon-about-comments">
+                        <div class="hexagon-about-comments-cont"></div>
+                    </div>`;
+                    let activeAboutTab = 'content';
+                    const selectActiveTab = () => {
+                        if(hexagonAbout.querySelector(`.${activeAboutTab}Btn`)){
+                            hexagonAbout.querySelector(`.${activeAboutTab}Btn`).style.textDecoration = 'underline';
+                        }
+                        if(hexagonAbout.querySelector(`.hexagon-about-${activeAboutTab}`)){
+                            hexagonAbout.querySelector(`.hexagon-about-${activeAboutTab}`).style.display = 'unset';
+                        }
+                    }
+                    
+                    const content = document.createElement('div');
+                    content.className = 'hexagon-about-content';
+                    
+                    const createImages = () => {
+                        const images = hexagonAbout.querySelector('.hexagon-about-images');
+                        hexagon.imgs = Array.from(content.querySelectorAll('img')).map(img => img.cloneNode(true));
+                        
+                        if(!hexagon.imgs || !hexagon.imgs.length) return;
+                        let imgsConts = [];
+                        hexagon.imgs.forEach((img, i) => {
+                            let imgCont = setClassName(document.createElement('div'), 'hexagon-about-images-imgCont');
+                            imgCont.append(img);
+
+                            imgCont.setAttribute('data-slidr', ''+(i+1));
+                            imgCont.style.setProperty('--num', `'pic. ${i+1}'`)
+                            imgsConts.push(imgCont);
+                        }); 
+
+                        images.innerHTML = '';
+                        images.append(...imgsConts);
+                        
+                        if(hexagon.imgs.length == 1) return
+                        setTimeout(() => {
+                            images.slider =  slidr.create('slidr-img', {
+                                breadcrumbs: true,
+                                controls: 'border',
+                                direction: 'h',
+                                fade: true,
+                                keyboard: true,
+                                overflow: true,
+                                pause: false,
+                                theme: colors.MAIN_C,
+                                timing: { 'linear': '0.4s linear' },
+                                touch: true,
+                                transition: 'linear'
+                            }); 
+                        }, 10)  
+                    }
+                    const createComments = async () => {
+                        const commentsElem = hexagonAbout.querySelector('.hexagon-about-comments-cont');
+
+                        const commentsRes = await fetch(`/chains/${hexagon.chainId}/comments`);
+                        if(!commentsRes.ok) return;
     
-                    const deleteObserver = new MutationObserver((mList) => {
-                        mList.forEach(mutation => {
-                            if(Array.from(mutation.removedNodes).includes(hexagonAbout)){
-                                hexagon.classList.remove('hexagon-active');
+                        const comments = await commentsRes.json();
+                        
+                        const createComment = comment => {
+                            let commentElem = setClassName(document.createElement('div'), 'hexagon-about-comment');
+                            commentElem.id = 'comment' + comment.id;
+
+                            commentElem.innerHTML = `<a href="/users/${comment.userId}" class="hexagon-about-comment-user">${comment.username}</a>:&nbsp<br>
+                            <div class="hexagon-about-comment-body">${comment.body}</div>`;
+
+                            if(hexagonAbout.querySelector('.hexagon-about-comments-empty')) hexagonAbout.querySelector('.hexagon-about-comments-empty').remove();
+                            commentsElem.append(commentElem)
+                        }
+                        if(!comments || !comments.length){
+                            commentsElem.innerHTML = '<h3 class="hexagon-about-comments-empty">No comments</h3>';
+                        }else{
+                            comments.forEach(createComment)
+                        }
+
+                        socket.on('newComment' + hexagon.chainId, (data) => {
+                            try{
+                                createComment(JSON.parse(data))
+                            }catch(err){
+                                console.log(err);
                             }
                         });
-                    });
-                    deleteObserver.observe(hexagon, {
-                        childList: true
-                    });
-                    
-                    hexagonAbout.addEventListener('mousedown', evt => {
-                        evt.stopPropagation();
-                    })
-    
+                        socket.on('deleteComment' + hexagon.chainId, (id) => {
+                            try{
+                                hexagonAbout.querySelector('#comment' + id).remove();
+                            }catch(err){
+                                console.log(err);
+                            }
+                        });
+                    }
+
                     if(!hexagon.about){
                         const loadAbout = () => {
                             hexagonAbout.innerHTML += `<div class="loading about-loading">
@@ -353,34 +240,110 @@ window.addEventListener('load', async () => {
                                   begin="0.3"/>     
                               </circle>
                             </svg>
-                          </div>`;
-
+                            </div>`;
                             fetch(`/hexs/${hexagon.uuid}/about`).then(aboutRes => {
                                 if(aboutRes.ok){
-                                    aboutRes.text().then(aboutContent => {
+                                    aboutRes.text().then(async aboutContent => {
+                                        hexagonAbout.querySelectorAll('.hexagon-about-content').forEach(elem => elem.remove());
                                         content.innerHTML = hexagon.about = aboutContent;
                                         hexagonAbout.append(content);
-                                        // content.innerHTML = aboutContent;
+                                        
+                                        createImages();
+                                        
+                                        selectActiveTab();
 
                                         const loading = hexagonAbout.querySelector('.loading');
                                         loading.style.opacity = 0;
                                         
                                         loading.ontransitionend = () => {
                                             loading.remove();
+                                            loading.isDeleted = true;
                                         }
+                                        setTimeout(() => {if(!loading.isDeleted) loading.remove()}, 1000)
                                     });
                                 }
                             });
                         }
                         loadAbout();
 
-                        socket.on('changeAbout' + hexagon.uuid, () => {
+                        socket.on('changeAbout' + hexagon.uuid, (data) => {
+                            if(JSON.parse(data).userId == JSON.parse(sessionStorage.getItem('user') || '{}').userId) return ;
                             loadAbout();
                         });
                     }else{
                         content.innerHTML = hexagon.about;
                         hexagonAbout.append(content);
+                        selectActiveTab();
+                        createImages();
                     }
+
+                    fetch(`/chains/${hexagon.chainId}/rating`).then(async rating =>{
+                        if(rating.ok){
+                            rating = await rating.json()
+                            hexagonAbout.querySelector('.hexagon-about-rating-num').innerText = rating.num;
+                        } 
+                    });
+                    createComments();
+    
+                    const deleteObserver = new MutationObserver((mList) => {
+                        mList.forEach(mutation => {
+                            if(Array.from(mutation.removedNodes).includes(hexagonAbout)){
+                                hexagon.classList.remove('hexagon-active');
+                            }
+                        });
+                    });
+                    deleteObserver.observe(hexagon, {
+                        childList: true
+                    });
+
+                    const clearStyles = node => {
+                        if(node.style){
+                            node.style.cssText = '';
+
+                            if(node.hasChildNodes()){
+                                Array.from(node.childNodes).forEach(clearStyles);
+                            }
+                        }
+                    }
+                    
+                    hexagonAbout.addEventListener('mousedown', evt => {
+                        evt.stopPropagation();
+                    });
+
+                    selectActiveTab();
+                    const changeTab = (newTabName) => {
+                        if(hexagonAbout.querySelector(`.${activeAboutTab}Btn`)){
+                            hexagonAbout.querySelector(`.${activeAboutTab}Btn`).style.cssText = '';
+                        }
+                        if(hexagonAbout.querySelector(`.hexagon-about-${activeAboutTab}`)){
+                            hexagonAbout.querySelector(`.hexagon-about-${activeAboutTab}`).style.cssText = '';
+                        }
+                        activeAboutTab = newTabName;
+                        selectActiveTab();
+                    }
+                    hexagonAbout.addEventListener('click', (evt) => {
+                        if(evt.target.classList.contains('hexagon-about-btn')){
+                            const btn = evt.target;
+                            changeTab(btn.classList[1].replace('Btn', ''));
+
+                            let currentBlock = hexagonAbout.querySelector(`.hexagon-about-${activeAboutTab}`);
+                            if(activeAboutTab == 'images'){
+                                if(!hexagon.imgs || !hexagon.imgs.length) return;
+                                currentBlock.style.setProperty('--about-image-width', hexagonAbout.offsetWidth <= hexagon.imgs[0].width ? `calc(100% - 20px)` : `100%`);
+                                
+                                currentBlock.style.height = Math.max(...hexagon.imgs.map(img => img.height)) + 'px';
+                                currentBlock.style.setProperty('--imgCont-height', Math.max(...hexagon.imgs.map(img => img.height)) + 'px');
+                                currentBlock.style.display = 'block';
+                                
+                                try{
+                                    if(currentBlock.slider) currentBlock.slider.start('1');
+                                }catch(err){
+                                    console.log(err);
+                                }
+                            }
+                        }
+                    });
+
                     
                     hexagon.append(hexagonAbout);
     
@@ -453,7 +416,213 @@ window.addEventListener('load', async () => {
                     }
                     
                     document.addEventListener('mousedown', clearAbouts);
+                    
+                    hexagonAbout.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center',
+                        inline: 'center'
+                    });
                 }
+        
+                return editedField;
+            }
+
+            let hexPath = `M 0 ${TRIANGLE_HEIGHT} L ${HEXAGON_WIDTH/2} 0 L ${HEXAGON_WIDTH} ${TRIANGLE_HEIGHT} L ${HEXAGON_WIDTH} ${HEXAGON_HEIGHT-TRIANGLE_HEIGHT} L ${HEXAGON_WIDTH/2} ${HEXAGON_HEIGHT} L 0 ${HEXAGON_HEIGHT-TRIANGLE_HEIGHT} Z`;
+            if(otherSettings.rounded){
+                hexPath = roundPathCorners(hexPath, .05, true);
+            }
+            const setHexVisible = hexagon => {
+                hexagon.style.transition = 'inherit';
+                hexagon.style.opacity = 1;
+                hexagon.classList.add('hexagon-visible');
+                
+                if(hexagon.querySelector('.polygon')) return;
+                
+                hexagon.insertAdjacentHTML('afterbegin', `<svg class="polygon"> 
+                <path d="${hexPath}"></path>
+                </svg>`);
+            }
+            function parseHexsFromJson(savedHexs){    
+                if(!savedHexs.length) return [];
+        
+                let parsedHexs = [];
+                for(let hex of savedHexs){
+                    let hexagon = document.querySelector(hex.selector);
+                    if(hexagon.classList.contains('hexagon-visible')) continue;
+                    setHexVisible(hexagon);      
+                    
+                    if(hex.innerText){
+                        let editedField = createEditedField(hexagon); 
+                        
+                        editedField.innerText = hex.innerText;
+                    }
+        
+                    // if(hex.about){
+                    //     hexagon.about = hex.about
+                    // }
+                    
+                    hexagon.querySelector('.hexagon-num').innerText = hex.num;
+                    hexagon.style.setProperty('--bgc', hexsColors[((hex.num-1) - hexsColors.length * (Math.ceil((hex.num-1) / hexsColors.length) - 1)) - 1]);
+                    
+                    if(hex.num == 1){
+                        hexagon.classList.add('hexagon-first');
+                        hexagon.style.setProperty('--bgc', colors.MAIN_C);
+                    }
+
+                    ['chainId', 'userId', 'username', 'creationDate', 'uuid'].forEach(prop => {
+                        hexagon[prop] = hex[prop];
+                    });
+
+                    visibleHexs.push(hexagon);
+                    parsedHexs.push(hexagon);   
+                }
+        
+                return parsedHexs
+            }
+    
+            
+            if(!document.querySelector('.loading')) return;
+            document.body.className = 'field';
+            document.body.style.width = '';
+            document.body.style.height = '';
+
+            let hexsCont = document.querySelector('.hexsCont');
+            hexsCont.style.opacity = 1;
+            
+            // document.documentElement.style.width = (GRID_WIDTH * HEXAGON_WIDTH + HEXAGON_WIDTH/2) + 'px';
+            
+            // создание сетки
+            for(let i = 1; i <= GRID_HEIGHT; i+=2){
+                let hexagonStr = `<div class="hexagon">
+                <div class="hexagon-num">0</div>
+                </div>`.repeat(GRID_WIDTH);
+                
+                hexsCont.innerHTML += `
+                <div id="r${i}" class="row">${hexagonStr}</div>
+                <div id="r${i+1}" class="row row-moved">${hexagonStr}</div>
+                `
+            }
+
+            document.querySelector('#r2').classList.add('row-first');
+            document.querySelector('#r' + GRID_HEIGHT).classList.add('row-last');
+            document.querySelectorAll(`#r1, #r${GRID_HEIGHT}, #h1, #h${GRID_WIDTH}`).forEach(elem => {
+                elem.style.pointerEvents = 'none';
+            });
+
+            if(!isTouchDevice()){
+                const SLIDE_SPEED = otherSettings.slideSpeed || 2.1;
+                const MIN_CHANGE = 20;
+                const slider = document.body;
+                let isDown = false;
+    
+                let startX;
+                let scrollLeft;
+    
+                let startY;
+                let scrollTop;
+    
+                slider.addEventListener('mousedown', (e) => {
+                    isDown = true;
+                    setTimeout(() => {
+                        if(isDown){
+                            slider.classList.add('active');
+                        }
+                    }, 500)
+                    startX = e.pageX - slider.offsetLeft;
+                    scrollLeft = slider.scrollLeft;
+                    
+                    startY = e.pageY - slider.offsetTop;
+                    scrollTop = slider.scrollTop;
+                });
+                slider.addEventListener('mouseleave', () => {
+                    isDown = false;
+                    slider.classList.remove('active');
+                });
+                slider.addEventListener('mouseup', () => {
+                    isDown = false;
+                    slider.classList.remove('active');
+                });
+                slider.addEventListener('mousemove', (e) => {
+                    if(!isDown) return;
+                    e.preventDefault();
+                    const x = e.pageX - slider.offsetLeft;
+                    const walkX = (x - startX) * SLIDE_SPEED; //scroll-fast
+                    
+                    const y = e.pageY - slider.offsetTop;
+                    const walkY = (y - startY) * SLIDE_SPEED; //scroll-fast
+                    if(Math.abs(walkX) > MIN_CHANGE || Math.abs(walkY) > MIN_CHANGE){
+                        slider.classList.add('active');
+                    } 
+                    requestAnimationFrame(function scroll(){
+
+                        slider.scrollLeft = scrollLeft - walkX;
+                        slider.scrollTop = scrollTop - walkY;
+                        if(isDown) requestAnimationFrame(scroll);
+                    })
+                });
+            }
+            
+            let zoomIndex = 1;
+            document.addEventListener('wheel', evt => {
+                if(otherSettings.ctrlZoom){
+                    if(!(evt.metaKey || evt.ctrlKey)) return;
+                    else{
+                        evt.preventDefault();
+                    }
+                } 
+                document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});
+                evt.preventDefault();
+                
+                zoomIndex += -(evt.deltaY/1260);
+                
+                if(zoomIndex <= 0) zoomIndex = 0.01;
+
+
+                hexsCont.style.top = -(hexsCont.offsetHeight - (hexsCont.offsetHeight * zoomIndex)) + 'px';
+                hexsCont.style.left = -(hexsCont.offsetWidth - (hexsCont.offsetWidth * zoomIndex)) + 'px';
+                hexsCont.style.transform = `scale(${zoomIndex})`;
+            }, {passive: false});
+        
+            let visibleHexs = [];
+            let chains = [];
+            const getChain = id => {
+                for(let chain of chains){
+                    if(chain && chain.id == id) return chain
+                }
+            }
+            
+            document.documentElement.addEventListener('keydown', evt => {
+                if(evt.key == '=' && (evt.ctrlKey || evt.metaKey)){
+                    evt.preventDefault();
+                    
+                    hexsCont.style.transform = `scale(${zoomIndex += (0.1)})`
+                }
+                if(evt.key == '-' && (evt.ctrlKey || evt.metaKey)){
+                    evt.preventDefault();
+        
+                    hexsCont.style.transform = `scale(${zoomIndex += -(0.1)})`
+                }
+            }, {passive: false})
+            
+            document.addEventListener('click', evt => {
+                document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});
+            })
+            
+            document.body.oncontextmenu = (evt) => {
+                document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});
+                window.onscroll = () => {document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});}
+        
+                return false
+            }
+        
+            // определение свойст шестиугольника
+            const setHexProps = hexagon => {
+                // ид ряда и ид шестиугольника
+                let row = hexagon.parentElement;
+                hexagon.id = 'h' +  ([].indexOf.call(row.children, hexagon) + 1);
+                hexagon.rowId = idToNum(row.id);
+
+                createEditedField(hexagon);
             }
             document.querySelectorAll('.hexagon').forEach(setHexProps);
             
@@ -466,13 +635,16 @@ window.addEventListener('load', async () => {
             };
             
             try{
-                let res = await fetch('/hexs/' + document.title);
-                if(res.ok){
-                    res = await res.json();
-                    parseHexsFromJson(res.body);
+                let res = await fetch('/chains/' + document.title);
+                if(!res.ok) return showModal('An error occurred when loading hexagons', 'Please try later. Status: ' + res.status);
+                res = await res.json();
+
+                for(let chain of res.body){
+                    chain.hexs = parseHexsFromJson(chain.hexs); 
+                    chains.push(chain)
                 }
             }catch(err){
-        
+                showModal('An error occurred when loading hexagons', err);
             }
         
             socket.on('hexs', (data) => {

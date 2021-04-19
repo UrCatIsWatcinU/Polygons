@@ -57,6 +57,7 @@
   <script src="{{ url_for('static', filename='socketio.js') }}"></script>
   <script src="{{ url_for('static', filename='fontsloader.js') }}"></script>
   <script src="{{ url_for('static', filename='scrollpolyfill.js') }}"></script>
+  <script src="{{ url_for('static', filename='sldr.js') }}"></script>
   <script src="{{ url_for('static', filename='field/noedite-script.js') }}"></script>
   <script src="{{url_for('static', filename='public.js')}}"></script>
   <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.png') }}" type="image/png">
@@ -106,8 +107,11 @@
     <button class="back" onclick="window.location.href = `{{ url_for('index') }}`">Back</button>
     <button onclick="window.location.href = `{{ url_for('login') }}`">Login</button>
     <button class="auth" onclick="window.location.href = `{{ url_for('registration') }}`">Register</button>
-</div>
-  <img class="icon" src="{{ url_for('static', filename='favicon.png') }}" alt="logo" width="40px">
+  </div>
+  <svg class="icon" viewBox="0 0 603 201" fill="#703868" xmlns="http://www.w3.org/2000/svg">
+    <path d="M148.86 67.75V134.8L133.26 143.8L131.39 144.88V109.63H108.61V158.04L106.94 158.99L91.14 168.12V22.43L86.83 20.05L83.54 21.95L73.87 27.52L66.07 32.01L55.44 38.14L43.29 45.14L25.82 55.21L17.47 60.02V140L24.07 143.8L25.82 144.81L43.29 154.88L47.96 157.57H47.97L55.44 161.88V182.05L43.29 175.04L25.82 164.98L17.47 160.16L0 150.1V49.92L0.960007 49.37L17.47 39.86L25.82 35.04L43.29 24.98L55.44 17.98L55.74 17.8L68.96 10.18L86.64 0L91.14 2.47L104.52 9.86002L108.61 12.11V92.16H131.39V58.38L148.86 67.75Z" />
+    <path d="M157.22 38.92L148.87 34.32L131.4 24.68L118.49 17.56V37.51L131.4 44.63L148.87 54.27L157.22 58.88V140.71L151.84 143.81L148.86 145.53L131.39 155.59L118.48 163.03L113.57 165.86L108.6 168.72L97.19 175.29L91.13 178.78L90.88 178.92L87.95 180.61C86.55 179.66 85.15 178.72 83.74 177.77C83.74 167.96 83.74 158.14 83.74 148.33C70.25 140.24 56.77 132.15 43.28 124.06C43.28 102.11 43.28 80.16 43.28 58.21L25.81 68.3V134.1C31.27 137.54 36.89 140.98 42.66 144.42C50.5 149.09 58.21 153.5 65.78 157.67C65.78 167.72 65.78 177.78 65.78 187.83C67.33 188.78 68.89 189.74 70.44 190.69L83.53 198.23L87.94 200.77L89.09 200.11L91.13 198.93L103.4 191.86L105.44 190.68L108.59 188.86L114.67 185.36L118.47 183.17L126.08 178.78L131.38 175.73L148.85 165.67L157.2 160.85L174.67 150.79V48.56L157.22 38.92Z" />
+  </svg>
 </body>
 </html>
 </html>

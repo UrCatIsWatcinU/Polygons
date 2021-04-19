@@ -86,7 +86,7 @@ window.addEventListener('load', async () => {
             showAsk(() => {     
                 fetch('/categ/delete/' + hexagon.innerText, {method: 'DELETE'});
                 window.location.reload();
-            })
+            });
         }
 
         contextmenu.style.top = evt.clientY + 'px';

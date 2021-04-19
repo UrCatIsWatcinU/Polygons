@@ -46,17 +46,16 @@ html{
   --bgc: var(--main-c);
   z-index: 10;
 }
-.hexagon-first{
-  /* transform: scale(.98); */
+.hexagon-first .polygon{
+  transform: scale(1.1);
+}
+.hexagon-first .hexagon-num{
+  transform: translateX(5px);
 }
 .hexagon-visible:hover, .hexagon-active{
   /* transform: scale(.92); */
   filter: drop-shadow(6px 6px 3px rgba(68, 68, 68, 0.4));
   /* transform: scale(.9) translate(-1px, -1px); */
-}
-.hexagon-first:hover, .hexagon-first.hexagon-active{
-  /* transform: scale(.98) translate(-1px, -1px); */
-  /* transform: scale(1.02); */
 }
 .hexagon-num{
   border-radius: 50%;
@@ -163,6 +162,7 @@ html{
   box-sizing: border-box;
   transition: inherit;
   user-select: text;
+  font-size: .97em;
 }
 .hexagon-about:focus{
   outline: none;
@@ -175,15 +175,156 @@ html{
   width: 100%;
   height: 100%;  
   min-height: 50px;
+  white-space: pre-wrap;
 }
 .hexagon-about-content *{
   background-color: transparent;
   color: var(--black-c);
 }
-.hexagon-about-content img{
+.hexagon-about-content *:first-child{
+  margin-top: 0;
+}
+.hexagon-about img{
+  max-width: 100%;
+}
+.hexagon-about-images{
+  overflow: hidden;
   width: 100%;
+  /* position: relative; */
+}
+.hexagon-about-images-imgCont{
+  display: flex;
+  height: calc(var(--imgCont-height) - 20px);
+  max-width: var(--about-image-width);
+  justify-content: center;
+  align-items: center;
+  padding-bottom: 20px;
+  position: relative;
+  margin: auto;
+}
+.hexagon-about-images-imgCont::after{
+  content: var(--num);
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+.hexagon-about-images img{
+  /* width: calc(100% - 20px); */
+  max-width: var(--about-image-width);
+  max-height: 100%;
+  margin: 0;
+}
+.disabled{
+  pointer-events: none !important;
+}
+.slidr-control .right{
+  height: calc(100% - 50px);
+}
+.hexagon-about-content,
+.hexagon-about-images,
+.hexagon-about-comments{
+  display: none;
+
+}
+.hexagon-about-comments-cont{
+  padding-bottom: 5px;
+  min-height: 50px;
+  overflow-y: auto;
+  max-height: 70vh;
+}
+.hexagon-about-comments-empty{
+  margin: 0;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0.24; 
+  text-align: center;
+}
+.hexagon-about-comments-form{
+  padding-top: 10px;
+  margin-top: 5px;
+  min-height: 50px;
+  border-top: 1px solid var(--main-c);
+}
+.hexagon-about-comments-input{
+  resize: vertical;
+  width: calc(100% - 20px);
+  margin-top: 5px;
+}
+.hexagon-about-comment{
+  --underline-color: var(--black-c);
+  position: relative;
+  margin-bottom: 5px;
+}
+.hexagon-about-comment-user{
+  opacity: .7;
+  text-decoration: none;
+  font-size: .95em;
+  position: relative;
+}
+.hexagon-about-comment-user::after{
+  content: '';
+  width: calc(100%);
+  border-top: 1.5px solid var(--underline-color);
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+.hexagon-about-comment-body{
+  margin-top: 2px;
+  white-space: pre-wrap;
+}
+.hexagon-about-comment-close{
+  --size: 1em;
+  transform: rotate(45deg);
+  stroke: var(--main-c);
+  stroke-width: 1.5px;
+  width: var(--size);
+  height: var(--size);
+  cursor: pointer;
+  position: absolute;
+  top: 5px;
+  right: 0;
 }
 
+.hexagon-about-controls{
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--main-c);
+}
+.hexagon-about-btn{
+  --pad: 8px;
+  margin-right: var(--pad);
+  padding-right: var(--pad);
+  border-right: 1px solid var(--main-c);
+  cursor: pointer;
+}
+.hexagon-about-btn:last-child{
+  border-right: none;
+}
+.hexagon-about-btn:hover{
+  opacity: .75;
+}
+.hexagon-about-rating{
+  display: flex;
+  align-items: center;
+}
+.hexagon-about-rating-num{
+  margin: 0 5px;
+}
+.hexagon-about-rating-btn{
+  --size: 1em;
+  width: var(--size);
+  height: var(--size);
+  stroke: var(--main-c);
+  cursor: pointer;
+}
+.hexagon-about-rating-plus:hover{
+  transform: scale(1.05);
+}
 .about-loading{
   background-color: var(--about-bgc);
   position: absolute;
@@ -194,6 +335,19 @@ html{
   width: 50px;
 }
 
+
+
+
+.icon{
+  width: 100px;
+  fill: var(--dark-main-c);
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
+  z-index: 10;
+  opacity: .2;
+  pointer-events: none;
+}
 
 
 
@@ -400,7 +554,7 @@ html{
 .row{
   border-left: 5px var(--grid-c) solid;
   border-right: 5px var(--grid-c) solid;
-  --pad: 5px;
+  --pad: 6.5px;
 }
 .row-first{
   border-top: 5px var(--grid-c) solid;
