@@ -240,7 +240,7 @@ window.addEventListener('load', async () => {
                             hexagonAbout.querySelector(`.${activeAboutTab}Btn`).style.textDecoration = 'underline';
                         }
                         if(hexagonAbout.querySelector(`.hexagon-about-${activeAboutTab}`)){
-                            hexagonAbout.querySelector(`.hexagon-about-${activeAboutTab}`).style.display = 'unset';
+                            hexagonAbout.querySelector(`.hexagon-about-${activeAboutTab}`).style.display = 'block';
                         }
                     }
                     
@@ -536,15 +536,12 @@ window.addEventListener('load', async () => {
                                 
                                 currentBlock.style.height = Math.max(...hexagon.imgs.map(img => img.height)) + 'px';
                                 currentBlock.style.setProperty('--imgCont-height', Math.max(...hexagon.imgs.map(img => img.height)) + 'px');
-                                currentBlock.style.display = 'block';
                                 
                                 try{
                                     if(currentBlock.slider) currentBlock.slider.start('1');
                                 }catch(err){
                                     console.log(err);
                                 }
-                            }else if(activeAboutTab == 'content'){
-                                currentBlock.style.display = 'block';
                             }
                         }else if(evt.target.classList.contains('hexagon-about-rating-btn')){
                             const btn = evt.target;
