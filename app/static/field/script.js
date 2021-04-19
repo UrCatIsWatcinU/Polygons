@@ -92,7 +92,7 @@ window.addEventListener('load', async () => {
                     if(hexagon.querySelector('.hexagon-about')){
                         hexagon.querySelector('.hexagon-about').remove();
                     }   
-                    hexagon.about = ''
+                    hexagon.about = '';
                     
                     let chain = getChain(hexagon.chainId);
                     if(+hexagon.querySelector('.hexagon-num').innerText === 1){
@@ -378,7 +378,6 @@ window.addEventListener('load', async () => {
                                         
                                         createImages();
                                         
-                                        
                                         selectActiveTab();
 
                                         const loading = hexagonAbout.querySelector('.loading');
@@ -544,6 +543,8 @@ window.addEventListener('load', async () => {
                                 }catch(err){
                                     console.log(err);
                                 }
+                            }else if(activeAboutTab == 'content'){
+                                currentBlock.style.display = 'block';
                             }
                         }else if(evt.target.classList.contains('hexagon-about-rating-btn')){
                             const btn = evt.target;
