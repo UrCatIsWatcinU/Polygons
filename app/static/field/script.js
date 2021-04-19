@@ -294,7 +294,7 @@ window.addEventListener('load', async () => {
                             let commentElem = setClassName(document.createElement('div'), 'hexagon-about-comment');
                             commentElem.id = 'comment' + comment.id;
 
-                            commentElem.innerHTML = `<a href="/users/${comment.userId}" class="hexagon-about-comment-user">${comment.username}</a>:&nbsp<br>
+                            commentElem.innerHTML = `<a href="/users/${comment.userId}" class="hexagon-about-comment-user">${comment.username}:</a>&nbsp<br>
                             <div class="hexagon-about-comment-body">${comment.body}</div>`;
 
                             if(comment.userId == user.userId || user.userRole == 2){
@@ -408,7 +408,7 @@ window.addEventListener('load', async () => {
                     fetch(`/chains/${hexagon.chainId}/rating`).then(async rating =>{
                         if(rating.ok){
                             rating = await rating.json()
-                            hexagonAbout.querySelector('.hexagon-about-rating-num').innerText = rating.num;
+                            hexagonAbout.querySelector('.hexagon-about-rating-num').innerText = rating.num ? rating.num : '0';
                             hexagonAbout.allowedChange = rating.allowedChange;
                             if(rating.allowedChange == -1){
                                 hexagonAbout.querySelector('.rating-plus').style.opacity = 0;
