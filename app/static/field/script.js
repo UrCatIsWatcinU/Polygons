@@ -254,6 +254,8 @@ window.addEventListener('load', async () => {
                         if(!hexagon.imgs || !hexagon.imgs.length) return;
                         let imgsConts = [];
                         hexagon.imgs.forEach((img, i) => {
+                            if(! img || !img.src) return;
+                            
                             let imgCont = setClassName(document.createElement('div'), 'hexagon-about-images-imgCont');
                             imgCont.append(img);
 
@@ -561,7 +563,7 @@ window.addEventListener('load', async () => {
                                 })
                             }).then(async res =>{
                                 if(!res.ok) return;
-                                res = await res.json()
+                                res = await res.json();
                                 
                                 const plus = hexagonAbout.querySelector('.rating-plus');
                                 const minus = hexagonAbout.querySelector('.rating-minus');
