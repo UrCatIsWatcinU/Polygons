@@ -777,6 +777,7 @@ window.addEventListener('load', async () => {
                         hexagon[prop] = hex[prop];
                     });
                     hexagon.imgs = hex.imgs ? !hex.imgs.length ? [] : hex.imgs : [];
+                    console.log(hex.imgs);
 
                     visibleHexs.push(hexagon);
                     parsedHexs.push(hexagon);   
