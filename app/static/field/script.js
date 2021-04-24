@@ -276,6 +276,7 @@ window.addEventListener('load', async () => {
                                 fetch(`/hexs/imgs/delete/` + imgObj.uuid, {
                                     method: 'DELETE'
                                 });
+                                imgCont.remove();
                             }
                         }); 
 
