@@ -1,5 +1,12 @@
-*{
+/* user select restricts */
+button, h1, h2,
+.hexagon,
+.hexagon-about-controls{
     user-select: none;
+}
+
+/* user select restricts */
+*{
     transition: all .13s linear;
     font-family: var(--font), sans-serif;
 }
@@ -206,7 +213,7 @@ a{
 
 
 .row {
-    --pad: 8px;
+    --pad: calc(8px * 1.5);
     height: calc(var(--triangle-height) * 2 + var(--body-height));
     padding: var(--pad);
     overflow: visible;
@@ -227,9 +234,6 @@ a{
     position: relative;
     width: var(--hexagon-width);
     height: 100%;
-    /* background-color: var(--bgc); */
-    background-clip: content-box;
-    /* padding:  var(--triangle-height) 0px; */
     display: block;
     transition: none;
     cursor: default;
@@ -239,9 +243,8 @@ a{
     padding: var(--pad);
     opacity: 0;
 
-    scrollbar-width: none;
     --webkit-scrollbar-width: none;
-    filter: drop-shadow(3px 3px 3px rgba(68, 68, 68, 0.3));
+    scrollbar-width: none;
 }
 .hexagon *{
     scrollbar-width: none;
@@ -274,7 +277,7 @@ a{
     top: calc(var(--triangle-height) + var(--pad));
     border-radius: 3px;
     
-    font-size: .94em;
+    font-size: 1.07em;
     transition: inherit;
     white-space: pre-wrap;
 }
@@ -306,11 +309,12 @@ a{
     cursor: pointer;   
 }
 .categs-plus:hover{
-    transform: scale(1.1);
+    transform: scale(1.);
 }
 .categ{
     opacity: 1;
     transition: inherit;
+    filter: drop-shadow(3px 3px 3px rgba(68, 68, 68, 0.3));
 }
 .categ .hexagon-editedField{
     cursor: pointer;
@@ -320,9 +324,11 @@ a{
 }
 .categ .polygon{
     cursor: pointer;
+    transform-origin: center;
+    will-change: transform;
 }
 .categ:hover .polygon{
-    transform: scale(1.03);
+    transform: scale(1.02);
 }
 .categ.new{
     position: relative;
@@ -472,6 +478,55 @@ a{
     top: unset;
     bottom: 10px;
     height: max-content;
+}
+
+
+.user-username{
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.user-title{
+    margin: 0;
+}
+.user-rating-cont{
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
+}
+.user-rating-num{
+    margin: 0 5px;
+}
+.user-rating-btn{
+    --size: 1em;
+    width: var(--size);
+    height: var(--size);
+    stroke: var(--main-c);
+    cursor: pointer;
+}
+.user-content{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden;
+}
+.user-info{
+    padding: 10px;
+    border: 1px solid var(--main-c);
+    width: 400px;
+    margin-bottom: 20px;
+}
+.user-info-item{
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+.user-info-item:last-child{
+    margin: 0;
+}
+.user-chains{
+    overflow: auto;
 }
 
 

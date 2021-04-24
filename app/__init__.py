@@ -11,10 +11,10 @@ app.config.from_object(Config)
 
 socketio = SocketIO(app)
 
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
 
 login = LoginManager(app)
 login.login_view = 'login'
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 from app import routes, models

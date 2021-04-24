@@ -17,6 +17,17 @@ function isTouchDevice() {
 } 
 
 
+const setHexVisible = hexagon => {
+    hexagon.style.transition = 'inherit';
+    hexagon.style.opacity = 1;
+    hexagon.classList.add('hexagon-visible');
+    
+    if(hexagon.querySelector('.polygon')) return;
+    
+    hexagon.insertAdjacentHTML('afterbegin', `<svg class="polygon"> 
+    <path d="${hexPath}"></path>
+    </svg>`);
+}
 
 const showAsk = (yesCallback, body='You will not be able to cancel this action', title = 'Are you sure?', noCallback = () => {document.querySelector('.ask').remove()}) => {
     let ask = document.createElement('div');
@@ -204,26 +215,12 @@ let font = {
     size: ".98em"
 };
 
-// const savedSettings = localStorage.getItem('otherSettings');
-// if(savedSettings){
-//     otherSettings = JSON.parse(savedSettings);
-// }
-
-// if(localStorage.getItem('font')){
-//     font = JSON.parse(localStorage.getItem('font'));
-// }
-
-// if(localStorage.getItem('hexsColors')){
-//     hexsColors = JSON.parse(localStorage.getItem('hexsColors'))
-// }
-
-// if(localStorage.getItem('colors')){
-//     colors = JSON.parse(localStorage.getItem('colors'));
-// }
-let BODY_HEIGHT = 52;
+let BODY_HEIGHT = 52 * 1.5;
 const TRIANGLE_HEIGHT = BODY_HEIGHT * (35 / 60);
 const HEXAGON_HEIGHT  = TRIANGLE_HEIGHT * 2 + BODY_HEIGHT;
-let HEXAGON_WIDTH = HEXAGON_HEIGHT
+let HEXAGON_WIDTH = HEXAGON_HEIGHT;
+
+let hexPath = `M 0 ${TRIANGLE_HEIGHT} L ${HEXAGON_WIDTH/2} 0 L ${HEXAGON_WIDTH} ${TRIANGLE_HEIGHT} L ${HEXAGON_WIDTH} ${HEXAGON_HEIGHT-TRIANGLE_HEIGHT} L ${HEXAGON_WIDTH/2} ${HEXAGON_HEIGHT} L 0 ${HEXAGON_HEIGHT-TRIANGLE_HEIGHT} Z`;
 
 const main = async () => {
     let mainLogo = document.querySelector('.header-img.big');
@@ -254,6 +251,7 @@ const main = async () => {
                     }
 
                     localStorage.setItem('colors', JSON.stringify(settings.colors || '{}'));
+                    window.dispatchEvent(new Event('settingsLoaded'))
                 }else{
                     showModal('An error occurred while loading the settings', 'Please try later. The settings are set to default');
                 }
@@ -261,6 +259,10 @@ const main = async () => {
         }
     }catch(err){
         showModal('An error occurred while loading the settings', err)
+    }
+
+    if(otherSettings.rounded){
+        hexPath = roundPathCorners(hexPath, .05, true);
     }
 
     if(font.family != 'Arial'){

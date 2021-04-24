@@ -47,7 +47,7 @@ html{
   z-index: 10;
 }
 .hexagon-first .polygon{
-  transform: scale(1.1);
+  transform: scale(1.04);
 }
 .hexagon-first .hexagon-num{
   transform: translateX(5px);
@@ -149,7 +149,7 @@ html{
 .hexagon-about{
   background: var(--about-bgc);
   color: var(--black-c);
-  min-width: 380px;
+  width: 420px;
   min-height: 100px;
   max-height: var(--max-about-height);
   position: absolute;
@@ -176,6 +176,7 @@ html{
   height: 100%;  
   min-height: 50px;
   white-space: pre-wrap;
+  user-select: contain;
 }
 .hexagon-about-content *{
   background-color: transparent;
@@ -216,9 +217,10 @@ html{
 }
 .disabled{
   pointer-events: none !important;
+  opacity: 0 !important; 
 }
 .slidr-control .right{
-  height: calc(100% - 50px);
+  height: calc(100% - 50px) !important;
 }
 .hexagon-about-content,
 .hexagon-about-images,
@@ -275,6 +277,7 @@ html{
   margin-top: 2px;
   white-space: pre-wrap;
 }
+.hexagon-about-img-close,
 .hexagon-about-comment-close{
   --size: 1em;
   transform: rotate(45deg);

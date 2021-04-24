@@ -1,14 +1,17 @@
+import os
+
+from sqlalchemy.sql.expression import select
 from app import app, socketio, db
 from app.forms import LoginForm, RegistrationForm
-from app.models import Chain, Change, Comment, Complaint, Hexagon, RatingChange, User, Categ
+from app.models import Chain, Comment, Complaint, Hexagon, Image, RatingChange, User, Categ, UserRating
+from app.lib import allowed_file, create_dir, delete_dir
 
 from flask import render_template, redirect, url_for, request
 from flask_socketio import emit
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 from flask_sqlalchemy import sqlalchemy
-from sqlalchemy import engine, func
-from sqlalchemy.sql import select
+from sqlalchemy import func
 
 import json
 import time
@@ -84,6 +87,9 @@ def delete_categ(name):
         return json.dumps({"success":False})
 
     categ = Categ.query.filter(Categ.name==name).first_or_404()
+    
+    delete_dir(f"/app/static/uploadedImgs/{categ.name}")
+
     db.session.delete(categ)
     db.session.commit()
     socketio.emit('reload')
@@ -137,6 +143,48 @@ def users_all():
         return "<h1>You don't have access</h1"
     
     return render_template('users.html', users=User.query.all())
+
+@app.route('/users/<id>')
+def user(id):
+    user = User.query.get(id)
+    rating = db.session.execute(select([func.sum(UserRating.change)]).where(UserRating.user_id == id)).first().values()[0] or 0
+    allowed_change = 0
+
+    is_auth = False
+    if current_user.is_authenticated and current_user.id:
+        is_auth = True
+        user_change = UserRating.query.filter_by(user_id=id, user_who_change_id=current_user.id).first()
+        if user_change:
+            allowed_change = -user_change.change
+
+    def hexs_sort_fn(hexs):
+        list(hexs).sort(key=lambda hex: hex.num)
+        return hexs or []
+
+    print(is_auth)
+    return render_template('user.html', title=user.username, user=user, rating = rating, allowed_change=allowed_change, hexs_sort_fn=hexs_sort_fn, is_auth=is_auth)
+
+@app.route('/users/<id>/rating/change', methods=['POST'])
+@login_required
+def change_user_rating(id):
+    user_rating_change = UserRating.query.filter_by(user_who_change_id=current_user.id, user_id=id).first()
+
+    change_num = 0
+    if not user_rating_change:
+        change = UserRating(change=request.get_json(True)['change'], user_who_change_id=current_user.id, user_id=id)
+        change_num = request.get_json(True)['change']
+        db.session.add(change)
+    else:
+        if user_rating_change.change == request.get_json(True)['change']:
+            return json.dumps({'success': False})
+        else:
+            db.session.delete(user_rating_change)
+    
+    db.session.commit()
+    
+    rating = db.session.execute(select([func.sum(UserRating.change)]).where(UserRating.user_id == id)).first().values()[0] or 0
+
+    return json.dumps({'success': True, 'num': rating, 'change': change_num})
 
 @app.route('/users/i')
 def give_current_user():
@@ -192,7 +240,20 @@ def fields(categ_name):
 
 
 
-
+prepare_hex_to_send = lambda hex: {
+    "uuid": hex.id,
+    "selector": hex.selector,
+    "num": hex.num,
+    "innerText": hex.inner_text,
+    "chainId": hex.chain_id,
+    "userId": hex.user_id,
+    "username": User.query.get(hex.user_id).username if User.query.get(hex.user_id) else 'none',
+    "creationDate": time.mktime(hex.created_at.timetuple()),
+    "imgs": list(map(lambda img: {
+        "uuid": img.id,
+        "url": img.filename
+    }, hex.imgs)) if hex.imgs else [],
+}
 @app.route('/hexs/<categ_name>')
 def get_hexs(categ_name):
     userId = 0
@@ -214,16 +275,7 @@ def get_hexs(categ_name):
         }, all_hexs))
     else:
         categ = Categ.query.filter_by(name=categ_name).first_or_404()
-        hexs_to_send = list(map(lambda hex: {
-            "uuid": hex.id,
-            "selector": hex.selector,
-            "num": hex.num,
-            "innerText": hex.inner_text,
-            "chainId": hex.chain_id,
-            "userId": hex.user_id,
-            "username": User.query.get(hex.user_id).username if User.query.get(hex.user_id) else 'none',
-            "creationDate": time.mktime(hex.created_at.timetuple())
-        }, categ.hexs))
+        hexs_to_send = list(map(prepare_hex_to_send, categ.hexs))
 
     return json.dumps({"body": hexs_to_send, "userId": userId, "userRole": userRole})
 
@@ -241,6 +293,55 @@ def change_hex_about(id):
     db.session.commit()
 
     socketio.emit(f'changeAbout{hexagon.id}', json.dumps({'userId': current_user.id}))
+    return json.dumps({'success': True})
+
+@app.route('/hexs/<id>/imgs/upload', methods=['POST'])
+@login_required
+def upload_hex_img(id):
+    hex = Hexagon.query.get(id)
+    if hex.user_id != current_user.id:
+        return json.dumps({'success': False})
+
+    if 'file' not in request.files:
+        return json.dumps({'success': False})
+
+    file = request.files['file']
+    if not file.filename or not allowed_file(file.filename):
+        return json.dumps({'success': False})
+    
+    img = Image(hex_id=id)
+    db.session.add(img)
+    db.session.commit()
+
+    categ_name = hex.categ.name
+    
+    create_dir("/app/static/uploadedImgs/" + categ_name)
+    create_dir(f"/app/static/uploadedImgs/{categ_name}/{hex.chain.id}")
+    create_dir(f"/app/static/uploadedImgs/{categ_name}/{hex.chain.id}/{hex.id}")
+
+    img.filename = f"static/uploadedImgs/{categ_name}/{hex.chain.id}/{hex.id}/{img.id}.{file.mimetype.replace('image/', '')}"
+    try:
+        file.save(os.getcwd() + "/app/" + img.filename)
+    except BaseException:
+        db.session.delete(img)
+        db.session.commit()
+        return json.dumps({'success': False})
+
+    db.session.add(img)
+    db.session.commit()
+
+    return json.dumps({'success': True, 'url': img.filename})
+
+@app.route('/hexs/imgs/delete/<id>', methods=['DELETE'])
+@login_required
+def delete_hex_img(id):
+    img = Image.query.get_or_404(id)
+    
+    os.remove(os.getcwd() + '/app/' + img.filename)
+
+    db.session.delete(img)
+    db.session.commit()
+
     return json.dumps({'success': True})
 
 @app.route('/hexs/<categ_name>/new', methods=['POST'])
@@ -272,16 +373,7 @@ def new_hex(categ_name):
         db.session.add(hex)
         db.session.commit()
 
-        hexs_to_send.append({
-            "uuid": hex.id,
-            "selector": hex.selector,
-            "num": hex.num,
-            "innerText": hex.inner_text,
-            "chainId": hex.chain_id,
-            "userId": hex.user_id,
-            "username": User.query.get(hex.user_id).username if User.query.get(hex.user_id) else 'none',
-            "creationDate": time.mktime(hex.created_at.timetuple())
-        })
+        hexs_to_send.append(prepare_hex_to_send(hex))
 
     if(categ):
         socketio.emit('hexs', {
@@ -322,7 +414,9 @@ def handle_hexs(data):
             if hex:
                 if hex.num == 1:
                     db.session.delete(hex.chain)
+                    delete_dir(f"/app/static/uploadedImgs/{hex.categ.name}/{hex.chain.id}")
                 db.session.delete(hex)
+                delete_dir(f"/app/static/uploadedImgs/{hex.categ.name}/{hex.chain.id}/{hex.id}")
         
         data_to_send = {'action': 'delete','body': json.dumps(hexs_to_delete_selectors)}
     
@@ -350,16 +444,7 @@ def get_chains(categ_name):
         chains_to_send.append({
             'id': chain.id,
             'userId': chain.user_id,
-            'hexs': list(map(lambda hex: {
-                "uuid": hex.id,
-                "selector": hex.selector,
-                "num": hex.num,
-                "innerText": hex.inner_text,
-                "chainId": hex.chain_id,
-                "userId": hex.user_id,
-                "username": User.query.get(hex.user_id).username if User.query.get(hex.user_id) else 'none',
-                "creationDate": time.mktime(hex.created_at.timetuple())
-            }, chain.hexs))
+            'hexs': list(map(prepare_hex_to_send, chain.hexs))
         })
 
     return json.dumps({"body": chains_to_send, "userId": userId, "userRole": userRole})
@@ -413,11 +498,11 @@ def delete_comment(id):
     return json.dumps({'success': True})
 @app.route('/chains/<id>/rating')
 def get_rating(id):
-    rating = db.session.execute(func.sum(RatingChange.change)).first().values()[0]
+    rating = db.session.execute(select([func.sum(RatingChange.change)]).where(RatingChange.chain_id == id)).first().values()[0]
     allowed_change = 0
 
     if current_user.is_authenticated and current_user.id:
-        user_change = RatingChange.query.filter_by(user_id=current_user.id).first()
+        user_change = RatingChange.query.filter_by(user_id=current_user.id, chain_id=id).first()
         if user_change:
             allowed_change = -user_change.change
     
@@ -426,7 +511,7 @@ def get_rating(id):
 @app.route('/chains/<id>/rating/change', methods=['POST'])
 @login_required
 def change_rating(id):
-    user_rating_change = RatingChange.query.filter_by(user_id=current_user.id).first()
+    user_rating_change = RatingChange.query.filter_by(user_id=current_user.id, chain_id=id).first()
 
     change_num = 0
     if not user_rating_change:
@@ -441,7 +526,7 @@ def change_rating(id):
     
     db.session.commit()
     
-    rating = db.session.execute(func.sum(RatingChange.change)).first().values()[0]
+    rating = db.session.execute(select([func.sum(RatingChange.change)]).where(RatingChange.chain_id == id)).first().values()[0]
 
     return json.dumps({'success': True, 'num': rating, 'change': change_num})
 

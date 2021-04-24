@@ -1,0 +1,87 @@
+{% extends "layout.html" %}
+
+{% block head %}
+    <script src="{{url_for('static', filename='user/script.js')}}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='field/style.css') }}">
+{% endblock %}
+
+{% block content %}
+    <div class="user-username">
+        <h1 class="user-title">{{ user.username }}</h1>
+        
+    </div>
+    <div class="user-content">
+        <div class="user-info">
+            <div class="user-info-item">
+                <span>Id:</span>&nbsp;
+                <span class="user-id">{{ user.id }}</span>
+            </div>
+            <div class="user-info-item">
+                <span>Email:</span>&nbsp;
+                <span>{{ user.email }}</span>
+            </div>
+            <div class="user-info-item">
+                <span>Chains count:</span>&nbsp;
+                <span>{{ user.chains.count() }}</span>
+            </div>
+            <div class="user-info-item">
+                <span>Hexs count:</span>&nbsp;
+                <span>{{ user.hexs.count() }}</span>
+            </div>
+            <div class="user-info-item">
+                <span>Rating:</span>&nbsp;
+                <div class="user-rating-cont">
+                    <svg class="user-rating-btn rating-plus" style="{% if allowed_change == -1  %} pointer-events: none; opacity: 0; {% endif %} {% if not is_auth %} display: none; {% endif %}">
+                        <line x1="50%" y1="0%" x2="50%" y2="100%"></line><line x1="0%" y1="50%" x2="100%" y2="50%"></line>
+                    </svg>
+                    <span class="user-rating-num" style="{% if not is_auth %} margin:0; {% endif %}">{{ rating }}</span>
+                    <svg class="user-rating-btn rating-minus" style="{% if allowed_change == 1 %} pointer-events: none; opacity: 0; {% endif %} {% if not is_auth %} display: none; {% endif %}">
+                        <line x1="0%" y1="50%" x2="100%" y2="50%"></line>
+                    </svg>
+                </div>
+            </div>
+        </div>
+        <div class="user-chains">
+            {% for chain in user.chains %}
+                <div class="row">
+                    {% for hex in hexs_sort_fn(chain.hexs) %}
+                        <div class="hexagon" id="h{{ hex.num }}">
+                            <div class="hexagon-editedField"><a href='/fields/{{ hex.categ.name }}?{{ hex.selector }}' target="_blank" rel="noopener noreferrer">{{ hex.inner_text }}</a></div>
+                            <div class="hexagon-num">{{ hex.num }}</div>
+                        </div>
+                    {% endfor %}  
+                </div>
+            {% endfor %}  
+        </div>
+    </div>
+    <style>
+        .app{
+            width: 100%;
+            padding: 0 15vw;
+            overflow-y: auto;
+            height: calc(100% - 20px);   
+        }
+        *{
+            user-select: unset;
+        }
+        @media (max-width: 580px){
+            .app{
+                padding: 0;
+            }
+            button{
+                margin: 5px;
+            }
+        }
+        .row{
+            margin: 0;
+            border: none;
+            overflow-x: auto;
+            overflow-y: hidden;
+            width: var(--max-row-w);
+        }
+    </style>
+{% endblock %}
+
+{% block btns %}
+    <button class="back" onclick="window.location.href = `{{ url_for('index') }}`">Back</button>
+{% endblock %}

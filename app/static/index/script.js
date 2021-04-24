@@ -85,7 +85,6 @@ window.addEventListener('load', async () => {
         contextmenu.firstElementChild.onclick = () => {
             showAsk(() => {     
                 fetch('/categ/delete/' + hexagon.innerText, {method: 'DELETE'});
-                window.location.reload();
             });
         }
 
@@ -248,10 +247,12 @@ window.addEventListener('load', async () => {
 
                 if(!res.ok){
                     showModal("Couldn't create category", 'An error occurred while creating the category');
+                    return
                 }else{
                     res = await res.json();
                     if(!res.success){
                         showModal('Error', res.message)
+                        return
                     }
                 }
                 window.location.reload()

@@ -137,16 +137,21 @@ window.addEventListener('load', async () => {
                     
                     const createImages = () => {
                         const images = hexagonAbout.querySelector('.hexagon-about-images');
-                        hexagon.imgs = Array.from(content.querySelectorAll('img')).map(img => img.cloneNode(true));
-                        
                         if(!hexagon.imgs || !hexagon.imgs.length) return;
+
                         let imgsConts = [];
-                        hexagon.imgs.forEach((img, i) => {
+
+                        hexagon.imgs.forEach((imgObj, i) => {
+                            if(!imgObj || !imgObj.url) return;
+                            
                             let imgCont = setClassName(document.createElement('div'), 'hexagon-about-images-imgCont');
+                            const img = document.createElement('img');
+                            img.src = '/' + imgObj.url;
+                            
                             imgCont.append(img);
 
                             imgCont.setAttribute('data-slidr', ''+(i+1));
-                            imgCont.style.setProperty('--num', `'pic. ${i+1}'`)
+                            imgCont.style.setProperty('--num', `'pic. ${i+1}'`);
                             imgsConts.push(imgCont);
                         }); 
 
@@ -248,8 +253,6 @@ window.addEventListener('load', async () => {
                                         content.innerHTML = hexagon.about = aboutContent;
                                         hexagonAbout.append(content);
                                         
-                                        createImages();
-                                        
                                         selectActiveTab();
 
                                         const loading = hexagonAbout.querySelector('.loading');
@@ -274,7 +277,6 @@ window.addEventListener('load', async () => {
                         content.innerHTML = hexagon.about;
                         hexagonAbout.append(content);
                         selectActiveTab();
-                        createImages();
                     }
 
                     fetch(`/chains/${hexagon.chainId}/rating`).then(async rating =>{
@@ -284,6 +286,7 @@ window.addEventListener('load', async () => {
                         } 
                     });
                     createComments();
+                    createImages();
     
                     const deleteObserver = new MutationObserver((mList) => {
                         mList.forEach(mutation => {
@@ -427,21 +430,6 @@ window.addEventListener('load', async () => {
                 return editedField;
             }
 
-            let hexPath = `M 0 ${TRIANGLE_HEIGHT} L ${HEXAGON_WIDTH/2} 0 L ${HEXAGON_WIDTH} ${TRIANGLE_HEIGHT} L ${HEXAGON_WIDTH} ${HEXAGON_HEIGHT-TRIANGLE_HEIGHT} L ${HEXAGON_WIDTH/2} ${HEXAGON_HEIGHT} L 0 ${HEXAGON_HEIGHT-TRIANGLE_HEIGHT} Z`;
-            if(otherSettings.rounded){
-                hexPath = roundPathCorners(hexPath, .05, true);
-            }
-            const setHexVisible = hexagon => {
-                hexagon.style.transition = 'inherit';
-                hexagon.style.opacity = 1;
-                hexagon.classList.add('hexagon-visible');
-                
-                if(hexagon.querySelector('.polygon')) return;
-                
-                hexagon.insertAdjacentHTML('afterbegin', `<svg class="polygon"> 
-                <path d="${hexPath}"></path>
-                </svg>`);
-            }
             function parseHexsFromJson(savedHexs){    
                 if(!savedHexs.length) return [];
         
@@ -472,6 +460,7 @@ window.addEventListener('load', async () => {
                     ['chainId', 'userId', 'username', 'creationDate', 'uuid'].forEach(prop => {
                         hexagon[prop] = hex[prop];
                     });
+                    hexagon.imgs = hex.imgs ? !hex.imgs.length ? [] : hex.imgs : [];
 
                     visibleHexs.push(hexagon);
                     parsedHexs.push(hexagon);   

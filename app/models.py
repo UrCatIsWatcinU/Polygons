@@ -5,6 +5,11 @@ from flask_login import UserMixin
 from datetime import datetime
 
 
+
+@login.user_loader
+def load_user(id):
+    return User.query.get(int(id))
+
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True)
@@ -27,15 +32,16 @@ class User(UserMixin, db.Model):
     def __repr__(self):
         return f'<User {self.username} {self.role_id}>'
 
+class UserRating(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    change = db.Column(db.Integer, default=0)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
+    user_who_change_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
+
 class Role(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), index=True, unique=True)
     users = db.relationship('User', backref='role', lazy='dynamic', cascade="all, delete-orphan")
-
-@login.user_loader
-def load_user(id):
-    return User.query.get(int(id))
-
 
 class Hexagon(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -48,7 +54,13 @@ class Hexagon(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     complaints = db.relationship('Complaint', backref='hex', lazy='dynamic', cascade="all, delete-orphan")
+    imgs = db.relationship('Image', backref='hex', lazy='dynamic', cascade="all, delete-orphan")
 
+class Image(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    hex_id = db.Column(db.Integer,db.ForeignKey('hexagon.id'), index=True)
+    filename = db.Column(db.String(32), default='404.png')
+    
 class Categ(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=True, index=True)
@@ -77,8 +89,8 @@ class Comment(db.Model):
 class RatingChange(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     change = db.Column(db.Integer, default=0)
-    chain_id = db.Column(db.Integer,db.ForeignKey('chain.id'), index=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
+    chain_id = db.Column(db.Integer,db.ForeignKey('chain.id'), index=True)
 
 class Chain(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -87,4 +99,3 @@ class Chain(db.Model):
     hexs = db.relationship('Hexagon', backref='chain', lazy='dynamic', cascade="all, delete-orphan")
     comments = db.relationship('Comment', backref='chain', lazy='dynamic', cascade="all, delete-orphan")
     rating_changes = db.relationship('RatingChange', backref='chain', lazy='dynamic', cascade="all, delete-orphan")
-

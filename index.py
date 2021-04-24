@@ -1,5 +1,5 @@
 from app import app, db, socketio
-from app.models import User, Role, Hexagon, Categ
+from app.models import User, Role, Hexagon, Categ, UserRating
 
 @app.shell_context_processor
 def make_shell_context(): 

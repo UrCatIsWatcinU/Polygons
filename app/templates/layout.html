@@ -56,10 +56,11 @@
     <script src="{{url_for('static', filename='jscolor.js')}}"></script>
     <script src="{{url_for('static', filename='socketio.js')}}"></script>
     <script src="{{url_for('static', filename='fontsloader.js')}}"></script>
+    <script src="{{ url_for('static', filename='rounding.js') }}"></script>
     <script src="{{url_for('static', filename='public.js')}}"></script>
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.png') }}" type="image/png">
     <link rel="stylesheet" href="{{url_for('static', filename='public.css')}}">
-    {% block head%}
+    {% block head %}
     {% endblock %}
     <title>Library Hexagon | {{title}}</title>
 </head>
