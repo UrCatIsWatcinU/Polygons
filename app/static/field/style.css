@@ -152,6 +152,7 @@ html{
   width: 420px;
   min-height: 100px;
   max-height: var(--max-about-height);
+  
   position: absolute;
   top: calc(var(--triangle-height) + 5px);
   z-index: 10;
