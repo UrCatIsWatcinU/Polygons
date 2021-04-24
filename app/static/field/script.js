@@ -275,8 +275,16 @@ window.addEventListener('load', async () => {
                             deleteImgButton.onclick = () => {
                                 fetch(`/hexs/imgs/delete/` + imgObj.uuid, {
                                     method: 'DELETE'
+                                }).then(res => {
+                                    if(!res.ok) return showModal('An error occurred while deleting the image', 'Please try again. Status: ' + res.status);
+
+                                    return res.json();
+                                }).then(deleteImgRes => {
+                                    if(!deleteImgRes.success) return showModal('An error occurred while deleting the image', 'Please try again');
+
+                                    imgCont.remove();
                                 });
-                                imgCont.remove();
+                                
                             }
                         }); 
 
