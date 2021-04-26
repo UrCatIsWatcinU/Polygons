@@ -245,7 +245,7 @@ const main = async () => {
                         settings = JSON.parse(settings.body);
         
                         otherSettings = settings.otherSettings;
-                        colors = settings.colors;
+                        if(settings.colors) colors = settings.colors;
                         hexsColors = settings.hexsColors;
                         font = settings.font;
                     }

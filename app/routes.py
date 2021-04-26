@@ -223,6 +223,15 @@ def set_settings():
     db.session.commit()
     return json.dumps({"success": "true"})
 
+@app.route('/settings/reset')
+@login_required
+def delete_settings():
+    current_user.settings = None
+    db.session.add(current_user)
+    db.session.commit()
+    return json.dumps({"success": "true"})
+
+
 
 
 

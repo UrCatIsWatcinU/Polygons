@@ -383,6 +383,7 @@ window.addEventListener('load', async () => {
                                         bullet.innerHTML = `<circle cx="50" cy="50" r="40"></circle>`;
 
                                         bullet.onclick = () => {
+                                            if(isSlideAnimationActive) return;
                                             images.slideTo(i + 1);
                                             changeActiveBullet(i);
                                         }
@@ -1673,6 +1674,7 @@ window.addEventListener('load', async () => {
                 <div class="btn-cont" style="display: flex;">
                     <button class="save-button">Save</button>
                     <button class="close-button">Close</button>
+                    <button class="reset-button">Reset</button>
                 </div>
                 `;
 
@@ -1867,7 +1869,7 @@ window.addEventListener('load', async () => {
                                 showModal('An error occurred while changing the settings');
                             }else{
                                 window.location.reload();
-                                localStorage.setItem('colors', JSON.stringify(colors || '{}'));
+                                localStorage.setItem('colors', JSON.stringify(colors));
                             } 
                         }else{
                             showModal('An error occurred while changing the settings');
@@ -1877,6 +1879,13 @@ window.addEventListener('load', async () => {
                     }
                 }
                 settingsCont.querySelector('.settings-close').onclick = settingsCont.querySelector('.close-button').onclick = hideModal;
+                settingsCont.querySelector('.reset-button').onclick = () => {
+                    showAsk(() => {
+                        fetch('/settings/reset').then(() => {
+                            window.location.reload();
+                        });
+                    });
+                }
                 
                 jscolor.install();
             }
