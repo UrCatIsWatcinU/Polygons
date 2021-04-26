@@ -192,43 +192,73 @@ html{
 .hexagon-about-images{
   overflow: hidden;
   width: 100%;
-  /* position: relative; */
+  position: relative; 
+}
+.hexagon-about-images-slider{
+  display: flex;
+  overflow-x: scroll;
+  height: 100%;
 }
 .hexagon-about-images-imgCont{
   display: flex;
-  height: calc(var(--imgCont-height) - 20px);
-  max-width: var(--about-image-width);
+  height: 100%;
+  width: 100%;
   justify-content: center;
   align-items: center;
-  padding-bottom: 20px;
   position: relative;
   margin: auto;
-}
-.hexagon-about-images-imgCont::after{
-  content: var(--num);
-  position: absolute;
-  bottom: 0;
-  left: 0;
+  flex: none;
+  overflow: hidden;
+  box-sizing: border-box;
+  padding: calc(var(--size) + var(--arrow-pad) * 2);
+  background-color: var(--body-bgc);
 }
 .hexagon-about-images img{
-  /* width: calc(100% - 20px); */
+  width: 100%;
   max-width: var(--about-image-width);
   max-height: 100%;
   margin: 0;
 }
-.disabled{
-  pointer-events: none !important;
-  opacity: 0 !important; 
+.hexagon-about-images-bullet,
+.hexagon-about-images-switch{
+  width: var(--size);
+  height: var(--size);
+  cursor: pointer;
 }
-.slidr-control .right{
-  height: calc(100% - 50px) !important;
+.hexagon-about-images-switch{
+  fill: var(--main-c);
+  position: absolute;
+  bottom: calc(50% - var(--size) / 2);
 }
-.hexagon-about-content,
-.hexagon-about-images,
-.hexagon-about-comments{
-  display: none;
+.hexagon-about-images-switch-disabled{
+  opacity: .4;
+  cursor: default;
+}
+.hexagon-about-images-prev{
+  left: var(--arrow-pad);
+  transform: rotate(180deg);
+}
+.hexagon-about-images-next{
+  right: var(--arrow-pad);
+}
+.hexagon-about-images-bullets{
+  position: absolute;
+  bottom: var(--arrow-pad);
+  height: var(--size);
+}
+.hexagon-about-images-bullet{
+  stroke: var(--main-c);
+  fill: transparent;
+  stroke-width: .4em;
+  margin-right: var(--arrow-pad);
+}
+.hexagon-about-images-bullet:last-child{
+  margin: 0;
+}
+.hexagon-about-images-active-bullet{
+  fill: var(--main-c);
+}
 
-}
 .hexagon-about-comments-cont{
   padding-bottom: 5px;
   min-height: 50px;
@@ -257,6 +287,7 @@ html{
 }
 .hexagon-about-comment{
   --underline-color: var(--black-c);
+  --size: 1em;
   position: relative;
   margin-bottom: 5px;
 }
@@ -280,7 +311,6 @@ html{
 }
 .hexagon-about-img-close,
 .hexagon-about-comment-close{
-  --size: 1em;
   transform: rotate(45deg);
   stroke: var(--main-c);
   stroke-width: 1.5px;
@@ -291,18 +321,26 @@ html{
   top: 5px;
   right: 0;
 }
+.hexagon-about-img-close{
+  top: var(--arrow-pad);
+  right: var(--arrow-pad);
+}
 
 .hexagon-about-controls{
+  --pad: 4px;
   display: flex;
   justify-content: space-between;
-  margin-bottom: 4px;
-  padding-bottom: 4px;
+  margin-bottom: var(--pad);
+  padding-bottom: var(--pad);
   border-bottom: 1px solid var(--main-c);
 }
+.hexagon-about-controls-btns{
+  display: flex;
+}
 .hexagon-about-btn{
-  --pad: 8px;
-  margin-right: var(--pad);
-  padding-right: var(--pad);
+  height: 100%;
+  padding: 4px 12px;
+  box-sizing: border-box;
   border-right: 1px solid var(--main-c);
   cursor: pointer;
 }

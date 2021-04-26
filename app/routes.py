@@ -330,7 +330,7 @@ def upload_hex_img(id):
     db.session.add(img)
     db.session.commit()
 
-    return json.dumps({'success': True, 'url': img.filename})
+    return json.dumps({'success': True, 'url': img.filename, 'uuid': img.id})
 
 @app.route('/hexs/imgs/delete/<id>', methods=['DELETE'])
 @login_required

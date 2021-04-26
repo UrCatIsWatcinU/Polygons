@@ -99,12 +99,13 @@ window.addEventListener('load', async () => {
 
                     const clearAbouts = evt => {
                         document.querySelectorAll('.hexagon-about').forEach(elem => {
+                            elem.parentElement.about = elem.querySelector('.hexagon-about-content').innerHTML;
                             elem.remove();
                         });
                         document.removeEventListener('mousedown', clearAbouts);
                     }
                     clearAbouts();
-
+    
                     let hexagonAbout = document.createElement('div');
                     hexagonAbout.className = 'hexagon-about';
                     hexagonAbout.innerHTML = `
@@ -118,8 +119,8 @@ window.addEventListener('load', async () => {
                             <span class="hexagon-about-rating-num">0</span>
                         </div>
                     </div>
-                    <div id='slidr-img' class="hexagon-about-images"></div>
-                    <div class="hexagon-about-comments">
+                    <div class="hexagon-about-images" style="display: none"></div>
+                    <div class="hexagon-about-comments" style="display: none">
                         <div class="hexagon-about-comments-cont"></div>
                     </div>`;
                     let activeAboutTab = 'content';
@@ -128,52 +129,175 @@ window.addEventListener('load', async () => {
                             hexagonAbout.querySelector(`.${activeAboutTab}Btn`).style.textDecoration = 'underline';
                         }
                         if(hexagonAbout.querySelector(`.hexagon-about-${activeAboutTab}`)){
-                            hexagonAbout.querySelector(`.hexagon-about-${activeAboutTab}`).style.display = 'unset';
+                            hexagonAbout.querySelector(`.hexagon-about-${activeAboutTab}`).style.display = '';
                         }
                     }
                     
                     const content = document.createElement('div');
                     content.className = 'hexagon-about-content';
+                    content.style.display = 'none';
                     
-                    const createImages = () => {
-                        const images = hexagonAbout.querySelector('.hexagon-about-images');
-                        if(!hexagon.imgs || !hexagon.imgs.length) return;
-
-                        let imgsConts = [];
-
-                        hexagon.imgs.forEach((imgObj, i) => {
-                            if(!imgObj || !imgObj.url) return;
-                            
-                            let imgCont = setClassName(document.createElement('div'), 'hexagon-about-images-imgCont');
-                            const img = document.createElement('img');
-                            img.src = '/' + imgObj.url;
-                            
-                            imgCont.append(img);
-
-                            imgCont.setAttribute('data-slidr', ''+(i+1));
-                            imgCont.style.setProperty('--num', `'pic. ${i+1}'`);
-                            imgsConts.push(imgCont);
-                        }); 
-
-                        images.innerHTML = '';
-                        images.append(...imgsConts);
+                    const createImageCont = (imgObj) => {
+                        if(!imgObj || !imgObj.url) return;
                         
-                        if(hexagon.imgs.length == 1) return
-                        setTimeout(() => {
-                            images.slider =  slidr.create('slidr-img', {
-                                breadcrumbs: true,
-                                controls: 'border',
-                                direction: 'h',
-                                fade: true,
-                                keyboard: true,
-                                overflow: true,
-                                pause: false,
-                                theme: colors.MAIN_C,
-                                timing: { 'linear': '0.4s linear' },
-                                touch: true,
-                                transition: 'linear'
-                            }); 
-                        }, 10)  
+                        let imgCont = setClassName(document.createElement('div'), 'hexagon-about-images-imgCont');
+                        const img = document.createElement('img');
+                        img.setAttribute('draggable', 'false')
+                        img.src = '/' + imgObj.url;
+                        img.uuid = imgObj.uuid;
+
+                        imgCont.append(img);
+                        imgCont.img = img;
+
+                        return imgCont;
+                    }
+                    let isSlideAnimationActive = false;
+                    const startImgsSlider = () => {
+                        const conts = Array.from(hexagonAbout.querySelectorAll('.hexagon-about-images-imgCont'));
+                        const images = hexagonAbout.querySelector('.hexagon-about-images');
+
+                        if(!conts || !conts.length || conts.length == 1) return;
+
+                        const inner = () => {
+                            console.log('create slider');
+                            images.slideTo = (n) => {
+                                const slider = images.firstElementChild;
+                                let neededScroll = 0;
+                                if(typeof n == 'number') {
+                                    neededScroll = slider.offsetWidth * (n-1);
+                                }else if(typeof n == 'string'){
+                                    if(n == 'next'){   
+                                        neededScroll = slider.scrollLeft + slider.offsetWidth;
+                                    }else if(n == 'prev'){
+                                        neededScroll = slider.scrollLeft - slider.offsetWidth;
+                                    }
+                                }
+                                
+                                if(neededScroll > slider.scrollWidth - slider.offsetWidth){
+                                    return Math.round(slider.scrollWidth / slider.offsetWidth) - 1;
+                                } else if(neededScroll < 0){
+                                    return 0;
+                                } 
+
+                                let step = Math.abs(neededScroll - slider.scrollLeft) * .05;
+
+                                const anim = () => {
+                                    isSlideAnimationActive = true;
+                                    if(Math.floor(slider.scrollLeft) == Math.floor(neededScroll)){
+                                        isSlideAnimationActive = false;
+                                        return;
+                                    } 
+                                    if(slider.scrollLeft > neededScroll){
+                                        slider.scrollLeft -= step;
+                                        requestAnimationFrame(anim);
+                                    }else{
+                                        slider.scrollLeft += step;
+                                        requestAnimationFrame(anim);
+                                    }
+                                }
+                                requestAnimationFrame(anim);
+                                
+                                return Math.round((neededScroll - slider.offsetWidth) / slider.offsetWidth) + 1;
+                            }
+
+                            images.style.height = `calc(${(Math.max(...conts.map(cont => cont.img.height)))}px + (${images.imagesArrowsSize} + ${images.arrowPad * 2}px) * 2)`;
+
+                            const bullets = images.querySelector('.hexagon-about-images-bullets');
+                            bullets.style.left = `calc(50% - ${bullets.offsetWidth}px / 2)`;
+                            bullets.firstElementChild.classList.add('hexagon-about-images-active-bullet');
+                        }
+                        if(!areImagesLoaded)hexagonAbout.addEventListener('allImagesLoaded', inner, {once: true});
+                        else inner(); 
+                    }
+                    let areImagesLoaded = false;
+                    const createImages = () => {
+                        const images = hexagonAbout.querySelector('.hexagon-about-images') || setClassName(document.createElement('div'), 'hexagon-about-images');
+                        if(!activeAboutTab == 'images') images.style.display = 'none';
+                        images.innerHTML = '<div class="hexagon-about-images-slider"></div>';
+                        images.arrowPad = 5;
+                        images.imagesArrowsSize = '1em';
+                        images.style.setProperty('--arrow-pad', images.arrowPad + 'px')
+                        images.style.setProperty('--size', images.imagesArrowsSize)
+                        
+                        if(!hexagon.imgs || !hexagon.imgs.length) return;
+                        
+                        let imgsConts = hexagon.imgs.map(createImageCont);
+                        
+                        let notLoadedImgs = hexagon.imgs.map(img => img.uuid);
+                        imgsConts.forEach(imgCont => {
+                            if(imgsConts.length == 1) return;
+                            imgCont.img.onload = () => {
+                                notLoadedImgs = notLoadedImgs.filter(uuid => imgCont.img.uuid != uuid);
+                                if(!notLoadedImgs.length){  
+                                    areImagesLoaded = true;
+
+                                    const bullets = setClassName(document.createElement('div'), 'hexagon-about-images-bullets');
+                                    const nextBtn = setClassName(document.createElementNS('http://www.w3.org/2000/svg', 'svg'), 'hexagon-about-images-switch hexagon-about-images-next');
+                                    const prevBtn = setClassName(document.createElementNS('http://www.w3.org/2000/svg', 'svg'), 'hexagon-about-images-switch hexagon-about-images-prev');
+                                    
+                                    const changeActiveBullet = (n) => {
+                                        Array.from(bullets.children).forEach((btn, i, btns) => {
+                                            btn.classList.remove('hexagon-about-images-active-bullet');
+                                            
+                                            
+                                            if(i == n){
+                                                btn.classList.add('hexagon-about-images-active-bullet');
+                                                prevBtn.classList.remove('hexagon-about-images-switch-disabled');
+                                                nextBtn.classList.remove('hexagon-about-images-switch-disabled');
+
+                                                console.log(i);
+                                                if(i === 0){
+                                                    prevBtn.classList.add('hexagon-about-images-switch-disabled');
+                                                }else if(i == btns.length - 1){
+                                                    nextBtn.classList.add('hexagon-about-images-switch-disabled');
+                                                }
+                                            }
+                                        });
+                                    }
+                                    imgsConts.forEach((cont, i) => {
+                                        const bullet = setClassName(document.createElementNS('http://www.w3.org/2000/svg', 'svg'), 'hexagon-about-images-bullet');
+                                        bullet.setAttribute( 'viewBox', '0 0 100 100');
+                                        bullet.innerHTML = `<circle cx="50" cy="50" r="40"></circle>`;
+
+                                        bullet.onclick = () => {
+                                            images.slideTo(i + 1);
+                                            changeActiveBullet(i);
+                                        }
+
+                                        bullets.append(bullet);
+                                    });
+                                    images.append(bullets);
+
+                                    
+                                    nextBtn.onclick = () => { 
+                                        if(isSlideAnimationActive) return;
+                                        changeActiveBullet(images.slideTo('next')); 
+                                    }
+                                    prevBtn.onclick = () => { 
+                                        if(isSlideAnimationActive) return;
+                                        changeActiveBullet(images.slideTo('prev')); 
+                                    }
+                                    
+                                    [nextBtn, prevBtn].forEach(btn => {
+                                        btn.setAttribute( 'viewBox', '0 0 100 100');
+                                        btn.innerHTML = `<polygon points="0,0 100,50 0,100"></polygon>`;
+
+                                        images.append(btn);
+                                    });
+
+                                    hexagonAbout.dispatchEvent(new Event('allImagesLoaded'));
+                                    if(activeAboutTab == 'images') startImgsSlider();
+                                }
+                            }
+                        });
+                        
+                        if(!hexagonAbout.querySelector('.hexagon-about-images')) hexagonAbout.append(images);
+                        images.firstElementChild.append(...imgsConts);
+
+                        images.addEventListener('wheel', (evt) => {
+                            evt.stopPropagation();
+                            evt.preventDefault();
+                        });
                     }
                     const createComments = async () => {
                         const commentsElem = hexagonAbout.querySelector('.hexagon-about-comments-cont');
@@ -187,7 +311,7 @@ window.addEventListener('load', async () => {
                             let commentElem = setClassName(document.createElement('div'), 'hexagon-about-comment');
                             commentElem.id = 'comment' + comment.id;
 
-                            commentElem.innerHTML = `<a href="/users/${comment.userId}" class="hexagon-about-comment-user">${comment.username}</a>:&nbsp<br>
+                            commentElem.innerHTML = `<a href="/users/${comment.userId}" class="hexagon-about-comment-user">${comment.username}:</a>&nbsp<br>
                             <div class="hexagon-about-comment-body">${comment.body}</div>`;
 
                             if(hexagonAbout.querySelector('.hexagon-about-comments-empty')) hexagonAbout.querySelector('.hexagon-about-comments-empty').remove();
@@ -278,15 +402,15 @@ window.addEventListener('load', async () => {
                         hexagonAbout.append(content);
                         selectActiveTab();
                     }
-
+                    
                     fetch(`/chains/${hexagon.chainId}/rating`).then(async rating =>{
                         if(rating.ok){
                             rating = await rating.json()
-                            hexagonAbout.querySelector('.hexagon-about-rating-num').innerText = rating.num;
+                            hexagonAbout.querySelector('.hexagon-about-rating-num').innerText = rating.num ? rating.num : '0';
                         } 
                     });
-                    createComments();
                     createImages();
+                    createComments();
     
                     const deleteObserver = new MutationObserver((mList) => {
                         mList.forEach(mutation => {
@@ -298,16 +422,6 @@ window.addEventListener('load', async () => {
                     deleteObserver.observe(hexagon, {
                         childList: true
                     });
-
-                    const clearStyles = node => {
-                        if(node.style){
-                            node.style.cssText = '';
-
-                            if(node.hasChildNodes()){
-                                Array.from(node.childNodes).forEach(clearStyles);
-                            }
-                        }
-                    }
                     
                     hexagonAbout.addEventListener('mousedown', evt => {
                         evt.stopPropagation();
@@ -319,7 +433,7 @@ window.addEventListener('load', async () => {
                             hexagonAbout.querySelector(`.${activeAboutTab}Btn`).style.cssText = '';
                         }
                         if(hexagonAbout.querySelector(`.hexagon-about-${activeAboutTab}`)){
-                            hexagonAbout.querySelector(`.hexagon-about-${activeAboutTab}`).style.cssText = '';
+                            hexagonAbout.querySelector(`.hexagon-about-${activeAboutTab}`).style.display = 'none';
                         }
                         activeAboutTab = newTabName;
                         selectActiveTab();
@@ -330,24 +444,12 @@ window.addEventListener('load', async () => {
                             changeTab(btn.classList[1].replace('Btn', ''));
 
                             let currentBlock = hexagonAbout.querySelector(`.hexagon-about-${activeAboutTab}`);
-                            if(activeAboutTab == 'images'){
-                                if(!hexagon.imgs || !hexagon.imgs.length) return;
-                                currentBlock.style.setProperty('--about-image-width', hexagonAbout.offsetWidth <= hexagon.imgs[0].width ? `calc(100% - 20px)` : `100%`);
-                                
-                                currentBlock.style.height = Math.max(...hexagon.imgs.map(img => img.height)) + 'px';
-                                currentBlock.style.setProperty('--imgCont-height', Math.max(...hexagon.imgs.map(img => img.height)) + 'px');
-                                currentBlock.style.display = 'block';
-                                
-                                try{
-                                    if(currentBlock.slider) currentBlock.slider.start('1');
-                                }catch(err){
-                                    console.log(err);
-                                }
+                            if(currentBlock.classList.contains('hexagon-about-images')){
+                                startImgsSlider();
                             }
                         }
                     });
 
-                    
                     hexagon.append(hexagonAbout);
     
                     const checkHexVisibility = (r, h) => document.querySelector(`#r${r} #h${h}`) ? document.querySelector(`#r${r} #h${h}`).classList.contains('hexagon-visible') : false;

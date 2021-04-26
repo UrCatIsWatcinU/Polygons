@@ -1,5 +1,5 @@
 /* user select restricts */
-button, h1, h2,
+button, h1, h2, h3, label,
 .hexagon,
 .hexagon-about-controls{
     user-select: none;
@@ -309,12 +309,13 @@ a{
     cursor: pointer;   
 }
 .categs-plus:hover{
-    transform: scale(1.);
+    transform: scale(1.08);
 }
 .categ{
     opacity: 1;
     transition: inherit;
     filter: drop-shadow(3px 3px 3px rgba(68, 68, 68, 0.3));
+    font-size: 1.3em;
 }
 .categ .hexagon-editedField{
     cursor: pointer;
