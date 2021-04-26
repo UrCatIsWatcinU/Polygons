@@ -253,7 +253,7 @@ window.addEventListener('load', async () => {
                         imgCont.append(img);
                         imgCont.img = img;
 
-                        if(hexagon.userId != user.userId || user.userRole != 2) return imgCont;
+                        if(hexagon.userId != user.userId && user.userRole != 2) return imgCont;
 
                         const deleteImgButton = setClassName(document.createElementNS('http://www.w3.org/2000/svg', 'svg'), 'hexagon-about-img-close');
                         deleteImgButton.innerHTML = '<line x1="50%" y1="0%" x2="50%" y2="100%"></line><line x1="0%" y1="50%" x2="100%" y2="50%"></line>';
