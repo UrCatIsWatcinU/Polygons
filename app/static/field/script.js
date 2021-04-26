@@ -436,7 +436,8 @@ window.addEventListener('load', async () => {
                             commentElem.id = 'comment' + comment.id;
 
                             commentElem.innerHTML = `<a href="/users/${comment.userId}" class="hexagon-about-comment-user">${comment.username}:</a>&nbsp<br>
-                            <div class="hexagon-about-comment-body">${comment.body}</div>`;
+                            <div class="hexagon-about-comment-body"></div>`;
+                            commentElem.querySelector('.hexagon-about-comment-body').innerText = comment.body;
 
                             if(comment.userId == user.userId || user.userRole == 2){
                                 const deleteCommentBtn = setClassName(document.createElementNS('http://www.w3.org/2000/svg', 'svg'), 'hexagon-about-comment-close');
