@@ -1,6 +1,12 @@
 import os
+import json
+import shutil
+import time
+import re
+from threading import Timer
 
 from sqlalchemy.sql.expression import select
+from sqlalchemy.sql.functions import ReturnTypeFromArgs
 from app import app, socketio, db
 from app.forms import LoginForm, RegistrationForm
 from app.models import Chain, Comment, Complaint, Hexagon, Image, RatingChange, User, Categ, UserRating
@@ -13,8 +19,6 @@ from werkzeug.urls import url_parse
 from flask_sqlalchemy import sqlalchemy
 from sqlalchemy import func
 
-import json
-import time
 
 @app.route('/')
 @app.route('/index')
@@ -99,7 +103,18 @@ def delete_categ(name):
 def give_categ_params(categ_name):
     return Categ.query.filter_by(name=categ_name).first_or_404().params
 
-
+@app.route('/categs/names')
+@login_required
+def get_categs_names():
+    if(current_user.role_id != 2):
+        return json.dumps({'success': False})
+    return json.dumps({
+        'success': True,
+        'categs': list(map(lambda categ: {
+            "name": categ.name, 
+            "id": categ.id
+        }, Categ.query.all())) 
+    })
 
 
 @app.route('/registration', methods=['GET', 'POST'])
@@ -249,6 +264,7 @@ def fields(categ_name):
 
 
 
+
 prepare_hex_to_send = lambda hex: {
     "uuid": hex.id,
     "selector": hex.selector,
@@ -260,7 +276,7 @@ prepare_hex_to_send = lambda hex: {
     "creationDate": time.mktime(hex.created_at.timetuple()),
     "imgs": list(map(lambda img: {
         "uuid": img.id,
-        "url": img.filename
+        "url": f"static/uploadedImgs/{hex.categ.name}/{hex.chain.id}/{hex.id}/{img.id}.{img.ext}"
     }, hex.imgs)) if hex.imgs else [],
 }
 @app.route('/hexs/<categ_name>')
@@ -328,9 +344,10 @@ def upload_hex_img(id):
     create_dir(f"/app/static/uploadedImgs/{categ_name}/{hex.chain.id}")
     create_dir(f"/app/static/uploadedImgs/{categ_name}/{hex.chain.id}/{hex.id}")
 
-    img.filename = f"static/uploadedImgs/{categ_name}/{hex.chain.id}/{hex.id}/{img.id}.{file.mimetype.replace('image/', '')}"
+    img.ext = file.mimetype.replace('image/', '')
+    filename = f"static/uploadedImgs/{categ_name}/{hex.chain.id}/{hex.id}/{img.id}.{img.ext}"
     try:
-        file.save(os.getcwd() + "/app/" + img.filename)
+        file.save(os.getcwd() + "/app/" + filename)
     except BaseException:
         db.session.delete(img)
         db.session.commit()
@@ -339,14 +356,14 @@ def upload_hex_img(id):
     db.session.add(img)
     db.session.commit()
 
-    return json.dumps({'success': True, 'url': img.filename, 'uuid': img.id})
+    return json.dumps({'success': True, 'url': filename, 'uuid': img.id})
 
 @app.route('/hexs/imgs/delete/<id>', methods=['DELETE'])
 @login_required
 def delete_hex_img(id):
     img = Image.query.get_or_404(id)
     
-    os.remove(os.getcwd() + '/app/' + img.filename)
+    os.remove(os.getcwd() + '/app/' + f"/app/static/uploadedImgs/{img.hex.categ.name}/{img.hex.chain_id}/{img.hex_id}/{img.id}.{img.ext}")
 
     db.session.delete(img)
     db.session.commit()
@@ -381,6 +398,15 @@ def new_hex(categ_name):
         )
         db.session.add(hex)
         db.session.commit()
+
+        def delete_empty_hex():
+            print('delete')
+            if not str(hex.inner_text):
+                db.session.delete(hex)
+                db.session.commit()
+
+        delete_empty_timer = Timer(1800.0, delete_empty_hex)
+        delete_empty_timer.start()
 
         hexs_to_send.append(prepare_hex_to_send(hex))
 
@@ -424,6 +450,7 @@ def handle_hexs(data):
                 if hex.num == 1:
                     db.session.delete(hex.chain)
                     delete_dir(f"/app/static/uploadedImgs/{hex.categ.name}/{hex.chain.id}")
+    
                 db.session.delete(hex)
                 delete_dir(f"/app/static/uploadedImgs/{hex.categ.name}/{hex.chain.id}/{hex.id}")
         
@@ -539,15 +566,45 @@ def change_rating(id):
 
     return json.dumps({'success': True, 'num': rating, 'change': change_num})
 
-# @app.route('/chains/<id>/delete', methods=['DELETE'])
-# def delete_chain(id):
-#     chain = Chain.query.get_or_404(id)
-#     db.session.delete(chain)
-#     db.session.commit()
-
-#     socketio.emit('hexs', {'categ': chain.categ.name, 'action': 'delete','body': json.dumps(chain.hexs)})
+@app.route('/chains/<chain_id>/move', methods=['POST'])
+@login_required
+def chain_move(chain_id):
+    def get_rId(selector):
+        return int(selector.split(' ')[0].replace('#r', ''))
+    def get_hId(selector):
+        return int(selector.split(' ')[1].replace('#h', ''))
+    def change_hex_selector(selector, r_offset, h_offset):
+        changed_r = re.sub(r"(?<=r)\d", selector, str(get_rId(selector) + r_offset))
+        changed_h = re.sub(r"(?<=h)\d", selector, str(get_hId(selector) + h_offset))
+        return f"#r{changed_r} #h{changed_h}"
     
-#     return json.dumps({'success': True})
+    chain = Chain.query.get_or_404(chain_id)
+
+    categ_id = request.get_json(True)['categId']
+
+    r_offset = request.get_json(True)['newRow'] - get_rId(chain.hexs[0].selector)
+    h_offset = request.get_json(True)['newHex'] - get_hId(chain.hexs[0].selector)
+
+    if(current_user.role_id != 2):
+        return json.dumps({'success': False})
+    old_dir = f"/app/static/uploadedImgs/{chain.categ.name}/{chain.id}"
+
+    chain.categ_id = categ_id
+    for hex in chain.hexs:
+        hex.selector = change_hex_selector(hex.selector, r_offset, h_offset)
+        hex.categ_id = categ_id
+        db.session.add(hex)
+
+    db.session.add(chain)
+    db.session.commit()
+
+    try:
+        shutil.move(os.getcwd() + old_dir, os.getcwd() +  f"/app/static/uploadedImgs/{chain.categ.name}/{chain.id}")
+    except FileNotFoundError:
+        pass
+    except:
+        return '', 500
+    return json.dumps({'success': True})
 
 
 

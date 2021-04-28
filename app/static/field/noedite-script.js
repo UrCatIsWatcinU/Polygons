@@ -403,7 +403,7 @@ window.addEventListener('load', async () => {
                         selectActiveTab();
                     }
                     
-                    fetch(`/chains/${hexagon.chainId}/rating`).then(async rating =>{
+                    fetch(`/chains/${hexagon.chainId}/rating`).then(async rating => {
                         if(rating.ok){
                             rating = await rating.json()
                             hexagonAbout.querySelector('.hexagon-about-rating-num').innerText = rating.num ? rating.num : '0';

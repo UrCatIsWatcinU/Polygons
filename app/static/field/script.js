@@ -1001,6 +1001,7 @@ window.addEventListener('load', async () => {
                 document.documentElement.style.height = (GRID_WIDTH * HEXAGON_WIDTH + HEXAGON_WIDTH/2) + 'px';
             }
 
+            // навигация мышью
             if(!isTouchDevice()){
                 const SLIDE_SPEED = otherSettings.slideSpeed || 1.6;
                 const MIN_CHANGE = 20;
@@ -1014,6 +1015,8 @@ window.addEventListener('load', async () => {
                 let scrollTop;
     
                 slider.addEventListener('mousedown', (e) => {
+                    console.log(e.buttons);
+                    if(e.buttons != 1) return;
                     isDown = true;
                     setTimeout(() => {
                         if(isDown){
@@ -1055,6 +1058,18 @@ window.addEventListener('load', async () => {
             }
             
             let zoomIndex = 1;
+            const changeZoom = (change) => {
+                zoomIndex += change;
+
+                if(zoomIndex <= 0) zoomIndex = 0.01;
+
+                let user = JSON.parse(sessionStorage.getItem('user') || '{}');
+                if(user.userRole != 2 && zoomIndex < 0.5) return;
+
+                hexsCont.style.top = -(hexsCont.offsetHeight - (hexsCont.offsetHeight * zoomIndex)) + 'px';
+                hexsCont.style.left = -(hexsCont.offsetWidth - (hexsCont.offsetWidth * zoomIndex)) + 'px';
+                hexsCont.style.transform = `scale(${zoomIndex})`;
+            }
             document.addEventListener('wheel', evt => {
                 if(otherSettings.ctrlZoom){
                     if(!(evt.metaKey || evt.ctrlKey)) return;
@@ -1066,19 +1081,26 @@ window.addEventListener('load', async () => {
                 document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});
                 evt.preventDefault();
                 
-                zoomIndex += -(evt.deltaY/1260);
-                
-                if(zoomIndex <= 0) zoomIndex = 0.01;
-
-                let user = JSON.parse(sessionStorage.getItem('user') || '{}');
-                if(user.userRole != 2 && zoomIndex < 0.5) return;
-
-                hexsCont.style.top = -(hexsCont.offsetHeight - (hexsCont.offsetHeight * zoomIndex)) + 'px';
-                hexsCont.style.left = -(hexsCont.offsetWidth - (hexsCont.offsetWidth * zoomIndex)) + 'px';
-                hexsCont.style.transform = `scale(${zoomIndex})`;
+                changeZoom(-(evt.deltaY/1260));
             }, {passive: false});
+            const scrollBtns = setClassName(document.createElement('div'), 'scroll-btns');
 
-        
+            const plusScrollBtn = setClassName(document.createElementNS('http://www.w3.org/2000/svg', 'svg'), 'scroll-btn plus-scroll');
+            plusScrollBtn.innerHTML = `<line x1="50%" y1="0%" x2="50%" y2="100%"></line><line x1="0%" y1="50%" x2="100%" y2="50%"></line>`;
+            plusScrollBtn.onclick = () => {
+                changeZoom(.1);
+            }
+            
+            const minusScrollBtn = setClassName(document.createElementNS('http://www.w3.org/2000/svg', 'svg'), 'scroll-btn minus-scroll');
+            minusScrollBtn.onclick = () => {
+                changeZoom(-.1);
+            }
+            minusScrollBtn.innerHTML = `<line x1="0%" y1="50%" x2="100%" y2="50%"></line>`
+            
+            scrollBtns.append(plusScrollBtn, minusScrollBtn);
+            document.body.append(scrollBtns)
+            scrollBtns.style.bottom = `calc(50% - ${scrollBtns.offsetHeight / 2}px)`
+            
             let visibleHexs = [];
             let chains = [];
             const getChain = id => {
@@ -1356,8 +1378,7 @@ window.addEventListener('load', async () => {
                 }else{
                     hexagon.isContextmenu = true;
                     let hexDate = new Date(hexagon.creationDate * 1000);
-                    contextmenu.innerHTML = `
-                    <div style="margin-bottom: 5px;" class="contextmenu-item edit">Edit</div> 
+                    contextmenu.innerHTML = ` 
                     <div style="margin-bottom: 5px;" class="contextmenu-item copy">Copy link</div> 
                     <div class="contextmenu-item complain">Complain</div>
                     <hr class="contextmenu-line">
@@ -1365,15 +1386,17 @@ window.addEventListener('load', async () => {
                     <div style="" class="contextmenu-item contextmenu-info">Date: ${hexDate.toLocaleDateString()}</div>`;
 
                     if(!hexagon.userId || (user.userId == hexagon.userId) || user.userRole == 2){
-                        let menuInfo = contextmenu.innerHTML;
-                        contextmenu.innerHTML = `
-                        <div style="margin-bottom: 5px;" class="delete-btn contextmenu-item">Delete</div>  
-                        ` + menuInfo;
-
+                        contextmenu.insertAdjacentHTML('afterbegin', `
+                        <div style="margin-bottom: 5px;" class="delete-btn contextmenu-item">Delete</div>
+                        <div style="margin-bottom: 5px;" class="contextmenu-item edit">Edit</div>
+                        ${user.userRole == 2 ? '<div style="margin-bottom: 5px;" class="move-btn contextmenu-item">Move</div>' : ''}`);
                     }
+
                     
                     if(user.userRole == 2){
-                        contextmenu.innerHTML += `<div class="contextmenu-item contextmenu-info">Chain: ${hexagon.chainId}</div>`;
+                        contextmenu.innerHTML += `<div style="margin: 5px 0;" class="contextmenu-item contextmenu-info">Chain: ${hexagon.chainId}</div>`;
+                        contextmenu.innerHTML += `<div style="margin-bottom: 5px;" class="contextmenu-item contextmenu-info">Row: ${hexagon.rowId}</div>`;
+                        contextmenu.innerHTML += `<div class="contextmenu-item contextmenu-info">Column: ${hexagon.id.replace('h', '')}</div>`;
                     }
                     if(contextmenu.querySelector('.delete-btn')){
                         contextmenu.querySelector('.delete-btn').onclick = () => {
@@ -1392,7 +1415,67 @@ window.addEventListener('load', async () => {
                                     data: JSON.stringify(deletedHexs)
                                 });
                                 
-                            }, '');
+                            }, 'If you delete this hexagon, all the following hexagons in the chain will be deleted along with it');
+                        }
+                    }
+                    if(contextmenu.querySelector('.move-btn')){
+                        contextmenu.querySelector('.move-btn').onclick = () => {
+                            fetch('/categs/names').then(async res => {
+                                if(!res.ok) return showModal('An error occurred while loading category names', 'Try later');
+                                
+                                res = await res.json();
+                                if(!res.success) return showModal('An error occurred while loading category names', 'Try later');
+                                const categNamesStr = res.categs.map(categ => `<option ${categ.name == document.title ? 'disabled' : ''} value="${categ.id}|${categ.name}">id: ${categ.id} | name: ${categ.name}</option>`).join('');
+
+                                let moveModal = showModal('', '', true);
+                                moveModal.onclick = null;
+                                moveModal = moveModal.firstElementChild;
+                                moveModal.classList.add('moveModal');
+                                moveModal.innerHTML = `
+                                <h1 class="moveModal-title">Move</h1>
+                                <svg class="moveModal-close"><line x1="50%" y1="0%" x2="50%" y2="100%"></line><line x1="0%" y1="50%" x2="100%" y2="50%"></line></svg>
+                                <div class="moveModal-select">
+                                    <div>
+                                        <label for="moveModal-text">Categ</label> 
+                                        <br> 
+                                        <select id="moveModal-text" class="moveModal-select">
+                                            ${categNamesStr}
+                                        </select>
+                                    </div>
+                                    <div> 
+                                        <label for="moveModal-row">Row</label> 
+                                        <br> 
+                                        <input type="number" min="0" id="moveModal-row" value="${getChain(hexagon.chainId).hexs[0].rowId}">
+                                        <br>
+                                        <label for="moveModal-hex">Column</label> 
+                                        <br> 
+                                        <input type="number" min="0" id="moveModal-hex" value="${getChain(hexagon.chainId).hexs[0].id.replace('h', '')}">
+                                    </div>
+                                </div>
+                                <div class="btn-cont" style="display: flex;">
+                                    <button class="move-button">Move</button>
+                                    <button class="close-button">Close</button>
+                                </div>
+                                `;
+                                moveModal.querySelector('.move-button').onclick = () => {
+                                    const selectedCategStr = moveModal.querySelector('#moveModal-text').value;
+                                    fetch(`/chains/${hexagon.chainId}/move`, {
+                                        method: 'POST',
+                                        body: JSON.stringify({
+                                            categId: selectedCategStr.split('|')[0],
+                                            newRow: +document.querySelector('#moveModal-row').value,
+                                            newHex: +document.querySelector('#moveModal-hex').value,
+
+                                        })
+                                    }).then(res => {
+                                        if(!res.ok) return showModal('An error occurred while moving the chain', 'Please try again. Status: ' + res.status);
+
+                                        window.location.href = '/fields/' + selectedCategStr.split('|')[1] + '?' + giveHexSelector(hexagon);
+                                    });
+                                }
+
+                                moveModal.querySelector('.moveModal-close').onclick = moveModal.querySelector('.close-button').onclick = hideModal;
+                            });
                         }
                     }
                     
@@ -1444,8 +1527,10 @@ window.addEventListener('load', async () => {
                         complaint.querySelector('.close-button').onclick = hideModal;
                         complaint.querySelector('.complaint-close').onclick = hideModal;
                     }
-                    contextmenu.querySelector('.edit').onclick = () => {
-                        hexagon.dispatchEvent(new Event('dblclick'));
+                    if(contextmenu.querySelector('.edit')){
+                        contextmenu.querySelector('.edit').onclick = () => {
+                            hexagon.dispatchEvent(new Event('dblclick'));
+                        }
                     }
                     contextmenu.querySelector('.copy').onclick = () => {
                         let link = window.location.href + '?' + giveHexSelector(hexagon).replace(/\s+/, '');
@@ -1622,6 +1707,7 @@ window.addEventListener('load', async () => {
                     userRole: res.userRole
                 }));
 
+                console.log(res.body);
                 for(let chain of res.body){
                     chain.hexs = parseHexsFromJson(chain.hexs); 
                     chains.push(chain)

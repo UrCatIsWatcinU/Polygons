@@ -20,6 +20,23 @@ html{
   /* overflow-y: hidden; */
   white-space: nowrap;
   display: block;
+  position: relative;
+}
+.scroll-btns{
+  position: fixed;
+  left: 10px;
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+}
+.scroll-btn{
+  --size: 2em;
+  height: var(--size);
+  width: var(--size);
+  stroke-width: 1.5px;
+  stroke: var(--main-c);
+  margin: 10px;
+  cursor: pointer;
 }
 
 .hexsCont{
@@ -80,7 +97,7 @@ html{
 }
 .founded-polygon{
   overflow: visible;
-  z-index: 10;
+  z-index: 9;
   filter: brightness(120%);
 }
 
@@ -409,6 +426,18 @@ html{
 }
 
 
+.moveModal{
+  position: relative;
+}
+
+.moveModal-title{
+  margin-bottom: 15px;
+}
+.moveModal-select{
+  margin-bottom: 10px;
+}
+
+
 
 
 .settings{
@@ -429,6 +458,7 @@ html{
   overflow: auto;
   margin-bottom: 10px;
 }
+.moveModal-close,
 .complaint-close,
 .settings-close{
   transform: rotate(45deg);
@@ -438,6 +468,9 @@ html{
   top: 20px;
   right: 20px;
   z-index: 12;
+  stroke: var(--main-c);
+  stroke-width: 1px;
+  cursor: pointer;
 }
 .settings-grid{
   display: grid;  

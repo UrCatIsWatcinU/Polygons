@@ -64,9 +64,10 @@ body {
     background-color: var(--body-bgc);
     border-radius: 10px;
     padding: 20px;
+    max-width: 90vw;
+    max-width: 40%;
 }
 .modal-content{
-    width: 40%;
     height: 40%;
 }
 .ask-title,
@@ -76,8 +77,8 @@ body {
     height: max-content;
     white-space: pre-wrap;
 }
+.ask-body,
 .modal-body{
-    width: max-content;
     white-space: pre-wrap;
 }
 .new-categ-modal{
@@ -132,7 +133,7 @@ a{
 
 .contextmenu{
     position: fixed;
-    z-index: 9;
+    z-index: 10;
     padding: 7.5px;
     font-size: .9em;
 }
@@ -315,10 +316,6 @@ a{
     opacity: 1;
     transition: inherit;
     filter: drop-shadow(3px 3px 3px rgba(68, 68, 68, 0.3));
-    font-size: 1.3em;
-}
-.categ .hexagon-editedField{
-    cursor: pointer;
 }
 .categ .hexagon-editedField:focus{
     top: 0;
@@ -342,9 +339,10 @@ a{
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 1.05em;
     color: inherit;
     height: calc(var(--body-height) - 10px);
+    font-size: 1.3em;
+    cursor: pointer;
 }
 
 
