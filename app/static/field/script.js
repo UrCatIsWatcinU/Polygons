@@ -1014,8 +1014,7 @@ window.addEventListener('load', async () => {
                 let startY;
                 let scrollTop;
     
-                slider.addEventListener('mousedown', (e) => {
-                    console.log(e.buttons);
+                slider.addEventListener('mousedown', (e) => {   
                     if(e.buttons != 1) return;
                     isDown = true;
                     setTimeout(() => {
@@ -1470,7 +1469,7 @@ window.addEventListener('load', async () => {
                                     }).then(res => {
                                         if(!res.ok) return showModal('An error occurred while moving the chain', 'Please try again. Status: ' + res.status);
 
-                                        window.location.href = '/fields/' + selectedCategStr.split('|')[1] + '?' + giveHexSelector(hexagon);
+                                        window.location.href = '/fields/' + selectedCategStr.split('|')[1] + '?' + `#r${document.querySelector('#moveModal-row').value} #h${document.querySelector('#moveModal-hex').value}`;
                                     });
                                 }
 
