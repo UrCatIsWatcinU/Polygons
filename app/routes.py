@@ -5,12 +5,10 @@ import time
 import re
 from threading import Timer
 
-from sqlalchemy.sql.expression import select
-from sqlalchemy.sql.functions import ReturnTypeFromArgs
 from app import app, socketio, db
 from app.forms import LoginForm, RegistrationForm
 from app.models import Chain, Comment, Complaint, Hexagon, Image, RatingChange, User, Categ, UserRating
-from app.lib import allowed_file, create_dir, delete_dir
+from app.lib import create_dir, delete_dir
 
 from flask import render_template, redirect, url_for, request
 from flask_socketio import emit
@@ -18,6 +16,7 @@ from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 from flask_sqlalchemy import sqlalchemy
 from sqlalchemy import func
+from sqlalchemy.sql.expression import select
 
 
 @app.route('/')
@@ -287,7 +286,6 @@ def get_hexs(categ_name):
         userId = current_user.id
         userRole = current_user.role_id
 
-    # hexs = categ.hexs.all()
     hexs_to_send = []
     if categ_name == 'all':
         all_hexs = Hexagon.query.all()
@@ -331,10 +329,12 @@ def upload_hex_img(id):
         return json.dumps({'success': False})
 
     file = request.files['file']
-    if not file.filename or not allowed_file(file.filename):
-        return json.dumps({'success': False})
     
     img = Image(hex_id=id)
+    img.ext = file.mimetype.replace('image/', '')
+
+    if(not img.ext in ['png', 'jpg', 'jpeg', 'gif']): # TODO: создать таблицу с расширениями файлов
+        return json.dumps({'success': False})
     db.session.add(img)
     db.session.commit()
 
@@ -344,7 +344,6 @@ def upload_hex_img(id):
     create_dir(f"/app/static/uploadedImgs/{categ_name}/{hex.chain.id}")
     create_dir(f"/app/static/uploadedImgs/{categ_name}/{hex.chain.id}/{hex.id}")
 
-    img.ext = file.mimetype.replace('image/', '')
     filename = f"static/uploadedImgs/{categ_name}/{hex.chain.id}/{hex.id}/{img.id}.{img.ext}"
     try:
         file.save(os.getcwd() + "/app/" + filename)
@@ -353,9 +352,6 @@ def upload_hex_img(id):
         db.session.commit()
         return json.dumps({'success': False})
 
-    db.session.add(img)
-    db.session.commit()
-
     return json.dumps({'success': True, 'url': filename, 'uuid': img.id})
 
 @app.route('/hexs/imgs/delete/<id>', methods=['DELETE'])
@@ -363,7 +359,7 @@ def upload_hex_img(id):
 def delete_hex_img(id):
     img = Image.query.get_or_404(id)
     
-    os.remove(os.getcwd() + '/app/' + f"/app/static/uploadedImgs/{img.hex.categ.name}/{img.hex.chain_id}/{img.hex_id}/{img.id}.{img.ext}")
+    os.remove(os.getcwd() + f"/app/static/uploadedImgs/{img.hex.categ.name}/{img.hex.chain_id}/{img.hex_id}/{img.id}.{img.ext}")
 
     db.session.delete(img)
     db.session.commit()

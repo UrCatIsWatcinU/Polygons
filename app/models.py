@@ -70,6 +70,7 @@ class Categ(db.Model):
     hexs = db.relationship('Hexagon', backref='categ', lazy='dynamic', cascade="all, delete-orphan")
     chains = db.relationship('Chain', backref='categ', lazy='dynamic', cascade="all, delete-orphan")
 
+# таблица для мохранения изменений пользователей, чтобы админ мог откатывать, пока что не нужна
 class Change(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     body = db.Column(db.String(400), index=True)

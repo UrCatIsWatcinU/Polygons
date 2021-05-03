@@ -124,7 +124,7 @@ window.addEventListener('load', async () => {
 
         categ.addEventListener('click', () => {
             if(!isHexagonActive){
-                window.location.href = '/fields/' + categ.innerText;
+                window.location.href = '/fields/' + categ.innerText.trim();
             }
         })
     })
