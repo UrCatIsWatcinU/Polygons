@@ -84,15 +84,16 @@ window.addEventListener('load', async () => {
                     hexagon.classList.remove('hexagon-active');
                     hexagon.classList.remove('hexagon-first');
                     hexagon.style.setProperty('--bgc', 'transparent');
-                    
-                    if(hexagon.querySelector('.hexagon-editedField')){
-                        hexagon.querySelector('.hexagon-editedField').innerText = '';
-                        hexagon.querySelector('.hexagon-editedField').remove();
-                    }
-                    if(hexagon.querySelector('.hexagon-about')){
-                        hexagon.querySelector('.hexagon-about').remove();
-                    }   
+
+                    ['.hexagon-editedField', '.hexagon-about', '.polygon'].forEach(s => {
+                        if(hexagon.querySelector(s)){
+                            if(s.innerText) s.innerText = '';
+                            hexagon.querySelector(s).remove();
+                        }
+                    });  
+
                     hexagon.about = '';
+                    hexagon.images = [];
                     
                     let chain = getChain(hexagon.chainId);
                     if(+hexagon.querySelector('.hexagon-num').innerText === 1){
@@ -249,11 +250,16 @@ window.addEventListener('load', async () => {
                         img.setAttribute('draggable', 'false')
                         img.src = '/' + imgObj.url;
                         img.uuid = imgObj.uuid;
+                        img.isBG = imgObj.isBG;
 
                         imgCont.append(img);
                         imgCont.img = img;
+                        img.onerror = () => {
+                            imgCont.remove();
+                            hexagon.imgs = hexagon.imgs.filter(i => i.uuid != img.uuid);
+                        }
 
-                        if(hexagon.userId != user.userId && user.userRole != 2) return imgCont;
+                        if(hexagon.userId != user.userId && user.userRole != 2 || img.isBG) return imgCont;
 
                         const deleteImgButton = setClassName(document.createElementNS('http://www.w3.org/2000/svg', 'svg'), 'hexagon-about-img-close');
                         deleteImgButton.innerHTML = '<line x1="50%" y1="0%" x2="50%" y2="100%"></line><line x1="0%" y1="50%" x2="100%" y2="50%"></line>';
@@ -412,7 +418,7 @@ window.addEventListener('load', async () => {
                                     hexagonAbout.dispatchEvent(new Event('allImagesLoaded'));
                                     if(activeAboutTab == 'images') startImgsSlider();
                                 }
-                            }
+                            } 
                         });
                         
                         if(!hexagonAbout.querySelector('.hexagon-about-images')) hexagonAbout.append(images);
@@ -566,6 +572,7 @@ window.addEventListener('load', async () => {
                         hexagonAbout.addEventListener('dragover', (evt) => {
                             if(activeAboutTab != 'images') return;
                             evt.preventDefault();
+                            evt.stopImmediatePropagation();
                             hexagonAbout.classList.add('hexagon-about-drag');
                         }, {passive: false});
                         
@@ -580,6 +587,7 @@ window.addEventListener('load', async () => {
                             const EXTENTIONS = ['png', 'jpg', 'jpeg', 'gif'];
     
                             evt.preventDefault();
+                            evt.stopImmediatePropagation();
     
                             if(evt.dataTransfer.files.length > 1){
                                 showModal('Drag one file');
@@ -870,6 +878,13 @@ window.addEventListener('load', async () => {
                 return editedField;
             }
             
+            const createBgHex = (hexagon, url) => {
+                hexagon.querySelector('.polygon').innerHTML = `
+                <mask id="hexagon-bgImg-mask">
+                    <path fill="#fff" d="${hexPath}"></path>
+                </mask>
+                <image mask="url(#hexagon-bgImg-mask)" href="/${url}" preserveAspectRatio="xMidYMid slice" width="100%" height="100%"></image>`;
+            }
             function parseHexsFromJson(savedHexs){    
                 if(!savedHexs.length) return [];
         
@@ -897,6 +912,10 @@ window.addEventListener('load', async () => {
                         hexagon[prop] = hex[prop];
                     });
                     hexagon.imgs = hex.imgs ? !hex.imgs.length ? [] : hex.imgs : [];
+
+                    if(hex.BGImg){
+                        createBgHex(hexagon, hex.BGImg);
+                    }
 
                     visibleHexs.push(hexagon);
                     parsedHexs.push(hexagon);   
@@ -1603,9 +1622,7 @@ window.addEventListener('load', async () => {
                     if(user.userId != hexagon.userId && user.userRole != 2) return;     
                     let editedField = createEditedField(hexagon);
                     evt.preventDefault();
-                    if(!hexagon.classList.contains('hexagon-visible')){
-                        return
-                    }
+                    if(!hexagon.classList.contains('hexagon-visible')) return;
                     hexagon.isFocused = true;
                     hexagon.classList.add('hexagon-active');   
                     
@@ -1613,6 +1630,72 @@ window.addEventListener('load', async () => {
                     editedField.setAttribute('contenteditable','true');
                     editedField.focus();
                     
+                }
+
+                const canCreateBgHex = () => hexagon.classList.contains('hexagon-visible') && !hexagon.querySelector('.hexagon-about');
+                hexagon.addEventListener('dragover', (evt) => {
+                    if(user.userId != hexagon.userId && user.userRole != 2) return;     
+                    evt.preventDefault();
+                    console.log(hexagon.querySelector('.hexagon-about'))
+                    if(!canCreateBgHex()) return;
+                    hexagon.classList.add('hexagon-drag');
+                }, {passive: false, capture: true});
+                
+                hexagon.addEventListener('drop', (evt) => {
+                    hexagon.classList.remove('hexagon-drag');
+                    if(!window.FileReader){
+                        showModal('Cannot upload file', 'Your browser don\'t support files uploads');
+                        return;
+                    }
+                    const MAX_SIZE = 3000000;
+                    const EXTENTIONS = ['png', 'jpg', 'jpeg', 'gif'];
+
+                    if(user.userId != hexagon.userId && user.userRole != 2) return;     
+                    evt.preventDefault();
+                    if(!canCreateBgHex()) return;
+
+                    if(evt.dataTransfer.files.length > 1){
+                        showModal('Drag one file');
+                        return;
+                    }
+                    
+                    let file = evt.dataTransfer.files[0];
+                    
+                    if(!EXTENTIONS.map(ext => `image/${ext}`).includes(file.type)){
+                        showModal('Wrong file format', `Please drag file with one of these extentions:\n ${EXTENTIONS.map(ext => ext.toUpperCase()).join(', ')}`);
+                        return;
+                    }
+                    if(file.size > MAX_SIZE){
+                        showModal('Big file', 'Max file size is ' + MAX_SIZE / 1000000 + 'MB')
+                    }
+
+                    const fileForm = new FormData();
+                    file.arrayBuffer().then(result => {
+                        const blob = new Blob([result], {type: file.type});
+                        fileForm.append('file', blob, 'BG');
+
+                        fetch(`/hexs/${hexagon.uuid}/imgs/upload`, {
+                            method: 'POST',
+                            body: fileForm
+                        }).then(res => {
+                            if(!res.ok){
+                                showModal('An error occurred while uploading the image', 'Please try again. Status: ' + res.status);
+                            }else{
+                                return res.json()
+                            }
+                        }).then(imgUploadRes => {
+                            if(!imgUploadRes || !imgUploadRes.success) return showModal('An error occurred while uploading the image', 'Please try again');
+                            delete imgUploadRes.success;
+
+                            hexagon.imgs.push(imgUploadRes);
+
+                            createBgHex(hexagon, imgUploadRes.url);
+                        });
+                    }); 
+                }, {passive: false});
+                
+                hexagon.ondragleave = () => {
+                    hexagon.classList.remove('hexagon-drag');
                 }
 
                 for(let setting in otherSettings){

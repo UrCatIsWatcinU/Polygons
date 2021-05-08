@@ -38,14 +38,14 @@ window.addEventListener('load', async () => {
                     hexagon.classList.remove('hexagon-first');
                     hexagon.style.setProperty('--bgc', 'transparent');
                     
-                    if(hexagon.querySelector('.hexagon-editedField')){
-                        hexagon.querySelector('.hexagon-editedField').innerText = '';
-                        hexagon.querySelector('.hexagon-editedField').remove();
-                    }
-                    if(hexagon.querySelector('.hexagon-about')){
-                        hexagon.querySelector('.hexagon-about').remove();
-                    }   
-                    hexagon.about = ''
+                    ['.hexagon-editedField', '.hexagon-about', '.polygon'].forEach(s => {
+                        if(hexagon.querySelector(s)){
+                            if(s.innerText) s.innerText = '';
+                            hexagon.querySelector(s).remove();
+                        }
+                    });
+                    hexagon.about = '';
+                    hexagon.images = [];
                     
                     let chain = getChain(hexagon.chainId);
                     if(+hexagon.querySelector('.hexagon-num').innerText === 1){
@@ -145,6 +145,10 @@ window.addEventListener('load', async () => {
                         img.setAttribute('draggable', 'false')
                         img.src = '/' + imgObj.url;
                         img.uuid = imgObj.uuid;
+                        img.onerror = () => {
+                            imgCont.remove();
+                            hexagon.imgs = hexagon.imgs.filter(i => i.uuid != img.uuid);
+                        }
 
                         imgCont.append(img);
                         imgCont.img = img;
@@ -532,6 +536,13 @@ window.addEventListener('load', async () => {
                 return editedField;
             }
 
+            const createBgHex = (hexagon, url) => {
+                hexagon.querySelector('.polygon').innerHTML = `
+                <mask id="hexagon-bgImg-mask">
+                    <path fill="#fff" d="${hexPath}"></path>
+                </mask>
+                <image mask="url(#hexagon-bgImg-mask)" href="/${url}" preserveAspectRatio="xMidYMid slice" width="100%" height="100%"></image>`;
+            }
             function parseHexsFromJson(savedHexs){    
                 if(!savedHexs.length) return [];
         
@@ -563,6 +574,10 @@ window.addEventListener('load', async () => {
                         hexagon[prop] = hex[prop];
                     });
                     hexagon.imgs = hex.imgs ? !hex.imgs.length ? [] : hex.imgs : [];
+
+                    if(hex.BGImg){
+                        createBgHex(hexagon, hex.BGImg);
+                    }
 
                     visibleHexs.push(hexagon);
                     parsedHexs.push(hexagon);   

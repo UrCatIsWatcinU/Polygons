@@ -95,7 +95,7 @@ html{
 .hexagon-visible .hexagon-num{
   opacity: 1;
 }
-.founded-polygon{
+.founded-polygon, .hexagon-drag{
   overflow: visible;
   z-index: 9;
   filter: brightness(120%);
@@ -443,6 +443,7 @@ html{
 .settings{
   height: 70%;
   width: unset;
+  max-width: unset;
   overflow: hidden;
   display: flex;
   flex-direction: column;

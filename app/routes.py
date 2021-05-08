@@ -273,9 +273,11 @@ prepare_hex_to_send = lambda hex: {
     "userId": hex.user_id,
     "username": User.query.get(hex.user_id).username if User.query.get(hex.user_id) else 'none',
     "creationDate": time.mktime(hex.created_at.timetuple()),
+    'BGImg': hex.BG_img,
     "imgs": list(map(lambda img: {
         "uuid": img.id,
-        "url": f"static/uploadedImgs/{hex.categ.name}/{hex.chain.id}/{hex.id}/{img.id}.{img.ext}"
+        "url": f"static/uploadedImgs/{hex.categ.name}/{hex.chain.id}/{hex.id}/{img.id}.{img.ext}",
+        "isBG": img.is_BG
     }, hex.imgs)) if hex.imgs else [],
 }
 @app.route('/hexs/<categ_name>')
@@ -345,6 +347,17 @@ def upload_hex_img(id):
     create_dir(f"/app/static/uploadedImgs/{categ_name}/{hex.chain.id}/{hex.id}")
 
     filename = f"static/uploadedImgs/{categ_name}/{hex.chain.id}/{hex.id}/{img.id}.{img.ext}"
+    if 'BG' in file.filename:
+        hex.BG_img = filename
+        for img in hex.imgs:
+            img.is_BG = False
+            db.session.add(img)
+
+        img.is_BG = True
+        db.session.add_all([hex, img])
+        db.session.commit()
+
+
     try:
         file.save(os.getcwd() + "/app/" + filename)
     except BaseException:
@@ -352,7 +365,7 @@ def upload_hex_img(id):
         db.session.commit()
         return json.dumps({'success': False})
 
-    return json.dumps({'success': True, 'url': filename, 'uuid': img.id})
+    return json.dumps({'success': True, 'url': filename, 'uuid': img.id, "isBG": img.is_BG})
 
 @app.route('/hexs/imgs/delete/<id>', methods=['DELETE'])
 @login_required

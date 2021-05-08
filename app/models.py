@@ -20,8 +20,8 @@ class User(UserMixin, db.Model):
     
     hexs = db.relationship('Hexagon', backref='author', lazy='dynamic')
     chains = db.relationship('Chain', backref='author', lazy='dynamic')
-    complaints = db.relationship('Complaint', backref='author', lazy='dynamic')
-    comments = db.relationship('Comment', backref='author', lazy='dynamic')
+    complaints = db.relationship('Complaint', backref='author', lazy='dynamic', cascade="all, delete-orphan")
+    comments = db.relationship('Comment', backref='author', lazy='dynamic', cascade="all, delete-orphan")
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -53,6 +53,7 @@ class Hexagon(db.Model):
     about = db.Column(db.Text)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    BG_img = db.Column(db.String(100), default='')
     complaints = db.relationship('Complaint', backref='hex', lazy='dynamic', cascade="all, delete-orphan")
     imgs = db.relationship('Image', backref='hex', lazy='dynamic', cascade="all, delete-orphan")
 
@@ -60,6 +61,7 @@ class Image(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     hex_id = db.Column(db.Integer,db.ForeignKey('hexagon.id'), index=True)
     ext = db.Column(db.String(5), default='.png')
+    is_BG = db.Column(db.Boolean, default=False)
     
 class Categ(db.Model):
     id = db.Column(db.Integer, primary_key=True)
