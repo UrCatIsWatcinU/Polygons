@@ -15,6 +15,18 @@ function setClassName(elem, classList){
 function isTouchDevice() {
     return ('ontouchstart' in window);
 } 
+function isIOS() {
+    return [
+      'iPad Simulator',
+      'iPhone Simulator',
+      'iPod Simulator',
+      'iPad',
+      'iPhone',
+      'iPod'
+    ].includes(navigator.platform)
+    // iPad on iOS 13 detection
+    || (navigator.userAgent.includes("Mac") && "ontouchend" in document)
+}
 
 
 const setHexVisible = hexagon => {
@@ -223,6 +235,8 @@ let HEXAGON_WIDTH = HEXAGON_HEIGHT;
 let hexPath = `M 0 ${TRIANGLE_HEIGHT} L ${HEXAGON_WIDTH/2} 0 L ${HEXAGON_WIDTH} ${TRIANGLE_HEIGHT} L ${HEXAGON_WIDTH} ${HEXAGON_HEIGHT-TRIANGLE_HEIGHT} L ${HEXAGON_WIDTH/2} ${HEXAGON_HEIGHT} L 0 ${HEXAGON_HEIGHT-TRIANGLE_HEIGHT} Z`;
 
 const main = async () => {
+    if(isIOS()) document.body.classList.add('ios')
+    
     let mainLogo = document.querySelector('.header-img.big');
     let smallLogo = document.querySelector('.header-img.small');
     if(mainLogo && smallLogo){

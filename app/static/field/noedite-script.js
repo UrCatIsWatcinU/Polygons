@@ -459,67 +459,69 @@ window.addEventListener('load', async () => {
                     const checkHexVisibility = (r, h) => document.querySelector(`#r${r} #h${h}`) ? document.querySelector(`#r${r} #h${h}`).classList.contains('hexagon-visible') : false;
                     let rId = hexagon.rowId;
                     let hId = +hexagon.id.replace('h', '');
-    
-                    if(checkHexVisibility(rId, hId + 1) && checkHexVisibility(rId, hId - 1)){
-                        if(hexagon.parentElement.classList.contains('row-moved')){
-                            if(checkHexVisibility(rId - 1 , hId) || checkHexVisibility(rId - 1, hId + 1)){
-                                hexagonAbout.style.top = (HEXAGON_HEIGHT + 5) + 'px';
-                            }else if(checkHexVisibility(rId + 1, hId) || checkHexVisibility(rId + 1, hId + 1)){
-                                hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5) + 'px';
+                    
+                    if(!isIOS()){
+                        if(checkHexVisibility(rId, hId + 1) && checkHexVisibility(rId, hId - 1)){
+                            if(hexagon.parentElement.classList.contains('row-moved')){
+                                if(checkHexVisibility(rId - 1 , hId) || checkHexVisibility(rId - 1, hId + 1)){
+                                    hexagonAbout.style.top = (HEXAGON_HEIGHT + 5) + 'px';
+                                }else if(checkHexVisibility(rId + 1, hId) || checkHexVisibility(rId + 1, hId + 1)){
+                                    hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5) + 'px';
+                                }else{
+                                    hexagonAbout.style.top = (HEXAGON_HEIGHT + 5) + 'px';
+                                }
                             }else{
-                                hexagonAbout.style.top = (HEXAGON_HEIGHT + 5) + 'px';
+                                if(checkHexVisibility(rId - 1 , hId) || checkHexVisibility(rId - 1, hId - 1)){
+                                    hexagonAbout.style.top = (HEXAGON_HEIGHT + 5) + 'px';
+                                }else if(checkHexVisibility(rId + 1, hId) || checkHexVisibility(rId + 1, hId - 1)){
+                                    hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5) + 'px';
+                                }else{
+                                    hexagonAbout.style.top = (HEXAGON_HEIGHT + 5) + 'px';
+                                }
                             }
+                        }else if(checkHexVisibility(rId, hId + 1)){
+                            hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
+                        }else if(checkHexVisibility(rId, hId - 1)){
+                            hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
                         }else{
-                            if(checkHexVisibility(rId - 1 , hId) || checkHexVisibility(rId - 1, hId - 1)){
-                                hexagonAbout.style.top = (HEXAGON_HEIGHT + 5) + 'px';
-                            }else if(checkHexVisibility(rId + 1, hId) || checkHexVisibility(rId + 1, hId - 1)){
-                                hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5) + 'px';
-                            }else{
-                                hexagonAbout.style.top = (HEXAGON_HEIGHT + 5) + 'px';
-                            }
-                        }
-                    }else if(checkHexVisibility(rId, hId + 1)){
-                        hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
-                    }else if(checkHexVisibility(rId, hId - 1)){
-                        hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
-                    }else{
-                        if(hexagon.parentElement.classList.contains('row-moved')){
-                            if(checkHexVisibility(rId + 1, hId) && checkHexVisibility(rId + 1, hId+ 1)){
-                                hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5 - TRIANGLE_HEIGHT) + 'px';
-                                if(checkHexVisibility(rId - 1, hId)){
-                                    hexagonAbout.style.bottom = 0
+                            if(hexagon.parentElement.classList.contains('row-moved')){
+                                if(checkHexVisibility(rId + 1, hId) && checkHexVisibility(rId + 1, hId+ 1)){
+                                    hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5 - TRIANGLE_HEIGHT) + 'px';
+                                    if(checkHexVisibility(rId - 1, hId)){
+                                        hexagonAbout.style.bottom = 0
+                                        hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
+                                    }else if(checkHexVisibility(rId - 1, hId + 1)){
+                                        hexagonAbout.style.bottom = 0
+                                        hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
+                                    }else{
+                                        hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
+                                    }
+                                }else if(checkHexVisibility(rId + 1, hId)){
                                     hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
-                                }else if(checkHexVisibility(rId - 1, hId + 1)){
-                                    hexagonAbout.style.bottom = 0
+                                }else if(checkHexVisibility(rId + 1, hId + 1)){
                                     hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
                                 }else{
                                     hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
                                 }
-                            }else if(checkHexVisibility(rId + 1, hId)){
-                                hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
-                            }else if(checkHexVisibility(rId + 1, hId + 1)){
-                                hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
                             }else{
-                                hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
-                            }
-                        }else{
-                            if(checkHexVisibility(rId + 1, hId - 1) && checkHexVisibility(rId + 1, hId)){
-                                hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5 - TRIANGLE_HEIGHT) + 'px';
-                                if(checkHexVisibility(rId - 1, hId)){
-                                    hexagonAbout.style.bottom = 0
+                                if(checkHexVisibility(rId + 1, hId - 1) && checkHexVisibility(rId + 1, hId)){
+                                    hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5 - TRIANGLE_HEIGHT) + 'px';
+                                    if(checkHexVisibility(rId - 1, hId)){
+                                        hexagonAbout.style.bottom = 0
+                                        hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
+                                    }else if(checkHexVisibility(rId - 1, hId + 1)){
+                                        hexagonAbout.style.bottom = 0
+                                        hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
+                                    }else{
+                                        hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
+                                    }
+                                }else if(checkHexVisibility(rId + 1, hId - 1)){
                                     hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
-                                }else if(checkHexVisibility(rId - 1, hId + 1)){
-                                    hexagonAbout.style.bottom = 0
+                                }else if(checkHexVisibility(rId + 1, hId)){
                                     hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
                                 }else{
                                     hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
                                 }
-                            }else if(checkHexVisibility(rId + 1, hId - 1)){
-                                hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
-                            }else if(checkHexVisibility(rId + 1, hId)){
-                                hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
-                            }else{
-                                hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
                             }
                         }
                     }

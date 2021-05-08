@@ -569,3 +569,10 @@ a{
         padding-right: 5vw;
     }
 }
+
+.ios *{
+    filter: none !important;
+}
+.ios *:focus{
+    filter: none !important;
+}
