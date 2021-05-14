@@ -4,41 +4,50 @@ button, h1, h2, h3, label,
 .hexagon-about-controls{
     user-select: none;
 }
-
 /* user select restricts */
-*{
-    transition: all .13s linear;
-    font-family: var(--font), sans-serif;
+
+/* transition restricts */
+p, h1, h2, h3, label{
+    transition: none !important;
 }
+/* transition restricts */
 html{
     padding: 0;
     margin: 0;
 }
 body {
+    --aside-pad: 15vw;
     color: var(--black-c);
     background: var(--body-bgc);
     /* overflow: hidden; */
     margin: 0;  
     padding: 0;
 
-    --triangle-height: calc(var(--body-height) * (35 / 60));
-    --hexagon-width: calc(var(--triangle-height) * 2 + var(--body-height));
     display: flex;
     justify-content: center;
     align-items: center;
     font-size: var(--font-size);
 }
+*{
+    transition: var(--trans);
+    transition-property: filter, transform, opacity, visibility, color;
+    font-family: var(--font), sans-serif;
+}
 .main{
     overflow: hidden;
     padding-top: 100px;
     padding-bottom: 45px;
-    transition: .3s;
+    transition-duration: .3s;
     box-sizing: border-box;
 }
 .app{
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 100%;
+    padding: 0 var(--aside-pad);
+    overflow-y: auto;
+    height: calc(100% - 20px);
 }
 
 
@@ -64,12 +73,13 @@ body {
     background-color: var(--body-bgc);
     border-radius: 10px;
     padding: 20px;
-    max-width: 90vw;
-    max-width: 40%;
+    max-width: 40vw;
+    min-width: 40vw;
+    box-sizing: border-box;
 }
 .modal-content{
-    width: 40%;
-    height: 40%;
+    width: 40vw;
+    min-height: 40%;
 }
 .ask-title,
 .modal-title{
@@ -85,9 +95,13 @@ body {
 .new-categ-modal{
     display: flex;
     justify-content: center;
-    align-items: center ;
     height: 500px;
 }
+.new-categ-cont{
+    position: relative;
+    top: var(--triangle-height);
+}
+
 
 
 
@@ -239,7 +253,7 @@ a{
     display: block;
     transition: none;
     cursor: default;
-    color: var(--body-bgc);
+    color: var(--white-c);
     z-index: 2;
     overflow: visible;
     padding: var(--pad);
@@ -274,7 +288,7 @@ a{
     box-sizing: border-box;
     background: var(--bgc);
     padding: 4px;
-    color: var(--body-bgc);
+    color: var(--white-c);
     position: absolute;
     top: calc(var(--triangle-height) + var(--pad));
     border-radius: 3px;
@@ -297,37 +311,58 @@ a{
 
 
 .categs{
-    height: 250px;
-    overflow: auto;
-    padding-top: var(--triangle-height)
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    overflow-y: auto;
+    width: 100%;
+    overflow-x: hidden;
+    box-sizing: border-box;
+    padding-left:var(--categ-trH);
+    padding-top: calc(var(--categ-totalH) / 2 + 10px);
+
+    scrollbar-width: none;
+    --webkit-scrollbar-width: none;
 }
-.categs-plus{
-    width: 40px;
-    height: 40px;
-    stroke: var(--main-c);
-    stroke-width: 2.2px;
-    margin: 20px;
-    border-radius: 50%;
-    cursor: pointer;   
+.categs::-webkit-scrollbar{
+    display: none;
+}
+.categs-row{
+    display: flex;
+    width: max-content;
 }
 .categs-plus:hover{
     transform: scale(1.08);
 }
 .categ{
+    display: flex;
+    justify-content: center;
+    align-items: center;
     opacity: 1;
     transition: inherit;
     filter: drop-shadow(3px 3px 3px rgba(68, 68, 68, 0.3));
+    position: relative;
+    height: var(--categ-totalH);
+    width: var(--categ-totalW);
+    margin-left: calc(0px - var(--categ-trH) - var(--categ-pad) / 2);
+    padding: var(--categ-pad);
 }
-.categ .hexagon-editedField:focus{
-    top: 0;
+.categ:nth-child(2n){
+    margin-top: calc(0px - var(--categ-totalH) / 2 - var(--categ-pad));
 }
 .categ .polygon{
+    height: var(--categ-totalH);
+    width: var(--categ-totalW);
     cursor: pointer;
     transform-origin: center;
     will-change: transform;
 }
 .categ:hover .polygon{
     transform: scale(1.02);
+}
+.categ:hover .hexagon-editedField{
+    text-decoration: underline;
 }
 .categ.new{
     position: relative;
@@ -341,33 +376,35 @@ a{
     justify-content: center;
     align-items: center;
     color: inherit;
-    height: calc(var(--body-height) - 10px);
+    height: max-content;
+    width: calc(var(--categ-sideL));
     font-size: 1.3em;
     cursor: pointer;
+    top: unset;
 }
 
 
-.footer{
-    height: 25px;
-    width: calc(100% - 30vw);
+.footer,
+.header{
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 15vw;    
+    width: 100%;
+    box-sizing: border-box;
+}
+.footer{
+    height: 45px;
+    padding: 10px var(--aside-pad);    
     position: absolute;
     bottom: 0;
     left: 0;
     background-color: var(--dark-main-c);
-    color: var(--body-bgc);
+    color: var(--white-c);
     font-size: .9em;
 }
 .header{
     height: 80px;
-    width: calc(100% - 30vw);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 15vw;    
+    padding: 10px var(--aside-pad);    
     position: absolute;
     top: 0;
     left: 0;
@@ -380,18 +417,18 @@ a{
     display: flex;
 }
 
-.descript{
-    width: 50vw;
-    text-align: center;
-}
-.first-title{
-    text-align: center;
+.main-logo{
+    margin-bottom: 30px;
+    fill: var(--dark-main-c);
+    max-width: 420px;
+    width: 100%;
+    flex: none;
 }
 
 .find{
-    width: 100%;
+    width: 70%;
     display: flex;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
 }
 .find *{
     padding: 5px 10px ;
@@ -405,7 +442,7 @@ a{
     flex: none;
     margin-left: 5px;
     background-color: var(--main-c);
-    color: var(--body-bgc);
+    color: var(--white-c);
 }
 
 
@@ -532,18 +569,37 @@ a{
 
 
 
-@media (max-width: 580px){
-    .descript{
+@media (max-width: 1150px){
+    body{
+        --aside-pad: 10vw;
+    }
+}
+@media (max-width: 700px){
+    .categs{
+        --categ-height: calc(155px * 0.7);
+        --categ-width: calc(170px * 0.7);
+    }
+}
+@media (max-width: 850px){
+    .find{
+        width: 85%;
+    }
+}
+@media (max-width: 620px){
+    .find{
         width: 100%;
     }
-    .main{
-        padding-left: 10vw;
-        padding-right: 10vw;
-        
+    .main-logo{
+        width: 80%;
     }
-    .app{
-        padding: 0;
+}
+@media (max-width: 580px){
+    body{
+        --aside-pad: 5vw;
     }
+    .descript{
+        width: 100%;
+    } 
     .complaint, .modal-content{
         width: 80vw;
     }
@@ -555,18 +611,15 @@ a{
     html{
         font-size: .9em;
     }
-    .main{
-        padding-left: 7vw;
-        padding-right: 7vw;
+    .ask-content,
+    .modal-content{
+        max-width: 90vw;
+        width: max-content;
     }
 }
 @media (max-width: 365px){
     html{
         font-size: .81em;
-    }
-    .main{
-        padding-left: 5vw;
-        padding-right: 5vw;
     }
 }
 

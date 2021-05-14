@@ -2,7 +2,7 @@
 <html lang="ru" >
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
   <!-- <meta name="viewport" content="user-scalable=no" /> -->
   <title>{{ field_name }}</title>
   <script>
@@ -59,6 +59,7 @@
   <script src="{{ url_for('static', filename='rounding.js') }}"></script>
   <script src="{{ url_for('static', filename='fontsloader.js') }}"></script>
   <script src="{{ url_for('static', filename='scrollpolyfill.js') }}"></script>
+  <script src="{{ url_for('static', filename='field/hammer.js') }}"></script>
   <script src="{{ url_for('static', filename='field/script.js') }}"></script>
   <script src="{{url_for('static', filename='public.js')}}"></script>
   <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.png') }}" type="image/png">
@@ -109,7 +110,6 @@
       <button class="find-button">Search</button>
     </div>
     <div class="field-btns">
-      <button class="clear clear-histoty">Clear history</button>
       <button class="back" onclick="window.location.href = `{{ url_for('index') }}`">Back</button>
       <button class="settings-button">Settings</button>
     </div>

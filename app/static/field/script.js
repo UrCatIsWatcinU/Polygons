@@ -27,6 +27,117 @@ const stringifyHexs = hexsArr => {
 }
 
 let paramsRes = fetch(`/categ/${document.title}/params`);
+// определение свойст шестиугольника
+const setHexProps = hexagon => {
+    // ид ряда и ид шестиугольника
+    let row = hexagon.parentElement;
+    hexagon.id = 'h' +  ([].indexOf.call(row.children, hexagon) + 1);
+    // hexagon.querySelector('polygon').id = 'p' + ([].indexOf.call(row.children, hexagon) + 1)
+    hexagon.rowId = idToNum(row.id);
+    hexagon.text = '';
+    hexagon.username = '';
+    const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+    
+    hexagon.ondblclick = (evt) => {
+        if(user.userId != hexagon.userId && user.userRole != 2) return;     
+        let editedField = createEditedField(hexagon);
+        evt.preventDefault();
+        if(!hexagon.classList.contains('hexagon-visible')) return;
+        hexagon.isFocused = true;
+        hexagon.classList.add('hexagon-active');   
+        
+        
+        editedField.setAttribute('contenteditable','true');
+        editedField.focus();
+        
+    }
+
+    const canCreateBgHex = () => hexagon.classList.contains('hexagon-visible') && !hexagon.querySelector('.hexagon-about');
+    hexagon.addEventListener('dragover', (evt) => {
+        if(user.userId != hexagon.userId && user.userRole != 2) return;     
+        evt.preventDefault();
+        console.log(hexagon.querySelector('.hexagon-about'))
+        if(!canCreateBgHex()) return;
+        hexagon.classList.add('hexagon-drag');
+    }, {passive: false, capture: true});
+    
+    hexagon.addEventListener('drop', (evt) => {
+        hexagon.classList.remove('hexagon-drag');
+        if(!window.FileReader){
+            showModal('Cannot upload file', 'Your browser don\'t support files uploads');
+            return;
+        }
+        const MAX_SIZE = 3000000;
+        const EXTENTIONS = ['png', 'jpg', 'jpeg', 'gif'];
+
+        if(user.userId != hexagon.userId && user.userRole != 2) return;     
+        evt.preventDefault();
+        if(!canCreateBgHex()) return;
+
+        if(evt.dataTransfer.files.length > 1){
+            showModal('Drag one file');
+            return;
+        }
+        
+        let file = evt.dataTransfer.files[0];
+        
+        if(!EXTENTIONS.map(ext => `image/${ext}`).includes(file.type)){
+            showModal('Wrong file format', `Please drag file with one of these extentions:\n ${EXTENTIONS.map(ext => ext.toUpperCase()).join(', ')}`);
+            return;
+        }
+        if(file.size > MAX_SIZE){
+            showModal('Big file', 'Max file size is ' + MAX_SIZE / 1000000 + 'MB')
+        }
+
+        const fileForm = new FormData();
+        file.arrayBuffer().then(result => {
+            const blob = new Blob([result], {type: file.type});
+            fileForm.append('file', blob, 'BG');
+
+            fetch(`/hexs/${hexagon.uuid}/imgs/upload`, {
+                method: 'POST',
+                body: fileForm
+            }).then(res => {
+                if(!res.ok){
+                    showModal('An error occurred while uploading the image', 'Please try again. Status: ' + res.status);
+                }else{
+                    return res.json()
+                }
+            }).then(imgUploadRes => {
+                if(!imgUploadRes || !imgUploadRes.success) return showModal('An error occurred while uploading the image', 'Please try again');
+                delete imgUploadRes.success;
+
+                hexagon.imgs.push(imgUploadRes);
+
+                createBgHex(hexagon, imgUploadRes.url);
+            });
+        }); 
+    }, {passive: false});
+    
+    hexagon.ondragleave = () => {
+        hexagon.classList.remove('hexagon-drag');
+    }
+
+    for(let setting in otherSettings){
+        if(otherSettings[setting] && ['rounded', 'bordered', 'turned', 'innerNum'].includes(setting)){
+            hexagon.classList.add('hexagon-' + setting);
+        }
+    }
+
+    hexagon.about = '';
+    hexagon.imgs = [];
+}
+
+class ElHexagon extends HTMLDivElement{
+    constructor() {
+        super();
+    }
+    connectedCallback() { 
+        setHexProps(this)
+    }
+}
+
+customElements.define('el-hexagon', ElHexagon, {extends: 'div'});
 
 window.addEventListener('load', async () => {
     // document.querySelector('.loading').style.opacity = 1;
@@ -69,7 +180,7 @@ window.addEventListener('load', async () => {
             isTransEnd = true;
             
             if(otherSettings.turned){
-                document.body.style.setProperty('--hexagon-width', (HEXAGON_WIDTH -= 20) + 'px');
+                document.body.style.setProperty('--hexagon-width', (hexSizes.HEXAGON_WIDTH -= 20) + 'px');
             }
             let size = params.size.split(/[x\sх]+/);
             const GRID_HEIGHT = size[0]; // измеряется в шестиугольниках
@@ -182,14 +293,15 @@ window.addEventListener('load', async () => {
                 editedField.onclick = evt => {
                     if(!hexagon.classList.contains('hexagon-visible') || !editedField.innerText) return;
 
-                    document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});
-                    
+                    clearContextMenus();
+
                     evt.stopPropagation();
 
                     if(hexagon.classList.contains('hexagon-active')) return;
                     hexagon.classList.add('hexagon-active');
 
                     const clearAbouts = evt => {
+                        if(hexagon.isContextmenu) return;
                         document.querySelectorAll('.hexagon-about').forEach(elem => {
                             elem.parentElement.about = elem.querySelector('.hexagon-about-content').innerHTML;
                             elem.remove();
@@ -806,63 +918,63 @@ window.addEventListener('load', async () => {
                         if(checkHexVisibility(rId, hId + 1) && checkHexVisibility(rId, hId - 1)){
                             if(hexagon.parentElement.classList.contains('row-moved')){
                                 if(checkHexVisibility(rId - 1 , hId) || checkHexVisibility(rId - 1, hId + 1)){
-                                    hexagonAbout.style.top = (HEXAGON_HEIGHT + 5) + 'px';
+                                    hexagonAbout.style.top = (hexSizes.HEXAGON_HEIGHT + 5) + 'px';
                                 }else if(checkHexVisibility(rId + 1, hId) || checkHexVisibility(rId + 1, hId + 1)){
                                     hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5) + 'px';
                                 }else{
-                                    hexagonAbout.style.top = (HEXAGON_HEIGHT + 5) + 'px';
+                                    hexagonAbout.style.top = (hexSizes.HEXAGON_HEIGHT + 5) + 'px';
                                 }
                             }else{
                                 if(checkHexVisibility(rId - 1 , hId) || checkHexVisibility(rId - 1, hId - 1)){
-                                    hexagonAbout.style.top = (HEXAGON_HEIGHT + 5) + 'px';
+                                    hexagonAbout.style.top = (hexSizes.HEXAGON_HEIGHT + 5) + 'px';
                                 }else if(checkHexVisibility(rId + 1, hId) || checkHexVisibility(rId + 1, hId - 1)){
                                     hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5) + 'px';
                                 }else{
-                                    hexagonAbout.style.top = (HEXAGON_HEIGHT + 5) + 'px';
+                                    hexagonAbout.style.top = (hexSizes.HEXAGON_HEIGHT + 5) + 'px';
                                 }
                             }
                         }else if(checkHexVisibility(rId, hId + 1)){
                             hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
                         }else if(checkHexVisibility(rId, hId - 1)){
-                            hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
+                            hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
                         }else{
                             if(hexagon.parentElement.classList.contains('row-moved')){
                                 if(checkHexVisibility(rId + 1, hId) && checkHexVisibility(rId + 1, hId+ 1)){
-                                    hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5 - TRIANGLE_HEIGHT) + 'px';
+                                    hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5 - hexSizes.TRIANGLE_HEIGHT) + 'px';
                                     if(checkHexVisibility(rId - 1, hId)){
                                         hexagonAbout.style.bottom = 0
-                                        hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
+                                        hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
                                     }else if(checkHexVisibility(rId - 1, hId + 1)){
                                         hexagonAbout.style.bottom = 0
                                         hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
                                     }else{
-                                        hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
+                                        hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
                                     }
                                 }else if(checkHexVisibility(rId + 1, hId)){
-                                    hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
+                                    hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
                                 }else if(checkHexVisibility(rId + 1, hId + 1)){
                                     hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
                                 }else{
-                                    hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
+                                    hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
                                 }
                             }else{
                                 if(checkHexVisibility(rId + 1, hId - 1) && checkHexVisibility(rId + 1, hId)){
-                                    hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5 - TRIANGLE_HEIGHT) + 'px';
+                                    hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5 - hexSizes.TRIANGLE_HEIGHT) + 'px';
                                     if(checkHexVisibility(rId - 1, hId)){
                                         hexagonAbout.style.bottom = 0
-                                        hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
+                                        hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
                                     }else if(checkHexVisibility(rId - 1, hId + 1)){
                                         hexagonAbout.style.bottom = 0
                                         hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
                                     }else{
-                                        hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
+                                        hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
                                     }
                                 }else if(checkHexVisibility(rId + 1, hId - 1)){
-                                    hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
+                                    hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
                                 }else if(checkHexVisibility(rId + 1, hId)){
                                     hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
                                 }else{
-                                    hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
+                                    hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
                                 }
                             }
                         }
@@ -883,7 +995,7 @@ window.addEventListener('load', async () => {
             const createBgHex = (hexagon, url) => {
                 hexagon.querySelector('.polygon').innerHTML = `
                 <mask id="hexagon-bgImg-mask">
-                    <path fill="#fff" d="${hexPath}"></path>
+                    <use href="#hex-path"></use>
                 </mask>
                 <image mask="url(#hexagon-bgImg-mask)" href="/${url}" preserveAspectRatio="xMidYMid slice" width="100%" height="100%"></image>`;
             }
@@ -910,7 +1022,7 @@ window.addEventListener('load', async () => {
                         hexagon.style.setProperty('--bgc', colors.MAIN_C);
                     }
 
-                    ['chainId', 'userId', 'username', 'creationDate', 'uuid'].forEach(prop => {
+                    ['chainId', 'userId', 'username', 'creationDate', 'uuid', 'num'].forEach(prop => {
                         hexagon[prop] = hex[prop];
                     });
                     hexagon.imgs = hex.imgs ? !hex.imgs.length ? [] : hex.imgs : [];
@@ -988,25 +1100,33 @@ window.addEventListener('load', async () => {
             document.body.style.width = '';
             document.body.style.height = '';
 
-            let hexsCont = document.querySelector('.hexsCont');
+            const hexsCont = document.querySelector('.hexsCont');
 
             hexsCont.style.opacity = 1;
             
             // создание сетки
+            let rowsStr = '';
             for(let i = 1; i <= GRID_HEIGHT; i++){
-                let hexagonStr = `<div class="hexagon">
+                let hexagonStr = `<div is="el-hexagon" class="hexagon">
                 <div class="hexagon-num">0</div>
                 </div>`;
                 
-                let row = setClassName(document.createElement('div'), 'row');
-                row.id = 'r' + i;
-                if(i % 2 == 0){
-                    row.classList.add('row-moved');
-                }
-                hexsCont.append(row);
+                // let row = setClassName(document.createElement('div'), 'row');
+                // row.id = 'r' + i;
+                // if(i % 2 == 0){
+                    //     row.classList.add('row-moved');
+                // }
+                // hexsCont.append(row);
                 
-                row.innerHTML = hexagonStr.repeat(GRID_WIDTH);
+                // row.innerHTML = hexagonStr.repeat(GRID_WIDTH);
+                let rowClass = "row";
+                if(i % 2 == 0){
+                    rowClass += " row-moved"
+                }
+                rowsStr += `<div id="r${i}" class="${rowClass}">${hexagonStr.repeat(GRID_WIDTH)}</div>`
             }
+            
+            hexsCont.innerHTML = rowsStr;
 
             document.querySelector('#r2').classList.add('row-first');
             document.querySelector('#r' + GRID_HEIGHT).classList.add('row-last');
@@ -1019,24 +1139,38 @@ window.addEventListener('load', async () => {
             if(otherSettings.turned){
                 hexsCont.style.transform = 'rotate(90deg)';
                 document.documentElement.style.width = 'auto';
-                document.documentElement.style.height = (GRID_WIDTH * HEXAGON_WIDTH + HEXAGON_WIDTH/2) + 'px';
+                document.documentElement.style.height = (GRID_WIDTH * hexSizes.HEXAGON_WIDTH + hexSizes.HEXAGON_WIDTH/2) + 'px';
             }
 
-            // навигация мышью
+            let zoomIndex = 1;
+            const changeZoom = (change) => {
+                zoomIndex += change;
+
+                if(zoomIndex <= 0) zoomIndex = 0.01;
+
+                let user = JSON.parse(sessionStorage.getItem('user') || '{}');
+                if(user.userRole != 2 && zoomIndex < 0.5) return;
+
+                hexsCont.style.top = -(hexsCont.offsetHeight - (hexsCont.offsetHeight * zoomIndex)) + 'px';
+                hexsCont.style.left = -(hexsCont.offsetWidth - (hexsCont.offsetWidth * zoomIndex)) + 'px';
+                hexsCont.style.transform = `scale(${zoomIndex})`;
+            }   
+            
+
+            const clearContextMenus = () => {
+                document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});
+            }
+
             if(!isTouchDevice()){
                 const SLIDE_SPEED = otherSettings.slideSpeed || 1.6;
                 const MIN_CHANGE = 20;
                 const slider = document.body;
                 let isDown = false;
     
-                let startX;
-                let scrollLeft;
-    
-                let startY;
-                let scrollTop;
+                let startX, scrollLeft, startY, scrollTop;
     
                 slider.addEventListener('mousedown', (e) => {   
-                    if(e.buttons != 1) return;
+                    if(e.buttons != 1 || document.querySelector('.modal') && getComputedStyle(document.querySelector('.modal')).display != 'none') return;
                     isDown = true;
                     setTimeout(() => {
                         if(isDown){
@@ -1075,182 +1209,61 @@ window.addEventListener('load', async () => {
                         if(isDown) requestAnimationFrame(scroll);
                     })
                 });
-            }
+
+                document.addEventListener('wheel', evt => {
+                    if(otherSettings.ctrlZoom){
+                        if(!(evt.metaKey || evt.ctrlKey)) return;
+                        else{
+                            evt.preventDefault();
+                        }
+                    } 
+                    if((document.querySelector('.settings') && document.querySelector('.settings').style.display != 'none') || document.querySelector('.hexagon-about')) return;
+                    clearContextMenus();
+                    evt.preventDefault();
+                    
+                    changeZoom(-(evt.deltaY/1260));
+                }, {passive: false});
+
+                const scrollBtns = setClassName(document.createElement('div'), 'scroll-btns');
+    
+                const plusScrollBtn = setClassName(document.createElementNS('http://www.w3.org/2000/svg', 'svg'), 'scroll-btn plus-scroll');
+                plusScrollBtn.innerHTML = `<line x1="50%" y1="0%" x2="50%" y2="100%"></line><line x1="0%" y1="50%" x2="100%" y2="50%"></line>`;
+                plusScrollBtn.onclick = () => {
+                    changeZoom(.1);
+                }
+                
+                const minusScrollBtn = setClassName(document.createElementNS('http://www.w3.org/2000/svg', 'svg'), 'scroll-btn minus-scroll');
+                minusScrollBtn.onclick = () => {
+                    changeZoom(-.1);
+                }
+                minusScrollBtn.innerHTML = `<line x1="0%" y1="50%" x2="100%" y2="50%"></line>`
+                
+                scrollBtns.append(plusScrollBtn, minusScrollBtn);
+                document.body.append(scrollBtns)
+                scrollBtns.style.bottom = `calc(50% - ${scrollBtns.offsetHeight / 2}px)`
             
-            let zoomIndex = 1;
-            const changeZoom = (change) => {
-                zoomIndex += change;
-
-                if(zoomIndex <= 0) zoomIndex = 0.01;
-
-                let user = JSON.parse(sessionStorage.getItem('user') || '{}');
-                if(user.userRole != 2 && zoomIndex < 0.5) return;
-
-                hexsCont.style.top = -(hexsCont.offsetHeight - (hexsCont.offsetHeight * zoomIndex)) + 'px';
-                hexsCont.style.left = -(hexsCont.offsetWidth - (hexsCont.offsetWidth * zoomIndex)) + 'px';
-                hexsCont.style.transform = `scale(${zoomIndex})`;
-            }
-            document.addEventListener('wheel', evt => {
-                if(otherSettings.ctrlZoom){
-                    if(!(evt.metaKey || evt.ctrlKey)) return;
-                    else{
+                document.documentElement.addEventListener('keydown', evt => {
+                    if(evt.key == '=' && (evt.ctrlKey || evt.metaKey)){
                         evt.preventDefault();
+                        changeZoom(.1)
                     }
-                } 
-                if((document.querySelector('.settings') && document.querySelector('.settings').style.display != 'none') || document.querySelector('.hexagon-about')) return;
-                document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});
-                evt.preventDefault();
-                
-                changeZoom(-(evt.deltaY/1260));
-            }, {passive: false});
-            const scrollBtns = setClassName(document.createElement('div'), 'scroll-btns');
-
-            const plusScrollBtn = setClassName(document.createElementNS('http://www.w3.org/2000/svg', 'svg'), 'scroll-btn plus-scroll');
-            plusScrollBtn.innerHTML = `<line x1="50%" y1="0%" x2="50%" y2="100%"></line><line x1="0%" y1="50%" x2="100%" y2="50%"></line>`;
-            plusScrollBtn.onclick = () => {
-                changeZoom(.1);
-            }
-            
-            const minusScrollBtn = setClassName(document.createElementNS('http://www.w3.org/2000/svg', 'svg'), 'scroll-btn minus-scroll');
-            minusScrollBtn.onclick = () => {
-                changeZoom(-.1);
-            }
-            minusScrollBtn.innerHTML = `<line x1="0%" y1="50%" x2="100%" y2="50%"></line>`
-            
-            scrollBtns.append(plusScrollBtn, minusScrollBtn);
-            document.body.append(scrollBtns)
-            scrollBtns.style.bottom = `calc(50% - ${scrollBtns.offsetHeight / 2}px)`
-            
-            let visibleHexs = [];
-            let chains = [];
-            const getChain = id => {
-                for(let chain of chains){
-                    if(chain && chain.id == id) return chain
-                }
-            }
-            
-            let history = JSON.parse(localStorage.getItem('history') || '[]');
-            let currentHistoryStepIndex = history.length - 1 >= 0 ? history.length - 1 : 0;
-            const saveToHistory = change => {
-                history.push(change);
-                if(history.length > 70) history.shift();
-                
-                currentHistoryStepIndex = history.length - 1 >= 0 ? history.length - 1 : 0;
-                localStorage.setItem('history', JSON.stringify(history));
-            }
-        
-            document.documentElement.addEventListener('keydown', evt => {
-                if(history){
-                    if((evt.code == 'KeyZ' || evt.key == 'z') && (evt.ctrlKey || evt.metaKey) && !evt.shiftKey){
-                        if(currentHistoryStepIndex < 0) return;
-        
-                        let change = history[currentHistoryStepIndex--];
-                        while(change.categ != document.title){
-                            if(currentHistoryStepIndex == 0) return;
-                            change = history[currentHistoryStepIndex--];
-                        }
-                        
-                        let changeData = typeof(change.data) == 'string' ?  JSON.parse(change.data || '[]') : change.data;
-        
-                        if(change.action == 'new'){
-                            changeData.forEach(hex => {
-                                deleteHex(document.querySelector(hex.selector));
-                            });
-                            
-                            socket.emit('hexs', {
-                                action: 'delete',
-                                categ: document.title,
-                                data: JSON.stringify(changeData.map(hex => hex.selector))
-                            });
-                        }else if(change.action == 'delete'){
-                            let newHexs = parseHexsFromJson(changeData);
-                            
-                            sendHexsCreationReq(newHexs);
-
-                        }else if(change.action == 'change'){
-                            let hexagon = document.querySelector(changeData.hex);
-                            
-                            let editedField = createEditedField(hexagon);
-                            editedField.innerText = changeData.was.innerText;
-                            
-                            socket.emit('hexs', {
-                                action: 'change',
-                                categ: document.title,
-                                data: stringifyHexs([hexagon])
-                            })
-                        }
-                        if(currentHistoryStepIndex < -1) currentHistoryStepIndex++;
+                    if(evt.key == '-' && (evt.ctrlKey || evt.metaKey)){
+                        evt.preventDefault();
+                        changeZoom(-.1)
                     }
-                    if(((evt.code == 'KeyY' || evt.key == 'y') && (evt.ctrlKey || evt.metaKey)) || ((evt.code == 'KeyZ' || evt.key == 'z') && (evt.ctrlKey || evt.metaKey) && evt.shiftKey)){
-                        if(currentHistoryStepIndex >= history.length - 1) currentHistoryStepIndex = history.length - 2;
-                        
-                        let change = history[++currentHistoryStepIndex];
-                        while(change.categ != document.title){
-                            change = history[++currentHistoryStepIndex];
-                            if(currentHistoryStepIndex >= history.length - 1) return
-                        }
         
-                        let changeData = JSON.parse(change.data || '[]');
-        
-                        if(change.action == 'new'){
-                            let newHexs = parseHexsFromJson(changeData);
-        
-                            sendHexsCreationReq(newHexs);
-                        }else if(change.action == 'delete'){    
-                            changeData.map(hex => document.querySelector(hex.selector)).forEach(deleteHex);
-        
-                            socket.emit('hexs', {
-                                action: 'delete',
-                                categ: document.title,
-                                data: JSON.stringify(changeData.map(hex => hex.selector))
-                            })
-                        }else if(change.action == 'change'){
-                            let hexagon = document.querySelector(changeData.hex);
-                            
-                            let editedField = createEditedField(hexagon);
-                            editedField.innerText = changeData.became.innerText;
-                            
-                            socket.emit('hexs', {
-                                action: 'change',
-                                categ: document.title,
-                                data: stringifyHexs([hexagon])
-                            })
-                        }
-        
-                        if(currentHistoryStepIndex > history.length - 1) currentHistoryStepIndex--
+                    if(evt.code == 'Space'){
+                        if(document.activeElement == document.body) evt.preventDefault();
                     }
-                }
-                
-                if(evt.key == '=' && (evt.ctrlKey || evt.metaKey)){
-                    evt.preventDefault();
-                    
-                    hexsCont.style.transform = `scale(${zoomIndex += (0.1)})`
-                }
-                if(evt.key == '-' && (evt.ctrlKey || evt.metaKey)){
-                    evt.preventDefault();
-                    zoomIndex += -(0.1)
-                    
-                    if(zoomIndex > 0) zoomIndex = 0.01;
-                    
-                    let user = JSON.parse(sessionStorage.getItem('user') || '{}');
-                    if(user.role != 2 && zoomIndex < 0.3) return;
-    
-                    hexsCont.style.transform = `scale(${zoomIndex})`
-                }
-    
-                if(evt.code == 'Space'){
-                    if(document.activeElement == document.body) evt.preventDefault();
-                }
-            }, {passive: false});
-
-
-            if(isTouchDevice()){
+                }, {passive: false});
+            }else{
                 const MAX_CHANGE = 5;
                 let touchIsDown = false;
                 let contextMenuOpen = false;
-                let startMoveX;
-                let startMoveY;
+                let startMoveX, startMoveY;
                 document.body.ontouchstart = (evt) => {
+                    if(hexsCont.isPinched) return;
+
                     touchIsDown = true;
                     startMoveX = evt.changedTouches[0].clientX;
                     startMoveY = evt.changedTouches[0].clientY;
@@ -1270,7 +1283,7 @@ window.addEventListener('load', async () => {
                 }
                 document.body.addEventListener('touchmove', (evt) => {
                     if(startMoveX - evt.changedTouches[0].clientX > MAX_CHANGE || startMoveY - evt.changedTouches[0].clientY > MAX_CHANGE){
-                        document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});
+                        clearContextMenus();
                         touchIsDown = false;
                     }
                 });
@@ -1292,16 +1305,45 @@ window.addEventListener('load', async () => {
                 addEventListener('touchcancel', touchEnd, {
                     passive: false,
                 });
+
+                // let pz = new PinchZoom(hexsCont, {
+                //     maxZoom: 10, 
+                //     minZoom: 5,
+                //     tapZoomFactor: 5
+                // });
+                let hammerHexsCont = new Hammer(hexsCont);
+                hammerHexsCont.get('pinch').set({ enable: true });
+
+                let lastScale = 1;
+                hammerHexsCont.on('pinch pinchend', evt => {
+                    if (evt.type == 'pinch'){
+                        hexsCont.isPinched = true;
+                        clearContextMenus();
+                        
+                        zoomIndex = Math.max(.2, Math.min(lastScale * (evt.scale), 4));
+                        changeZoom(0);
+                    }
+                    if(evt.type == "pinchend"){
+                        hexsCont.isPinched = false;
+
+                        lastScale = zoomIndex;
+                    }
+                });
+            }
+
+            let visibleHexs = [];
+            let chains = [];
+            const getChain = id => {
+                for(let chain of chains){
+                    if(chain && chain.id == id) return chain
+                }
             }
             
-            document.addEventListener('click', evt => {
-                document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});
-            });
+            document.addEventListener('click', clearContextMenus);
 
             document.body.oncontextmenu = (evt) => {
-                document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});
+                clearContextMenus();
         
-                
                 let hexagon = document.elementFromPoint(evt.clientX, evt.clientY);
                 if(hexagon == document.body) return false;
                 while(!hexagon.classList.contains('hexagon')){
@@ -1317,8 +1359,16 @@ window.addEventListener('load', async () => {
                 let contextmenu  = document.createElement('div');
                 contextmenu.className = 'contextmenu';
         
-                contextmenu.addEventListener('DOMNodeRemoved', () => {
-                    hexagon.isContextmenu = false;
+                const deleteObserver = new MutationObserver((mList) => {
+                    mList.forEach(mutation => {
+                        if(Array.from(mutation.removedNodes).includes(contextmenu)){
+                            hexagon.isContextmenu = false;
+                            deleteObserver.disconnect();
+                        }
+                    });
+                });
+                deleteObserver.observe(document.body, {
+                    childList: true
                 });
         
                 const getNeighbors = hexagon => {
@@ -1351,6 +1401,7 @@ window.addEventListener('load', async () => {
                     }
                     if(noCreate){
                         contextmenu.innerHTML = 'Not here';
+                        contextmenu.style.color = 'var(--red-c)' 
                     }else{
                         contextmenu.innerHTML = 'Create here';
                         
@@ -1402,7 +1453,7 @@ window.addEventListener('load', async () => {
                     <div style="margin-bottom: 5px;" class="contextmenu-item copy">Copy link</div> 
                     <div class="contextmenu-item complain">Complain</div>
                     <hr class="contextmenu-line">
-                    <div style="margin-bottom: 5px" class="contextmenu-item contextmenu-info">User: ${hexagon.username}</div>
+                    <div style="margin-bottom: 5px" class="contextmenu-item contextmenu-info">Author: <a href="/users/${hexagon.userId}">${hexagon.username}</a></div>
                     <div style="" class="contextmenu-item contextmenu-info">Date: ${hexDate.toLocaleDateString()}</div>`;
 
                     if(!hexagon.userId || (user.userId == hexagon.userId) || user.userRole == 2){
@@ -1435,7 +1486,7 @@ window.addEventListener('load', async () => {
                                     data: JSON.stringify(deletedHexs)
                                 });
                                 
-                            }, 'If you delete this hexagon, all the following hexagons in the chain will be deleted along with it');
+                            }, 'If you delete this hexagon, all the following hexagons in the chain will be deleted along with it' + (hexagon.num == 1 ? '\n\nThis is first hexagon of the chain, if you delete it, the chain and all comments to it will be deleted' : ''));
                         }
                     }
                     if(contextmenu.querySelector('.move-btn')){
@@ -1548,9 +1599,18 @@ window.addEventListener('load', async () => {
                         complaint.querySelector('.complaint-close').onclick = hideModal;
                     }
                     if(contextmenu.querySelector('.edit')){
-                        contextmenu.querySelector('.edit').onclick = () => {
-                            hexagon.dispatchEvent(new Event('dblclick'));
-                        }
+                        contextmenu.querySelector('.edit').addEventListener('click', (evt) => {
+                            console.log(hexagon);
+                            hexagon.dispatchEvent(new Event('stopClearing'));
+
+                            if(hexagon.querySelector('.hexagon-about-content')){
+                                evt.stopImmediatePropagation();
+                                console.log('content');
+                                hexagon.querySelector('.hexagon-about-content').dispatchEvent(new Event('dblclick'));
+                            }else{
+                                hexagon.dispatchEvent(new Event('dblclick'));
+                            }
+                        }, {passive:false, capture: true})
                     }
                     contextmenu.querySelector('.copy').onclick = () => {
                         let link = window.location.href + '?' + giveHexSelector(hexagon).replace(/\s+/, '');
@@ -1608,108 +1668,8 @@ window.addEventListener('load', async () => {
         
                 return false
             }
-        
-            // определение свойст шестиугольника
-            const setHexProps = hexagon => {
-                // ид ряда и ид шестиугольника
-                let row = hexagon.parentElement;
-                hexagon.id = 'h' +  ([].indexOf.call(row.children, hexagon) + 1);
-                // hexagon.querySelector('polygon').id = 'p' + ([].indexOf.call(row.children, hexagon) + 1)
-                hexagon.rowId = idToNum(row.id);
-                hexagon.text = '';
-                hexagon.username = '';
-                const user = JSON.parse(sessionStorage.getItem('user') || '{}');
-                
-                hexagon.ondblclick = (evt) => {
-                    if(user.userId != hexagon.userId && user.userRole != 2) return;     
-                    let editedField = createEditedField(hexagon);
-                    evt.preventDefault();
-                    if(!hexagon.classList.contains('hexagon-visible')) return;
-                    hexagon.isFocused = true;
-                    hexagon.classList.add('hexagon-active');   
-                    
-                    
-                    editedField.setAttribute('contenteditable','true');
-                    editedField.focus();
-                    
-                }
 
-                const canCreateBgHex = () => hexagon.classList.contains('hexagon-visible') && !hexagon.querySelector('.hexagon-about');
-                hexagon.addEventListener('dragover', (evt) => {
-                    if(user.userId != hexagon.userId && user.userRole != 2) return;     
-                    evt.preventDefault();
-                    console.log(hexagon.querySelector('.hexagon-about'))
-                    if(!canCreateBgHex()) return;
-                    hexagon.classList.add('hexagon-drag');
-                }, {passive: false, capture: true});
-                
-                hexagon.addEventListener('drop', (evt) => {
-                    hexagon.classList.remove('hexagon-drag');
-                    if(!window.FileReader){
-                        showModal('Cannot upload file', 'Your browser don\'t support files uploads');
-                        return;
-                    }
-                    const MAX_SIZE = 3000000;
-                    const EXTENTIONS = ['png', 'jpg', 'jpeg', 'gif'];
-
-                    if(user.userId != hexagon.userId && user.userRole != 2) return;     
-                    evt.preventDefault();
-                    if(!canCreateBgHex()) return;
-
-                    if(evt.dataTransfer.files.length > 1){
-                        showModal('Drag one file');
-                        return;
-                    }
-                    
-                    let file = evt.dataTransfer.files[0];
-                    
-                    if(!EXTENTIONS.map(ext => `image/${ext}`).includes(file.type)){
-                        showModal('Wrong file format', `Please drag file with one of these extentions:\n ${EXTENTIONS.map(ext => ext.toUpperCase()).join(', ')}`);
-                        return;
-                    }
-                    if(file.size > MAX_SIZE){
-                        showModal('Big file', 'Max file size is ' + MAX_SIZE / 1000000 + 'MB')
-                    }
-
-                    const fileForm = new FormData();
-                    file.arrayBuffer().then(result => {
-                        const blob = new Blob([result], {type: file.type});
-                        fileForm.append('file', blob, 'BG');
-
-                        fetch(`/hexs/${hexagon.uuid}/imgs/upload`, {
-                            method: 'POST',
-                            body: fileForm
-                        }).then(res => {
-                            if(!res.ok){
-                                showModal('An error occurred while uploading the image', 'Please try again. Status: ' + res.status);
-                            }else{
-                                return res.json()
-                            }
-                        }).then(imgUploadRes => {
-                            if(!imgUploadRes || !imgUploadRes.success) return showModal('An error occurred while uploading the image', 'Please try again');
-                            delete imgUploadRes.success;
-
-                            hexagon.imgs.push(imgUploadRes);
-
-                            createBgHex(hexagon, imgUploadRes.url);
-                        });
-                    }); 
-                }, {passive: false});
-                
-                hexagon.ondragleave = () => {
-                    hexagon.classList.remove('hexagon-drag');
-                }
-
-                for(let setting in otherSettings){
-                    if(otherSettings[setting] && ['rounded', 'bordered', 'turned', 'innerNum'].includes(setting)){
-                        hexagon.classList.add('hexagon-' + setting);
-                    }
-                }
-        
-                hexagon.about = '';
-                hexagon.imgs = [];
-            }
-            document.querySelectorAll('.hexagon').forEach(setHexProps);
+            // document.querySelectorAll('.hexagon').forEach(setHexProps);
             
             const backup = () => {
                 localStorage.setItem('userScroll-' + document.title, JSON.stringify({x: document.body.scrollLeft, y: document.body.scrollTop}));
@@ -1725,10 +1685,6 @@ window.addEventListener('load', async () => {
                 backup();
             };
             
-            document.querySelector('.clear.clear-histoty').onclick = () => {
-                localStorage.setItem('history', '[]');
-                history = [];
-            }
             document.querySelector('.back').addEventListener('click', () => {
                 sessionStorage.clear();
             })
@@ -1850,8 +1806,8 @@ window.addEventListener('load', async () => {
                 `;
 
 
-                for(let color in colors){
-                    settingsCont.querySelector('.settings-grid.colors').innerHTML += `<div><label for="${color}">${color}: </label><br> <input id="${color}" class="color-input" value="${colors[color]}" data-jscolor="{}"></div>`
+                for(let color in defaultColors){
+                    settingsCont.querySelector('.settings-grid.colors').innerHTML += `<div><label for="${color}">${color}: </label><br> <input id="${color}" class="color-input" value="${colors[color] || defaultColors[color]}" data-jscolor="{}"></div>`
                 }
                 settingsCont.querySelectorAll('.color-input').forEach(input => {
                     input.onchange = () => {
@@ -1868,6 +1824,8 @@ window.addEventListener('load', async () => {
                         <svg class="settings-minus"><line x1="0%" y1="50%" x2="100%" y2="50%"></line></svg> 
                     </div>`;
                 }
+
+                const inputHeight = getComputedStyle(settingsCont.querySelector('input')).height
                 const setDColorProps = input => {
                     let num = +input.previousElementSibling.innerText.replace('.', '') - 1;
 
@@ -1877,8 +1835,9 @@ window.addEventListener('load', async () => {
                     }
                     
                     let minus = input.nextElementSibling;
-                    minus.style.width = getComputedStyle(settingsCont.querySelector('.jscolor')).height;
-                    minus.style.height = getComputedStyle(settingsCont.querySelector('.jscolor')).height;
+                    minus.style.width = inputHeight;
+                    minus.style.height = inputHeight;
+                    input.style.width = (input.offsetWidth - +inputHeight.replace('px', '') - 10 - 40 - 8 - input.parentElement.firstElementChild.offsetWidth) + 'px';
                     
                     minus.onclick = () => {
                         if(!input.toDelete){
@@ -2059,11 +2018,6 @@ window.addEventListener('load', async () => {
                 }
                 
                 jscolor.install();
-            }
-
-
-            if(document.documentElement.clientWidth < 700){
-                document.querySelector('.settings-button').remove()
             }
 
             if(document.documentElement.clientWidth < 800 || otherSettings.hideBtns){

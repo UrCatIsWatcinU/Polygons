@@ -24,20 +24,6 @@
             </div>
         {% endfor %}  
     </div>
-    <style>
-        .app{
-            width: 100%;
-            padding: 0 15vw;
-            overflow-y: auto;
-            overflow-x: hidden;
-            height: calc(100% - 40px);
-        }
-        @media (max-width: 580px){
-            .app{
-                padding: 0;
-            }
-        }
-    </style>
     <script>
         document.querySelectorAll('.complaint-delete').forEach(btn => {
             btn.onclick = (evt) => {

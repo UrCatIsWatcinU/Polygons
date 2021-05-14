@@ -541,7 +541,7 @@ window.addEventListener('load', async () => {
             const createBgHex = (hexagon, url) => {
                 hexagon.querySelector('.polygon').innerHTML = `
                 <mask id="hexagon-bgImg-mask">
-                    <path fill="#fff" d="${hexPath}"></path>
+                    <path fill="#fff" d="${hexPath()}"></path>
                 </mask>
                 <image mask="url(#hexagon-bgImg-mask)" href="/${url}" preserveAspectRatio="xMidYMid slice" width="100%" height="100%"></image>`;
             }
@@ -600,16 +600,18 @@ window.addEventListener('load', async () => {
             // document.documentElement.style.width = (GRID_WIDTH * HEXAGON_WIDTH + HEXAGON_WIDTH/2) + 'px';
             
             // создание сетки
+            let rowsStr = '';
             for(let i = 1; i <= GRID_HEIGHT; i+=2){
                 let hexagonStr = `<div class="hexagon">
                 <div class="hexagon-num">0</div>
                 </div>`.repeat(GRID_WIDTH);
                 
-                hexsCont.innerHTML += `
+                rowsStr += `
                 <div id="r${i}" class="row">${hexagonStr}</div>
-                <div id="r${i+1}" class="row row-moved">${hexagonStr}</div>
-                `
+                <div id="r${i+1}" class="row row-moved">${hexagonStr}</div>`;
             }
+
+            hexsCont.innerHTML = rowsStr;
 
             document.querySelector('#r2').classList.add('row-first');
             document.querySelector('#r' + GRID_HEIGHT).classList.add('row-last');

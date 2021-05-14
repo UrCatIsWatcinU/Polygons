@@ -95,13 +95,43 @@ window.addEventListener('load', async () => {
         return false
     }
 
-    let categs = Array.from(document.querySelectorAll('.categ'))
+    let user = null;
+    let userRes = await fetch('/users/i');
+    if(userRes.ok){
+        if(!userRes.message){
+            userRes = await userRes.text()
+            sessionStorage.setItem('user', userRes)
+            user = JSON.parse(userRes)
+        }
+    }
+
+
+    const categSizes = {
+        sideL: 70,
+        trH: 40,
+        totalH: 120,
+        pad: 7
+    }
+    categSizes.totalW = categSizes.sideL + categSizes.trH * 2;
+    if(document.documentElement.clientWidth < 600){
+        for(let prop in categSizes){
+            categSizes[prop] = categSizes[prop] * (document.documentElement.clientWidth < 410 ? document.documentElement.clientWidth < 360 ? .7 : .8 : .9)
+        }
+    }
+
+    setCSSProps(categSizes, 'categ-', 'px')
+
+    const categPath = roundPathCorners(
+    `M 0 ${categSizes.totalH / 2} L ${categSizes.trH} 0 L ${categSizes.totalW - categSizes.trH} 0 L ${categSizes.totalW} ${categSizes.totalH / 2} L ${categSizes.totalW - categSizes.trH} ${categSizes.totalH} L ${categSizes.trH} ${categSizes.totalH} Z`, 
+    .025, true);
+
+    const categs = Array.from(document.querySelectorAll('.categ'));
     categs.forEach(categ => {
         let polygon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         polygon.classList.add('polygon');
-        polygon.innerHTML = `<svg class="polygon"> 
-            <polygon points="0,${TRIANGLE_HEIGHT} ${HEXAGON_WIDTH/2},0 ${HEXAGON_WIDTH},${TRIANGLE_HEIGHT} ${HEXAGON_WIDTH},${HEXAGON_HEIGHT-TRIANGLE_HEIGHT} ${HEXAGON_WIDTH/2},${HEXAGON_HEIGHT} 0,${HEXAGON_HEIGHT-TRIANGLE_HEIGHT}"></polygon>
-        </svg>`;
+        polygon.setAttribute('preserveAspectRatio', 'none');
+        // polygon.setAttribute('transform', `rotate(90, ${hexSizes.HEXAGON_HEIGHT / 2}, ${hexSizes.HEXAGON_WIDTH / 2})`)
+        polygon.innerHTML = `<path class="categ-path" d="${categPath}"></path>`;
 
         categ.prepend(polygon);
 
@@ -127,36 +157,50 @@ window.addEventListener('load', async () => {
                 window.location.href = '/fields/' + categ.innerText.trim();
             }
         })
-    })
+    });
+    const showCategs = (hexsInRow = 5) => {
+        if(categs && categs.length >= hexsInRow){
+    
+            let splitedCategs = [];
+            
+            for(let i = 0; i < categs.length; i+=hexsInRow){
+                splitedCategs.push(categs.slice(i, i+hexsInRow));
+            }
 
-    let rows = Array.from(document.querySelectorAll('.row'));
-    for(let i = 0; i < rows.length; i++){
-        if(i % 2 != 0){
-            rows[i].classList.add('row-moved');
+            document.querySelectorAll('.categs-row').forEach(r => r.remove());
+    
+            for(let i = 0; i < splitedCategs.length; i++){
+                if(!splitedCategs[i].length) continue;
+
+                if(splitedCategs[i].length == 1) splitedCategs[i].unshift(setClassName(document.createElement('div'), 'categ'))
+
+                let row = setClassName(document.createElement('div'), 'categs-row');
+                row.style.width = ((categSizes.totalW - categSizes.trH + categSizes.pad * 2) * hexsInRow) + 'px';
+                row.append(...splitedCategs[i]);
+    
+                document.querySelector('.categs').append(row);
+            }
         }
     }
 
-    let user = null;
-    let userRes = await fetch('/users/i');
-    if(userRes.ok){
-        if(!userRes.message){
-            userRes = await userRes.text()
-            sessionStorage.setItem('user', userRes)
-            user = JSON.parse(userRes)
-        }
+    if(document.documentElement.clientWidth < 50){
+        showCategs(2);
+    }else if(document.documentElement.clientWidth < 670){
+        showCategs(3);
+    }else if(document.documentElement.clientWidth < 820){
+        showCategs(4);
+    }else if(document.documentElement.clientWidth < 1020){
+        showCategs(5);
+    }else{
+        showCategs(6);
     }
-
     // отрисовка плюса для создания категорий
     if(user && user.userRole == 2){
         let isNewCateg = false;
 
-        let plus = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        plus.classList.add('categs-plus');
-        plus.innerHTML = `<line x1="50%" y1="0%" x2="50%" y2="100%"></line><line x1="0%" y1="50%" x2="100%" y2="50%"></line>`;
-        if(!document.querySelector('.categs').lastElementChild){
-            document.querySelector('.categs').innerHTML = '<div class="row"></div>'
-        }
-        document.querySelector('.categs').lastElementChild.append(plus);
+        let plus = document.createElement('button');
+        plus.innerText = 'New categ'
+        document.querySelector('.btns').append(plus);
         
         plus.addEventListener('click', () => {
             if(isNewCateg) return;
@@ -166,17 +210,17 @@ window.addEventListener('load', async () => {
             let modal = document.querySelector('.modal-content');
             modal.classList.add('new-categ-modal');
 
-            modal.innerHTML = '<div class="row"></div>'
+            modal.innerHTML = '<div class="new-categ-cont"></div>'
 
             isNewCateg = true;
             let newCateg = document.createElement('div');
-            newCateg.className = 'categ hexagon new';
+            newCateg.className = 'categ ';
             newCateg.innerHTML =   `<svg class="polygon"> 
-            <polygon points="0,${TRIANGLE_HEIGHT} ${HEXAGON_WIDTH/2},0 ${HEXAGON_WIDTH},${TRIANGLE_HEIGHT} ${HEXAGON_WIDTH},${HEXAGON_HEIGHT-TRIANGLE_HEIGHT} ${HEXAGON_WIDTH/2},${HEXAGON_HEIGHT} 0,${HEXAGON_HEIGHT-TRIANGLE_HEIGHT}"></polygon>
+            <path d="${categPath}"></path>
             </svg>
             <div class="newCategPieces">
                 <label for="bgc">Background</label> <input id="bgc" class='picker bgc-picker' value="${colors.BLACK_C}" data-jscolor="{}">
-                <label for="fgc">Foreground</label> <input id="fgc" class='picker fgc-picker' value="${colors.BODY_BGC}" data-jscolor="{}">
+                <label for="fgc">Foreground</label> <input id="fgc" class='picker fgc-picker' value="${colors.WHITE_C}" data-jscolor="{}">
                 <label for="size">Size</label> <input id="size" class='param new-categ-size' value="30x40">
                 <label for="maxWords">Max words count</label> <input id="maxWords" class='param new-categ-maxWords' value="5">
                 <button class="create-categ">Create</button>
@@ -186,7 +230,7 @@ window.addEventListener('load', async () => {
             
             
             
-            modal.querySelector('.row').append(newCateg);
+            modal.querySelector('.new-categ-cont').append(newCateg);
             let editedField = createEditedField(newCateg);
             editedField.onfocus = null;
             editedField.onblur = null;
@@ -261,43 +305,4 @@ window.addEventListener('load', async () => {
         })
     }
 
-    const splitCateg = hexsInRow => {
-        let categs = document.querySelectorAll('.categ');
-        if(categs && categs.length >= hexsInRow){
-            categs = Array.from(categs);
-    
-            let splitedCategs = [];
-            
-            for(let i = 0; i < categs.length; i+=hexsInRow){
-                splitedCategs.push(categs.slice(i, i+hexsInRow));
-            }
-    
-            let plus = document.querySelector('.categs-plus');
-            if(plus) plus.remove()
-    
-            document.querySelectorAll('.row').forEach(row => {row.remove()});
-    
-            for(let i = 0; i < splitedCategs.length; i++){
-                if(!splitedCategs[i].length) continue
-
-                let row = setClassName(document.createElement('div'), 'row');
-                if(i % 2 == 0){
-                    row.classList.add('row-moved');
-                }else{
-                    if(splitedCategs[i+1] && splitedCategs[i+1].length){
-                        splitedCategs[i].push(splitedCategs[splitedCategs.length-1].shift());
-                    }
-                    
-                }
-                row.append(...splitedCategs[i]);
-    
-                document.querySelector('.categs').append(row)
-            }
-        }
-    }
-    if(document.documentElement.clientWidth < 540){
-        splitCateg(2)
-    }else if(document.documentElement.clientWidth < 680){
-        splitCateg(3)
-    }
 })

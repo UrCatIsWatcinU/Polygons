@@ -27,14 +27,8 @@ def index():
         user = current_user
     
     categs = Categ.query.all()
-    rows = []
-    for i in range(len(categs)):
-        if i == 0 or (i % 5) == 0:
-            rows.append([categs[i]])
-        else:
-            rows[i // 5].append(categs[i])
 
-    return render_template('index.html', rows=rows, title='Main', is_auth=current_user.is_authenticated, user=user)
+    return render_template('index.html',categs=categs, title='Main', is_auth=current_user.is_authenticated, user=user)
 
 
 
@@ -409,9 +403,26 @@ def new_hex(categ_name):
         db.session.commit()
 
         def delete_empty_hex():
-            print('delete')
-            if not str(hex.inner_text):
-                db.session.delete(hex)
+            hex_to_check = Hexagon.query.get(hex.id)
+            if not hex_to_check:
+                return
+
+            if not str(hex_to_check.inner_text):
+                hexs_to_delete = []
+                if hex_to_check.num == 1:
+                    print(f'Delete empty chain {hex_to_check.chain_id} after 30m')
+                    chain_to_delete = Chain.query.get(hex_to_check.chain_id) 
+                    db.session.delete(chain_to_delete)
+                    hexs_to_delete = chain_to_delete.hexs
+                else:
+                    for hex_to_delete in Hexagon.query.filter(Hexagon.chain_id == hex_to_check.chain_id, Hexagon.num >= hex_to_check.num).all():
+                        hexs_to_delete.append(hex_to_delete)
+                        db.session.delete(hex_to_delete)
+                        if(hex_to_delete.inner_text):
+                            return
+
+                    
+                socketio.emit('hexs', {'action': 'delete', 'categ': hex_to_check.categ.name,'body': json.dumps(list(map(lambda hex: hex.selector, hexs_to_delete)))})
                 db.session.commit()
 
         delete_empty_timer = Timer(1800.0, delete_empty_hex)

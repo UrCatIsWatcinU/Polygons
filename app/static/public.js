@@ -28,7 +28,11 @@ function isIOS() {
     || (navigator.userAgent.includes("Mac") && "ontouchend" in document)
 }
 
-
+const setCSSProps = (cssProps, prefix='', units='') => {
+    for(let prop in cssProps){
+        document.body.style.setProperty(`--${prefix}${prop}`, cssProps[prop] + units)
+    }
+}
 const setHexVisible = hexagon => {
     hexagon.style.transition = 'inherit';
     hexagon.style.opacity = 1;
@@ -37,7 +41,7 @@ const setHexVisible = hexagon => {
     if(hexagon.querySelector('.polygon')) return;
     
     hexagon.insertAdjacentHTML('afterbegin', `<svg class="polygon"> 
-    <path d="${hexPath}"></path>
+    <use href="#hex-path" x="0" y="0"></use>
     </svg>`);
 }
 
@@ -125,7 +129,7 @@ function hideModal(){
 }
 
 function createDropMenu(btns){
-    if(btns && btns.length >= 2){
+    if(btns && btns.length > 2){
         btns = Array.from(btns);
 
         let dropMenu = document.createElement('div');
@@ -213,10 +217,12 @@ let colors = {
     BODY_BGC:'#f0f0f0',
     ABOUT_BGC: '#dfdfdf',
     BLACK_C:'#333333',
+    WHITE_C: '#f0f0f0',
     MAIN_C:'#974E9E',
     DARK_MAIN_C: '#703868',
-    HEX_STROKE_C: '#333333'
+    HEX_STROKE_C: '#333333',
 }
+const defaultColors = Object.assign({}, colors);
 
 let hexsColors = [
     '#00A9B6', '#82B034', '#FFCA56', '#FF7626', '#FB91AF'
@@ -227,12 +233,32 @@ let font = {
     size: ".98em"
 };
 
-let BODY_HEIGHT = 52 * 1.5;
-const TRIANGLE_HEIGHT = BODY_HEIGHT * (35 / 60);
-const HEXAGON_HEIGHT  = TRIANGLE_HEIGHT * 2 + BODY_HEIGHT;
-let HEXAGON_WIDTH = HEXAGON_HEIGHT;
+let hexSizes = {
+    setBodyHeight(bh){
+        this.BODY_HEIGHT = bh,
+        this.TRIANGLE_HEIGHT = this.BODY_HEIGHT * (35 / 60);
+        this.HEXAGON_HEIGHT = this.TRIANGLE_HEIGHT * 2 + this.BODY_HEIGHT;
+        this.HEXAGON_WIDTH = this.HEXAGON_HEIGHT;
+    },
+    setTriangleHeight(th){
+        this.TRIANGLE_HEIGHT = th;
+        this.HEXAGON_HEIGHT = this.TRIANGLE_HEIGHT * 2 + this.BODY_HEIGHT;
+        this.HEXAGON_WIDTH = this.HEXAGON_HEIGHT;
+    },
 
-let hexPath = `M 0 ${TRIANGLE_HEIGHT} L ${HEXAGON_WIDTH/2} 0 L ${HEXAGON_WIDTH} ${TRIANGLE_HEIGHT} L ${HEXAGON_WIDTH} ${HEXAGON_HEIGHT-TRIANGLE_HEIGHT} L ${HEXAGON_WIDTH/2} ${HEXAGON_HEIGHT} L 0 ${HEXAGON_HEIGHT-TRIANGLE_HEIGHT} Z`;
+    createCSSProps(){
+        const cssProps = {};
+        for(let sizeProp in this){
+            if(typeof(hexSizes[sizeProp]) != 'number') continue
+            cssProps[sizeProp.toLowerCase().replace('_', '-')] = hexSizes[sizeProp] + 'px';
+        }
+        return cssProps
+    }
+}
+hexSizes.setBodyHeight(52 * 1.5);
+
+
+let hexPath = () => `M 0 ${hexSizes.TRIANGLE_HEIGHT} L ${hexSizes.HEXAGON_WIDTH/2} 0 L ${hexSizes.HEXAGON_WIDTH} ${hexSizes.TRIANGLE_HEIGHT} L ${hexSizes.HEXAGON_WIDTH} ${hexSizes.HEXAGON_HEIGHT-hexSizes.TRIANGLE_HEIGHT} L ${hexSizes.HEXAGON_WIDTH/2} ${hexSizes.HEXAGON_HEIGHT} L 0 ${hexSizes.HEXAGON_HEIGHT-hexSizes.TRIANGLE_HEIGHT} Z`;
 
 const main = async () => {
     if(isIOS()) document.body.classList.add('ios')
@@ -276,7 +302,17 @@ const main = async () => {
     }
 
     if(otherSettings.rounded){
-        hexPath = roundPathCorners(hexPath, .05, true);
+        const oldHexPath = hexPath;
+        hexPath = () => roundPathCorners(oldHexPath(), .05, true);
+    }
+
+    if(window.location.href.includes('fields')){
+        const hexPathSprite = setClassName(document.createElementNS('http://www.w3.org/2000/svg', 'svg'), 'hexPath-sprite');
+        hexPathSprite.innerHTML = `
+        <symbol id="hex-path">
+            <path d="${hexPath()}"></path>
+        </symbol>`;
+        document.body.append(hexPathSprite);
     }
 
     if(font.family != 'Arial'){
@@ -288,23 +324,18 @@ const main = async () => {
     }
 
     const cssProps = {
-        'body-height': BODY_HEIGHT + 'px',
         'max-about-height': (document.documentElement.clientHeight - 100) + 'px',
-        'body-bgc': colors.BODY_BGC,
-        'about-bgc': colors.ABOUT_BGC,
         'grid-c': hexToRgb(colors.MAIN_C, 0.1),
-        'main-c': colors.MAIN_C,
-        'dark-main-c': colors.DARK_MAIN_C,
-        'black-c': colors.BLACK_C,
-        'hex-stroke-c': colors.HEX_STROKE_C,
+        'red-c': '#f52e2e',
         'font': font.family,
         'font-size': font.size,
+        'trans': 'all .13s linear',
     }
-
-    for(let prop in cssProps){
-        document.body.style.setProperty('--' + prop, cssProps[prop])
+    for(let color in defaultColors){
+        cssProps[color.toLowerCase().replace('_', '-')] = colors[color] || defaultColors[color];
     }
     
+    setCSSProps(Object.assign(cssProps, hexSizes.createCSSProps()));
     
     window.onerror = (msg) => {
         showModal('Error', msg);
@@ -313,6 +344,8 @@ const main = async () => {
     if(document.querySelector('.find-button')){
         const search = document.querySelector('.find-button').onclick = async (evt) => {
             let input = document.querySelector('.find-input').value.trim().toLowerCase();
+
+            if(!input) return;
             
             let keywords = input.split(/[,-\.:]/).filter(word => word);
             let hexs = await fetch('/hexs/all');
