@@ -306,14 +306,12 @@ const main = async () => {
         hexPath = () => roundPathCorners(oldHexPath(), .05, true);
     }
 
-    if(window.location.href.includes('fields')){
-        const hexPathSprite = setClassName(document.createElementNS('http://www.w3.org/2000/svg', 'svg'), 'hexPath-sprite');
-        hexPathSprite.innerHTML = `
-        <symbol id="hex-path">
-            <path d="${hexPath()}"></path>
-        </symbol>`;
-        document.body.append(hexPathSprite);
-    }
+    const hexPathSprite = setClassName(document.createElementNS('http://www.w3.org/2000/svg', 'svg'), 'hexPath-sprite');
+    hexPathSprite.innerHTML = `
+    <symbol id="hex-path">
+        <path d="${hexPath()}"></path>
+    </symbol>`;
+    document.body.append(hexPathSprite);
 
     if(font.family != 'Arial'){
         WebFont.load({

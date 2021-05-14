@@ -213,8 +213,7 @@ window.addEventListener('load', async () => {
             modal.innerHTML = '<div class="new-categ-cont"></div>'
 
             isNewCateg = true;
-            let newCateg = document.createElement('div');
-            newCateg.className = 'categ ';
+            let newCateg = setClassName(document.createElement('div'), 'categ');
             newCateg.innerHTML =   `<svg class="polygon"> 
             <path d="${categPath}"></path>
             </svg>
@@ -237,7 +236,7 @@ window.addEventListener('load', async () => {
 
             jscolor.install();
             let bgc = colors.BLACK_C;
-            let fgc = colors.BODY_BGC;
+            let fgc = newCateg.style.color =  colors.WHITE_C;
             newCateg.querySelector('.bgc-picker').onchange = (evt) => {
                 newCateg.style.setProperty('--bgc', evt.target.value);
                 bgc = evt.target.value;

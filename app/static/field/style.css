@@ -59,9 +59,6 @@ html{
 .hexsCont *{
   cursor: inherit;
 }
-.hexPath-sprite{
-  display: none;
-}
 .hexagon-visible{
   --bgc: var(--main-c);
   opacity: 1;

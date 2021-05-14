@@ -92,15 +92,6 @@ body {
 .modal-body{
     white-space: pre-wrap;
 }
-.new-categ-modal{
-    display: flex;
-    justify-content: center;
-    height: 500px;
-}
-.new-categ-cont{
-    position: relative;
-    top: var(--triangle-height);
-}
 
 
 
@@ -364,12 +355,6 @@ a{
 .categ:hover .hexagon-editedField{
     text-decoration: underline;
 }
-.categ.new{
-    position: relative;
-}
-.newCategPieces{
-    position: absolute;
-}
 .categ .hexagon-editedField{
     text-align: center;
     display: flex;
@@ -381,6 +366,38 @@ a{
     font-size: 1.3em;
     cursor: pointer;
     top: unset;
+}
+
+
+
+.new-categ-modal{
+    display: flex;
+    justify-content: center;
+    height: 500px;
+    width: 70vw !important;
+    max-width: unset;
+}
+.new-categ-cont{
+    position: relative;
+    top: var(--triangle-height);
+
+    display: flex;
+}
+.new-categ-cont .categ{
+    width: unset;
+    height: unset;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 0;
+}
+.new-categ-cont .hexagon-editedField{
+    top: 20px;
+    z-index: 100;
+}
+.newCategPieces{
+    /* position: absolute; */
+    /* bottom: -100%; */
+    max-width: 200px;
 }
 
 
@@ -403,7 +420,7 @@ a{
     font-size: .9em;
 }
 .header{
-    height: 80px;
+    height: 100px;
     padding: 10px var(--aside-pad);    
     position: absolute;
     top: 0;
@@ -565,6 +582,12 @@ a{
 .user-chains{
     overflow: auto;
 }
+
+
+
+.hexPath-sprite{
+    display: none;
+  }
 
 
 
