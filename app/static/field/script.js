@@ -1004,7 +1004,7 @@ window.addEventListener('load', async () => {
                 let parsedHexs = [];
                 for(let hex of savedHexs){
                     let hexagon = document.querySelector(hex.selector);
-                    if(hexagon.classList.contains('hexagon-visible')) continue;
+                    if(!hexagon || !hexagon.classList || hexagon.classList.contains('hexagon-visible')) continue;
                     setHexVisible(hexagon);      
                     
                     if(hex.innerText){
@@ -1465,6 +1465,7 @@ window.addEventListener('load', async () => {
                             showAsk(() => {
                                 let virtualVisibleHexs = [...visibleHexs];
                                 
+                                deleteHex(hexagon);
                                 socket.emit('hexs', {
                                     action: 'delete',
                                     categ: document.title,
@@ -1776,7 +1777,6 @@ window.addEventListener('load', async () => {
                             <div class="bordered-cont check-cont"><label class="check-label" for="bordered">Borders</label><input class="check-input" type="checkbox" id="bordered"><div class="check-custom"></div></div>
                             <!-- <div class="turned-cont check-cont"><label class="check-label" for="turned">Turned hexagons (beta)</label><input class="check-input" type="checkbox" id="turned"><div class="check-custom"></div></div> -->
                             <div class="innerNum-cont check-cont"><label class="check-label" for="innerNum">Inner numeration</label><input class="check-input" type="checkbox" id="innerNum"><div class="check-custom"></div></div>
-                            <div class="hideBtns-cont check-cont"><label class="check-label" for="hideBtns">Always hide buttons</label><input class="check-input" type="checkbox" id="hideBtns"><div class="check-custom"></div></div>
                             <div class="ctrlZoom-cont check-cont"><label class="check-label" for="ctrlZoom">Zoom with ctrl button</label><input class="check-input" type="checkbox" id="ctrlZoom"><div class="check-custom"></div></div>
                             <div class="slideSpeed-cont check-cont short-text-cont"><label class="check-label" for="slideSpeed">Slide speed</label><input class="short-text-input" type="text" value="${otherSettings.slideSpeed}" id="slideSpeed"></div>
                         </div>

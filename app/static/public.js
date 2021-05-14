@@ -128,7 +128,7 @@ function hideModal(){
     }
 }
 
-function createDropMenu(btns){
+function createDropMenu(btns, elemAttachTo = null){
     if(btns && btns.length > 2){
         btns = Array.from(btns);
 
@@ -146,7 +146,7 @@ function createDropMenu(btns){
         <div class="drop-menu-cont"></div>`;
         let isDropMenu = false;
 
-        dropMenu.addEventListener('click', (evt) => {
+        const toggleDropMenu = (evt) => {
             evt.stopPropagation();
 
             let cont = dropMenu.querySelector('.drop-menu-cont');
@@ -190,7 +190,9 @@ function createDropMenu(btns){
             }
 
             dropMenu.querySelector('.drop-menu-cont').style.top = (dropMenu.parentElement.getBoundingClientRect().height + 5) + 'px'
-        }, {passive: false});
+        }
+        dropMenu.addEventListener('click', toggleDropMenu, {passive: false});
+        elemAttachTo.addEventListener('click', toggleDropMenu, {passive: false});
 
 
         btns[0].parentElement.append(dropMenu);
@@ -208,7 +210,6 @@ let otherSettings = {
     bordered: false,
     turned: false,
     innerNum: false,
-    hideBtns: false,
     ctrlZoom: true,
     slideSpeed: 1.6
 }
@@ -427,7 +428,7 @@ const main = async () => {
         }
     }
 
-    if(document.documentElement.offsetWidth < 800 || otherSettings.hideBtns){
+    if(document.documentElement.offsetWidth < 800){
         createDropMenu(document.querySelectorAll('.btns button'))
     }
 
