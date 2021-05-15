@@ -35,7 +35,6 @@ const setCSSProps = (cssProps, prefix='', units='') => {
 }
 const setHexVisible = hexagon => {
     hexagon.style.transition = 'inherit';
-    hexagon.style.opacity = 1;
     hexagon.classList.add('hexagon-visible');
     
     if(hexagon.querySelector('.polygon')) return;
@@ -410,7 +409,7 @@ const main = async () => {
         }
     }
 
-    if(document.body){
+    if(document.body || !window.location.includes('fields')){
         document.body.style.width = document.documentElement.clientWidth + 'px';
         document.body.style.height = document.documentElement.clientHeight + 'px';
         window.onresize = () => {

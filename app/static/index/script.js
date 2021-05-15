@@ -68,7 +68,7 @@ window.addEventListener('load', async () => {
 
         let hexagon = document.elementFromPoint(evt.clientX, evt.clientY);
         if(hexagon == document.body) return false;
-        while(!hexagon.classList.contains('hexagon')){
+        while(!hexagon.classList.contains('categ')){
             hexagon = hexagon.parentElement;
             if(hexagon == document.body) return false;
         }

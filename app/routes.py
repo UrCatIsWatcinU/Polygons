@@ -169,7 +169,6 @@ def user(id):
         list(hexs).sort(key=lambda hex: hex.num)
         return hexs or []
 
-    print(is_auth)
     return render_template('user.html', title=user.username, user=user, rating = rating, allowed_change=allowed_change, hexs_sort_fn=hexs_sort_fn, is_auth=is_auth)
 
 @app.route('/users/<id>/rating/change', methods=['POST'])

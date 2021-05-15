@@ -1094,10 +1094,6 @@ window.addEventListener('load', async () => {
 
                 }
             }
-            
-            document.body.className = 'field';
-            document.body.style.width = '';
-            document.body.style.height = '';
 
             const hexsCont = document.querySelector('.hexsCont');
 
@@ -1128,12 +1124,6 @@ window.addEventListener('load', async () => {
             hexsCont.innerHTML = rowsStr;
 
             document.querySelector('#r2').classList.add('row-first');
-            document.querySelector('#r' + GRID_HEIGHT).classList.add('row-last');
-            
-
-            document.querySelectorAll(`#r1, #r${GRID_HEIGHT}, #h1, #h${GRID_WIDTH}`).forEach(elem => {
-                elem.style.pointerEvents = 'none';
-            });
 
             if(otherSettings.turned){
                 hexsCont.style.transform = 'rotate(90deg)';
@@ -1150,8 +1140,11 @@ window.addEventListener('load', async () => {
                 let user = JSON.parse(sessionStorage.getItem('user') || '{}');
                 if(user.userRole != 2 && zoomIndex < 0.5) return;
 
-                hexsCont.style.top = -(hexsCont.offsetHeight - (hexsCont.offsetHeight * zoomIndex)) + 'px';
-                hexsCont.style.left = -(hexsCont.offsetWidth - (hexsCont.offsetWidth * zoomIndex)) + 'px';
+                const oH = hexsCont.offsetHeight;
+                const oW = hexsCont.offsetWidth;
+
+                hexsCont.style.top = -(oH - (oH * zoomIndex)) + 'px';
+                hexsCont.style.left = -(oW - (oW * zoomIndex)) + 'px';
                 hexsCont.style.transform = `scale(${zoomIndex})`;
             }   
             
@@ -1171,11 +1164,6 @@ window.addEventListener('load', async () => {
                 slider.addEventListener('mousedown', (e) => {   
                     if(e.buttons != 1 || document.querySelector('.modal') && getComputedStyle(document.querySelector('.modal')).display != 'none') return;
                     isDown = true;
-                    setTimeout(() => {
-                        if(isDown){
-                            slider.classList.add('active');
-                        }
-                    }, 500)
                     startX = e.pageX - slider.offsetLeft;
                     scrollLeft = slider.scrollLeft;
                     
@@ -1184,11 +1172,11 @@ window.addEventListener('load', async () => {
                 });
                 slider.addEventListener('mouseleave', () => {
                     isDown = false;
-                    slider.classList.remove('active');
+                    // slider.classList.remove('active');
                 });
                 slider.addEventListener('mouseup', () => {
                     isDown = false;
-                    slider.classList.remove('active');
+                    // slider.classList.remove('active');
                 });
                 slider.addEventListener('mousemove', (e) => {
                     if(!isDown) return;
@@ -1199,7 +1187,7 @@ window.addEventListener('load', async () => {
                     const y = e.pageY - slider.offsetTop;
                     const walkY = (y - startY) * SLIDE_SPEED; //scroll-fast
                     if(Math.abs(walkX) > MIN_CHANGE || Math.abs(walkY) > MIN_CHANGE){
-                        slider.classList.add('active');
+                        // slider.classList.add('active');
                     } 
                     requestAnimationFrame(function scroll(){
 
@@ -1239,7 +1227,7 @@ window.addEventListener('load', async () => {
                 
                 scrollBtns.append(plusScrollBtn, minusScrollBtn);
                 document.body.append(scrollBtns)
-                scrollBtns.style.bottom = `calc(50% - ${scrollBtns.offsetHeight / 2}px)`
+                // scrollBtns.style.bottom = `calc(50% - ${scrollBtns.offsetHeight / 2}px)`
             
                 document.documentElement.addEventListener('keydown', evt => {
                     if(evt.key == '=' && (evt.ctrlKey || evt.metaKey)){
@@ -1720,7 +1708,7 @@ window.addEventListener('load', async () => {
                 let scrollCoords = JSON.parse(localStorage.getItem('userScroll-' + document.title) || `{"x": ${document.body.scrollWidth / 2}, "y":  ${document.body.scrollHeight / 2}}`);
                 document.body.scrollLeft = scrollCoords.x;
                 document.body.scrollTop = scrollCoords.y;
-            }
+            }   
 
             try{
                 let res = await fetch('/chains/' + document.title);
@@ -2004,7 +1992,8 @@ window.addEventListener('load', async () => {
                 jscolor.install();
             }
 
-            if(document.documentElement.clientWidth < 800 || otherSettings.hideBtns){
+            const dW = document.documentElement.clientWidth; 
+            if(dW < 800 || otherSettings.hideBtns){
                 let userCont = document.querySelector('.user-cont');
 
                 if(userCont){
@@ -2015,8 +2004,6 @@ window.addEventListener('load', async () => {
 
                 createDropMenu(document.querySelectorAll('.field-btns button'));
             }
-
-            hexsCont.style.borderWidth = 'unset';
         }
         if(document.querySelector('.loading')) document.querySelector('.loading').ontransitionend = main;
 

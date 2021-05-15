@@ -648,9 +648,11 @@ a{
 
 .ios *{
     filter: none !important;
+    transform: none !important;
 }
 .ios *:focus{
     filter: none !important;
+    transform: none !important;
 }
 .ios *:hover{
     filter: none !important;
