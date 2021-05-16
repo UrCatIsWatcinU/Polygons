@@ -2,10 +2,10 @@
 
 {% block content %}
     <h1>Users</h1>
-    <ol class="users">
+    <ol class="users-list">
         {% for user_in_list in users %}
-            <li>
-                <div class="user-in-list" id='u{{user_in_list.id}}'>
+            <li class="user-in-list-cont" id='u{{user_in_list.id}}'>
+                <div class="user-in-list">
                     <div class="user-in-list-info">
                         <span class="role">{{ user_in_list.role.name }}</span>
                         <a href="{{ url_for('user', id=user_in_list.id) }}" class="username">{{ user_in_list.username }}</a>
@@ -13,12 +13,12 @@
                     </div>
                     <span class="rating">{{ user_in_list.get_rating() }}</span>
                 </div>
+                {% if user.role.name == 'admin' %}
+                    <button class="user-delete">Delete</button>
+                {% endif %}
             </li>
-            {% if user.role.name == 'admin' %}
-                <button class="user-delete">Delete</button>
-            {% endif %}
         {% endfor %}  
-        </ol>
+    </ol>
     <style>
         @media (max-width: 580px){
             button{
@@ -28,12 +28,12 @@
     </style>
     <script>
         document.querySelectorAll('.user-delete').forEach(btn => {
-            btn.onclick = (evt) => {
-                fetch('/users/delete/' + evt.target.parentElement.id, {
+            btn.onclick = () => {
+                fetch('/users/delete/' + btn.parentElement.id.replace('u', ''), {
                     method: 'DELETE'
                 });
 
-                evt.target.parentElement.remove();
+                btn.parentElement.remove();
             }
         });
     </script>

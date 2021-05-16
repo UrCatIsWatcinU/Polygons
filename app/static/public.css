@@ -461,6 +461,10 @@ a{
     border-radius: 3px;
     opacity: .7;
 }
+.users-list{
+    padding: 0 2em;
+    margin: 0;
+}
 .user-in-list{
     margin-bottom: 5px;
     display: flex;
