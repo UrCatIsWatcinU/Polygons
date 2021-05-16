@@ -149,8 +149,30 @@
         <div></div>
       {% endif %}
       <div class="btns">
-        {% block btns %}
-        {% endblock %}
+        
+        <div class="local-btns">
+          {% if not user %}
+            <button class="auth" onclick="window.location.href = `{{ url_for('login') }}`">Login</button>
+            <button class="auth" onclick="window.location.href = `{{ url_for('registration') }}`">Register</button>
+          {% endif %}
+          
+          {% block btns %}
+          {% endblock %}
+        </div>
+        {% if user %}
+          <div class="user-cont">
+            <span class="username"> {{ user.username }}</span>
+            <svg class="drop-menu-arrow" preserveAspectRatio="none" viewBox="0,0,100,100">
+              <polygon points="0,0 100,0 50,100"/>
+            </svg>
+          </div>
+          <div class="public-btns">
+            <button class="back" onclick="window.location.href = `{{ url_for('index') }}`">Main</button>
+            <button class="users" onclick="window.location.href = `{{ url_for('users_all') }}`">Users list</button>
+            <button class="users" onclick="window.location.href = `{{ url_for('user', id=user.id) }}`">Profile</button>
+            <button class="auth logout" style="color: var(--red-c)">Logout</button>
+          </div>
+        {% endif %}
       </div>
     </header>
     <div class="app">

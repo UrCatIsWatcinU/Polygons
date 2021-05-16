@@ -3,12 +3,19 @@ from app import db, login
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from datetime import datetime
+from sqlalchemy import func
+from sqlalchemy.sql.expression import select
 
 
 
 @login.user_loader
 def load_user(id):
     return User.query.get(int(id))
+class UserRating(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    change = db.Column(db.Integer, default=0)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
+    user_who_change_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -22,6 +29,7 @@ class User(UserMixin, db.Model):
     chains = db.relationship('Chain', backref='author', lazy='dynamic')
     complaints = db.relationship('Complaint', backref='author', lazy='dynamic', cascade="all, delete-orphan")
     comments = db.relationship('Comment', backref='author', lazy='dynamic', cascade="all, delete-orphan")
+    ratings = db.relationship('Comment', backref='target', lazy='dynamic', cascade="all, delete-orphan")
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -29,14 +37,9 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-    def __repr__(self):
-        return f'<User {self.username} {self.role_id}>'
+    def get_rating(self):
+        return db.session.execute(select([func.sum(UserRating.change)]).where(UserRating.user_id == self.id)).first().values()[0] or 0
 
-class UserRating(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    change = db.Column(db.Integer, default=0)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
-    user_who_change_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
 
 class Role(db.Model):
     id = db.Column(db.Integer, primary_key=True)

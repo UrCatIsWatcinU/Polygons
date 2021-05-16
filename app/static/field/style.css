@@ -59,6 +59,8 @@ html{
   opacity: 1;
   z-index: 3; 
   filter: drop-shadow(5px 5px 3px rgba(68, 68, 68, 0.3));
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 .hexagon-visible .polygon{
   stroke-width: 0;

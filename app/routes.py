@@ -22,13 +22,13 @@ from sqlalchemy.sql.expression import select
 @app.route('/')
 @app.route('/index')
 def index():
-    user = ''
-    if current_user:
+    user = None
+    if current_user and current_user.is_authenticated:
         user = current_user
     
     categs = Categ.query.all()
 
-    return render_template('index.html',categs=categs, title='Main', is_auth=current_user.is_authenticated, user=user)
+    return render_template('index.html', categs=categs, title='Main', user=user)
 
 
 
@@ -146,22 +146,19 @@ def logout():
 
 @app.route('/users')
 @login_required
-def users_all():
-    if current_user.role_id != 2:
-        return "<h1>You don't have access</h1"
-    
-    return render_template('users.html', users=User.query.all())
+def users_all():    
+    users = User.query.all()
+    return render_template('users.html', users=sorted(users, key=lambda u: u.get_rating(), reverse=True), user=current_user)
 
 @app.route('/users/<id>')
 def user(id):
-    user = User.query.get(id)
-    rating = db.session.execute(select([func.sum(UserRating.change)]).where(UserRating.user_id == id)).first().values()[0] or 0
+    owner = User.query.get(id)
     allowed_change = 0
 
-    is_auth = False
+    user = None
     if current_user.is_authenticated and current_user.id:
-        is_auth = True
-        user_change = UserRating.query.filter_by(user_id=id, user_who_change_id=current_user.id).first()
+        user = current_user
+        user_change = UserRating.query.filter_by(user_id=id, user_who_change_id=user.id).first()
         if user_change:
             allowed_change = -user_change.change
 
@@ -169,7 +166,7 @@ def user(id):
         list(hexs).sort(key=lambda hex: hex.num)
         return hexs or []
 
-    return render_template('user.html', title=user.username, user=user, rating = rating, allowed_change=allowed_change, hexs_sort_fn=hexs_sort_fn, is_auth=is_auth)
+    return render_template('user.html', title=owner.username, owner=owner, allowed_change=allowed_change, hexs_sort_fn=hexs_sort_fn, user=user)
 
 @app.route('/users/<id>/rating/change', methods=['POST'])
 @login_required
@@ -248,7 +245,7 @@ def fields(categ_name):
 
     if categ:
         if current_user.is_authenticated:
-            return render_template('field.html', field_name=categ_name, role=current_user.role_id, username=current_user.username)
+            return render_template('field.html', field_name=categ_name, role=current_user.role_id, user=current_user)
         else:
             return render_template('noedite-field.html', field_name=categ_name)
     else:
@@ -634,7 +631,7 @@ def get_complaints():
     if current_user.role_id != 2:
         return "<h1>You don't have access</h1"
 
-    return render_template('complaints.html', complaints=Complaint.query.all(), title="Complaints")
+    return render_template('complaints.html', complaints=Complaint.query.all(), title="Complaints", user=current_user)
 
 @app.route('/complaints/new', methods=['POST'])
 @login_required

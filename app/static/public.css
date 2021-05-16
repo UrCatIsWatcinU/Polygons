@@ -166,31 +166,29 @@ a{
     max-width: 95vw;
     position: fixed;
     top: 10px;
-    right: 5px;
+    right: 10px;
     z-index: 5;
     display: flex;
 }
 .drop-menu{
     position: relative;
 }
-.drop-menu-svg{
-    width: 27px;
+.drop-menu-arrow{
+    height: .7em;
+    width: .9em;
     fill: var(--main-c);
-    stroke-linecap: round;
-    cursor: pointer;
+    will-change: transform;
+    margin-left: 5px;
 }
-.drop-menu-svg *{
-    transition: .2s linear;
-    transform-origin: center;
-}
-.drop-menu-svg:hover{
-    filter: brightness(.8);
+.drop-menu-opened .drop-menu-arrow{
+    transform: rotate(-90deg);
 }
 .drop-menu-cont{
     position: absolute;
     top: 27px;
     right: 0;
     background-color: var(--body-bgc);
+    /* background-color: var(--about-bgc); */
     border-radius: 3px;
     border: 1px var(--main-c) solid;
     opacity: 0;
@@ -201,20 +199,13 @@ a{
     align-items: center;
 }
 .drop-menu-button{
-    width: 100%;
+    min-width: 100%;
+    width: max-content;
     border-width: 0px;
     margin: 0;
+    /* background-color: transparent; */
 }
 
-
-
-
-.user-cont{
-    margin-right: 10px;
-    display: flex;
-    align-items: center;
-    font-size: .9em;
-}
 
 
 
@@ -330,8 +321,6 @@ a{
     display: flex;
     justify-content: center;
     align-items: center;
-    opacity: 1;
-    transition: inherit;
     filter: drop-shadow(3px 3px 3px rgba(68, 68, 68, 0.3));
     position: relative;
     height: var(--categ-totalH);
@@ -474,11 +463,25 @@ a{
     border-radius: 3px;
     opacity: .7;
 }
-.user{
+.user-in-list{
     margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+}
+.user-in-list .rating{
+    margin-left: 20px;
+    color: var(--main-c);
 }
 .username{
     text-decoration: underline;
+    user-select: none;
+}
+.user-cont{
+    display: flex;
+    align-items: center;
+    font-size: .9em;
+    cursor: pointer;
+    padding: 0 7.5px;
 }
 .complaint{
     position: relative;

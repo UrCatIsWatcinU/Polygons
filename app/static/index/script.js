@@ -195,113 +195,109 @@ window.addEventListener('load', async () => {
         showCategs(6);
     }
     // отрисовка плюса для создания категорий
-    if(user && user.userRole == 2){
-        let isNewCateg = false;
+    let isNewCateg = false;
 
-        let plus = document.createElement('button');
-        plus.innerText = 'New categ'
-        document.querySelector('.btns').append(plus);
+    const plus = document.querySelector('.new-categ-btn')
+    if(!plus) return;
+    
+    plus.addEventListener('click', () => {
+        if(isNewCateg) return;
+
+        showModal('', '', true);
+
+        let modal = document.querySelector('.modal-content');
+        modal.classList.add('new-categ-modal');
+
+        modal.innerHTML = '<div class="new-categ-cont"></div>'
+
+        isNewCateg = true;
+        let newCateg = setClassName(document.createElement('div'), 'categ');
+        newCateg.innerHTML =   `<svg class="polygon"> 
+        <path d="${categPath}"></path>
+        </svg>
+        <div class="newCategPieces">
+            <label for="bgc">Background</label> <input id="bgc" class='picker bgc-picker' value="${colors.BLACK_C}" data-jscolor="{}">
+            <label for="fgc">Foreground</label> <input id="fgc" class='picker fgc-picker' value="${colors.WHITE_C}" data-jscolor="{}">
+            <label for="size">Size</label> <input id="size" class='param new-categ-size' value="30x40">
+            <label for="maxWords">Max words count</label> <input id="maxWords" class='param new-categ-maxWords' value="5">
+            <button class="create-categ">Create</button>
+            <button class="create-categ">Cancel</button>
+        </div>`;
+        newCateg.style.setProperty('--bgc', colors.BLACK_C);
         
-        plus.addEventListener('click', () => {
-            if(isNewCateg) return;
+        
+        
+        modal.querySelector('.new-categ-cont').append(newCateg);
+        let editedField = createEditedField(newCateg);
+        editedField.onfocus = null;
+        editedField.onblur = null;
 
-            showModal('', '', true);
+        jscolor.install();
+        let bgc = colors.BLACK_C;
+        let fgc = newCateg.style.color =  colors.WHITE_C;
+        newCateg.querySelector('.bgc-picker').onchange = (evt) => {
+            newCateg.style.setProperty('--bgc', evt.target.value);
+            bgc = evt.target.value;
+        }
+        newCateg.querySelector('.fgc-picker').onchange = (evt) => {
+            editedField.style.color = evt.target.value;
+            fgc = evt.target.value;
+        }
+        
+        newCateg.addEventListener('dblclick', (evt) => {
+            evt.preventDefault();
+            evt.stopImmediatePropagation();
 
-            let modal = document.querySelector('.modal-content');
-            modal.classList.add('new-categ-modal');
-
-            modal.innerHTML = '<div class="new-categ-cont"></div>'
-
-            isNewCateg = true;
-            let newCateg = setClassName(document.createElement('div'), 'categ');
-            newCateg.innerHTML =   `<svg class="polygon"> 
-            <path d="${categPath}"></path>
-            </svg>
-            <div class="newCategPieces">
-                <label for="bgc">Background</label> <input id="bgc" class='picker bgc-picker' value="${colors.BLACK_C}" data-jscolor="{}">
-                <label for="fgc">Foreground</label> <input id="fgc" class='picker fgc-picker' value="${colors.WHITE_C}" data-jscolor="{}">
-                <label for="size">Size</label> <input id="size" class='param new-categ-size' value="30x40">
-                <label for="maxWords">Max words count</label> <input id="maxWords" class='param new-categ-maxWords' value="5">
-                <button class="create-categ">Create</button>
-                <button class="create-categ">Cancel</button>
-            </div>`;
-            newCateg.style.setProperty('--bgc', colors.BLACK_C);
+            newCateg.classList.add('hexagon-active');   
             
+            let editedField = createEditedField(newCateg, false);
             
-            
-            modal.querySelector('.new-categ-cont').append(newCateg);
-            let editedField = createEditedField(newCateg);
-            editedField.onfocus = null;
-            editedField.onblur = null;
+            editedField.setAttribute('contenteditable','true');
+            editedField.focus();
+        
+        }, {passive:false, capture:true});
 
-            jscolor.install();
-            let bgc = colors.BLACK_C;
-            let fgc = newCateg.style.color =  colors.WHITE_C;
-            newCateg.querySelector('.bgc-picker').onchange = (evt) => {
-                newCateg.style.setProperty('--bgc', evt.target.value);
-                bgc = evt.target.value;
-            }
-            newCateg.querySelector('.fgc-picker').onchange = (evt) => {
-                editedField.style.color = evt.target.value;
-                fgc = evt.target.value;
-            }
-            
-            newCateg.addEventListener('dblclick', (evt) => {
-                evt.preventDefault();
-                evt.stopImmediatePropagation();
+        newCateg.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                modal.parentElement.style.display = 'none';
+                modal.classList.remove('new-categ-modal');
+                isNewCateg = false;
+            });
+        });
 
-                newCateg.classList.add('hexagon-active');   
-                
-                let editedField = createEditedField(newCateg, false);
-                
-                editedField.setAttribute('contenteditable','true');
-                editedField.focus();
-            
-            }, {passive:false, capture:true})
+        newCateg.querySelector('.create-categ').onclick = async () => {
+            if(!editedField.innerText) return;
 
-            newCateg.querySelectorAll('button').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    modal.parentElement.style.display = 'none';
-                    modal.classList.remove('new-categ-modal');
-                    isNewCateg = false;
+            let params = {};
+            Array.from(newCateg.querySelectorAll('.param')).forEach(param => {
+                params[param.id] = param.value;
+            });
+
+            if(!params.size.match(/\d{1,3}[xх\s]\d{1,3}/) || !params.maxWords.match(/\d+/) ) return;
+
+            newCateg.querySelector('.newCategPieces').remove();
+            let res = await fetch('/categ/new', {
+                method:'POST',
+                body:JSON.stringify({
+                    name: editedField.innerText.trim(),
+                    color: bgc.replace('#', '').trim(),
+                    textColor: fgc.replace('#', ''),
+                    params: JSON.stringify(params)
                 })
-            })
+            });
 
-            newCateg.querySelector('.create-categ').onclick = async () => {
-                if(!editedField.innerText) return;
-
-                let params = {};
-                Array.from(newCateg.querySelectorAll('.param')).forEach(param => {
-                    params[param.id] = param.value;
-                })
-
-                if(!params.size.match(/\d{1,3}[xх\s]\d{1,3}/) || !params.maxWords.match(/\d+/) ) return;
-
-                newCateg.querySelector('.newCategPieces').remove();
-                let res = await fetch('/categ/new', {
-                    method:'POST',
-                    body:JSON.stringify({
-                        name: editedField.innerText.trim(),
-                        color: bgc.replace('#', '').trim(),
-                        textColor: fgc.replace('#', ''),
-                        params: JSON.stringify(params)
-                    })
-                })
-
-                if(!res.ok){
-                    showModal("Couldn't create category", 'An error occurred while creating the category');
+            if(!res.ok){
+                showModal("Couldn't create category", 'An error occurred while creating the category');
+                return;
+            }else{
+                res = await res.json();
+                if(!res.success){
+                    showModal('Error', res.message)
                     return
-                }else{
-                    res = await res.json();
-                    if(!res.success){
-                        showModal('Error', res.message)
-                        return
-                    }
                 }
-                window.location.reload()
             }
+            window.location.reload();
+        }
 
-        })
-    }
-
-})
+    });
+});

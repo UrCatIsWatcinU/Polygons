@@ -59,17 +59,10 @@
 
 {% block btns %}
     {% if is_auth %}
-    <div class="user-cont">
-        <span class="username"> {{ user.username }}</span>
-    </div>
-    <button class="auth logout">Logout</button>
         {% if user.role.name == 'admin' %}
-            <button class="users" onclick="window.location.href = `{{ url_for('users_all') }}`">Users</button>
+            <button class="new-categ-btn">New categ</button>
             <button class="complaints" onclick="window.location.href = `{{ url_for('get_complaints') }}`">Complaints</button>
         {% endif %}
-    {% else %}
-    <button class="auth" onclick="window.location.href = `{{ url_for('login') }}`">Login</button>
-    <button class="reg" onclick="window.location.href = `{{ url_for('registration') }}`">Register</button>
     {% endif %}
 {% endblock %}
 

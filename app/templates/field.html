@@ -110,11 +110,14 @@
       <button class="find-button">Search</button>
     </div>
     <div class="field-btns">
-      <button class="back" onclick="window.location.href = `{{ url_for('index') }}`">Back</button>
+      <button class="back" onclick="window.location.href = `{{ url_for('index') }}`">To main</button>
+      <button class="users" onclick="window.location.href = `{{ url_for('users_all') }}`">Users list</button>
+      <button class="users" onclick="window.location.href = `{{ url_for('user', id=user.id) }}`">Profile</button>
       <button class="settings-button">Settings</button>
+      <button class="auth logout" style="color: var(--red-c)">Logout</button>
     </div>
     <div class="user-cont">
-      <span class="username"> {{ username }}</span>
+      <span class="username"> {{ user.username }}</span>
     </div>
   </div>
   <svg class="icon" viewBox="0 0 603 201" fill="#703868" xmlns="http://www.w3.org/2000/svg">

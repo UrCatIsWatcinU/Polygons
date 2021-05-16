@@ -7,42 +7,42 @@
 
 {% block content %}
     <div class="user-username">
-        <h1 class="user-title">{{ user.username }}</h1>
+        <h1 class="user-title">{{ owner.username }}</h1>
         
     </div>
     <div class="user-content">
         <div class="user-info">
             <div class="user-info-item">
                 <span>Id:</span>&nbsp;
-                <span class="user-id">{{ user.id }}</span>
+                <span class="user-id">{{ owner.id }}</span>
             </div>
             <div class="user-info-item">
                 <span>Email:</span>&nbsp;
-                <span>{{ user.email }}</span>
+                <span>{{ owner.email }}</span>
             </div>
             <div class="user-info-item">
                 <span>Chains count:</span>&nbsp;
-                <span>{{ user.chains.count() }}</span>
+                <span>{{ owner.chains.count() }}</span>
             </div>
             <div class="user-info-item">
                 <span>Hexs count:</span>&nbsp;
-                <span>{{ user.hexs.count() }}</span>
+                <span>{{ owner.hexs.count() }}</span>
             </div>
             <div class="user-info-item">
                 <span>Rating:</span>&nbsp;
                 <div class="user-rating-cont">
-                    <svg class="user-rating-btn rating-plus" style="{% if allowed_change == -1  %} pointer-events: none; opacity: 0; {% endif %} {% if not is_auth %} display: none; {% endif %}">
+                    <svg class="user-rating-btn rating-plus" style="{% if allowed_change == -1  %} pointer-events: none; opacity: 0; {% endif %} {% if not user %} display: none; {% endif %}">
                         <line x1="50%" y1="0%" x2="50%" y2="100%"></line><line x1="0%" y1="50%" x2="100%" y2="50%"></line>
                     </svg>
-                    <span class="user-rating-num" style="{% if not is_auth %} margin:0; {% endif %}">{{ rating }}</span>
-                    <svg class="user-rating-btn rating-minus" style="{% if allowed_change == 1 %} pointer-events: none; opacity: 0; {% endif %} {% if not is_auth %} display: none; {% endif %}">
+                    <span class="user-rating-num" style="{% if not user %} margin:0; {% endif %}">{{ owner.get_rating() }}</span>
+                    <svg class="user-rating-btn rating-minus" style="{% if allowed_change == 1 %} pointer-events: none; opacity: 0; {% endif %} {% if not user %} display: none; {% endif %}">
                         <line x1="0%" y1="50%" x2="100%" y2="50%"></line>
                     </svg>
                 </div>
             </div>
         </div>
         <div class="user-chains">
-            {% for chain in user.chains %}
+            {% for chain in owner.chains %}
                 <div class="row">
                     {% for hex in hexs_sort_fn(chain.hexs) %}
                         <div class="hexagon" id="h{{ hex.num }}">
@@ -66,10 +66,11 @@
             overflow-x: auto;
             overflow-y: hidden;
             width: var(--max-row-w);
+            border: none !important;
+            pointer-events: auto !important;
+        }
+        .hexagon{
+            pointer-events: auto !important;
         }
     </style>
-{% endblock %}
-
-{% block btns %}
-    <button class="back" onclick="window.location.href = `{{ url_for('index') }}`">Back</button>
 {% endblock %}

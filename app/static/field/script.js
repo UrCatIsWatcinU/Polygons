@@ -1706,8 +1706,9 @@ window.addEventListener('load', async () => {
                 
             }else{
                 let scrollCoords = JSON.parse(localStorage.getItem('userScroll-' + document.title) || `{"x": ${document.body.scrollWidth / 2}, "y":  ${document.body.scrollHeight / 2}}`);
-                document.body.scrollLeft = scrollCoords.x;
-                document.body.scrollTop = scrollCoords.y;
+                // document.body.scrollLeft = scrollCoords.x;
+                // document.body.scrollTop = scrollCoords.y;
+                document.body.scrollTo(scrollCoords.x, scrollCoords.y)
             }   
 
             try{
@@ -1992,18 +1993,14 @@ window.addEventListener('load', async () => {
                 jscolor.install();
             }
 
-            const dW = document.documentElement.clientWidth; 
-            if(dW < 800 || otherSettings.hideBtns){
-                let userCont = document.querySelector('.user-cont');
-
-                if(userCont){
-                    userCont.remove();
-                    
-                    document.querySelector('.field-btns').before(userCont);
-                }
-
-                createDropMenu(document.querySelectorAll('.field-btns button'));
+            const userCont = document.querySelector('.user-cont');
+            const btns = document.querySelector('.field-btns')
+            if(userCont){
+                userCont.remove();
+                
+                btns.before(userCont);
             }
+            createDropMenu(btns.children, userCont);
         }
         if(document.querySelector('.loading')) document.querySelector('.loading').ontransitionend = main;
 

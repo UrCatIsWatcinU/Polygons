@@ -2,17 +2,23 @@
 
 {% block content %}
     <h1>Users</h1>
-    <div class="users">
-        {% for user in users %}
-            <div class="user" id='{{user.id}}'>
-                <span >{{user.id}}.</span>
-                <span class="role">{{user.role.name}}</span>
-                <span class="username">{{user.username}}</span>
-                <span class="email">{{user.email}}</span>
+    <ol class="users">
+        {% for user_in_list in users %}
+            <li>
+                <div class="user-in-list" id='u{{user_in_list.id}}'>
+                    <div class="user-in-list-info">
+                        <span class="role">{{ user_in_list.role.name }}</span>
+                        <a href="{{ url_for('user', id=user_in_list.id) }}" class="username">{{ user_in_list.username }}</a>
+                        <span class="email">{{ user_in_list.email }}</span>
+                    </div>
+                    <span class="rating">{{ user_in_list.get_rating() }}</span>
+                </div>
+            </li>
+            {% if user.role.name == 'admin' %}
                 <button class="user-delete">Delete</button>
-            </div>
+            {% endif %}
         {% endfor %}  
-    </div>
+        </ol>
     <style>
         @media (max-width: 580px){
             button{
@@ -31,8 +37,4 @@
             }
         });
     </script>
-{% endblock %}
-
-{% block btns %}
-    <button class="back" onclick="window.location.href = `{{ url_for('index') }}`">Back</button>
 {% endblock %}
