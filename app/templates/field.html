@@ -109,8 +109,8 @@
       <input type="text" class="find-input">
       <button class="find-button">Search</button>
     </div>
-    <div class="field-btns">
-      <button class="back" onclick="window.location.href = `{{ url_for('index') }}`">To main</button>
+    <div class="drop-menu">
+      <button class="back" onclick="window.location.href = `{{ url_for('index') }}`">Main</button>
       <button class="users" onclick="window.location.href = `{{ url_for('users_all') }}`">Users list</button>
       <button class="users" onclick="window.location.href = `{{ url_for('user', id=user.id) }}`">Profile</button>
       <button class="settings-button">Settings</button>

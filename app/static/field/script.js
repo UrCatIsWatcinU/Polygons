@@ -1992,15 +1992,6 @@ window.addEventListener('load', async () => {
                 
                 jscolor.install();
             }
-
-            const userCont = document.querySelector('.user-cont');
-            const btns = document.querySelector('.field-btns')
-            if(userCont){
-                userCont.remove();
-                
-                btns.before(userCont);
-            }
-            createDropMenu(btns.children, userCont);
         }
         if(document.querySelector('.loading')) document.querySelector('.loading').ontransitionend = main;
 

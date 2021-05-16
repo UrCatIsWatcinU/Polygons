@@ -171,19 +171,6 @@ a{
     display: flex;
 }
 .drop-menu{
-    position: relative;
-}
-.drop-menu-arrow{
-    height: .7em;
-    width: .9em;
-    fill: var(--main-c);
-    will-change: transform;
-    margin-left: 5px;
-}
-.drop-menu-opened .drop-menu-arrow{
-    transform: rotate(-90deg);
-}
-.drop-menu-cont{
     position: absolute;
     top: 27px;
     right: 0;
@@ -198,7 +185,17 @@ a{
     flex-direction: column;
     align-items: center;
 }
-.drop-menu-button{
+.drop-menu-arrow{
+    height: .7em;
+    width: .9em;
+    fill: var(--main-c);
+    will-change: transform;
+    margin-left: 5px;
+}
+.drop-menu-opened .drop-menu-arrow{
+    transform: rotate(-90deg);
+}
+.drop-menu button{
     min-width: 100%;
     width: max-content;
     border-width: 0px;
@@ -421,6 +418,7 @@ a{
 }
 .btns{
     display: flex;
+    position: relative;
 }
 
 .main-logo{

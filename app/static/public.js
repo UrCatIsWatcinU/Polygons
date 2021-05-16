@@ -127,32 +127,24 @@ function hideModal(){
     }
 }
 
-function createDropMenu(btns, elemAttachTo = null){
-    if(btns && btns.length){
-        btns = Array.from(btns);
+function createDropMenu(dropMenu = null, userCont = null){
+    if(!dropMenu) dropMenu = document.querySelector('.drop-menu');
+    if(!userCont) userCont = document.querySelector('.user-cont');
 
-        let dropMenu = document.createElement('div');
-        dropMenu.className = 'drop-menu';
 
-        dropMenu.innerHTML = `<div class="drop-menu-cont"></div>`;
+    if(dropMenu){
         let isDropMenu = false;
 
         const toggleDropMenu = (evt) => {
             evt.stopPropagation();
 
-            let cont = dropMenu.querySelector('.drop-menu-cont');
-
             if(!isDropMenu){
                 isDropMenu = true;
                 
-                cont.append(...btns);
-                cont.style.opacity = 1;
-                btns.forEach(btn => {
-                    btn.classList.add('drop-menu-button');
-                });
+                dropMenu.style.opacity = 1;
 
                 document.addEventListener('click', closeDropMenu);
-                elemAttachTo.classList.add('drop-menu-opened');
+                userCont.classList.add('drop-menu-opened');
             }else{
                 closeDropMenu();
             }
@@ -160,30 +152,18 @@ function createDropMenu(btns, elemAttachTo = null){
             function closeDropMenu(){
                 if(isDropMenu){
                     isDropMenu = false;
-                    dropMenu.querySelectorAll('path').forEach(elem => {
-                        elem.style = ''
-                    })
-                    cont.style.opacity = 0;
+                    dropMenu.style.opacity = 0;
     
-                    btns.forEach(btn => {
-                        btn.remove();
-                    });
                     document.removeEventListener('click', closeDropMenu);
                 }
-                elemAttachTo.classList.remove('drop-menu-opened');
+                userCont.classList.remove('drop-menu-opened');
             }
             
-            dropMenu.querySelector('.drop-menu-cont').style.top = (dropMenu.parentElement.getBoundingClientRect().height + 5) + 'px';
+            dropMenu.style.top = (dropMenu.parentElement.getBoundingClientRect().height + 5) + 'px';
         }
+        console.log(dropMenu);
         dropMenu.addEventListener('click', toggleDropMenu, {passive: false});
-        if(elemAttachTo) elemAttachTo.addEventListener('click', toggleDropMenu, {passive: false});
-
-
-        btns[0].parentElement.append(dropMenu);
-        btns.forEach(btn => {
-            setTimeout(() => {btn.remove()}, 10)
-        });
-
+        if(userCont) userCont.addEventListener('click', toggleDropMenu, {passive: false});
 
         return dropMenu;
     }
@@ -394,16 +374,18 @@ const main = async () => {
         }
     }
 
-    if(document.body || !window.location.includes('fields')){
+    if(document.body || !window.location.href.includes('fields')){
         document.body.style.width = document.documentElement.clientWidth + 'px';
         document.body.style.height = document.documentElement.clientHeight + 'px';
         window.onresize = () => {
             document.body.style.width = document.documentElement.clientWidth + 'px';
             document.body.style.height = document.documentElement.clientHeight + 'px';
         }
+
+        console.log(window.location.href)
     }
-
-
+    
+    
     if(document.querySelector('.logout')){
         document.querySelector('.logout').onclick = () => {
             window.location.href = '/logout';
@@ -411,8 +393,8 @@ const main = async () => {
             sessionStorage.clear();
         }
     }
-
-    createDropMenu(document.querySelectorAll('.public-btns button'), document.querySelector('.user-cont'))
+    
+    createDropMenu();
 
     document.body.classList.remove('while-loading');
 
