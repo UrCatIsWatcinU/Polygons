@@ -6,7 +6,7 @@ function getRand(min, max) {
 
 function hexToRgb(color, alpha = 1){
     let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color);
-    return result ? `rgb(${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}, ${alpha})` : null;
+    return result ? `rgba(${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}, ${alpha})` : null;
 } 
 function setClassName(elem, classList){
     elem.classList.add(...classList.split(/[(\s+)(,\s+)]/));
@@ -161,13 +161,15 @@ function createDropMenu(dropMenu = null, userCont = null){
             
             dropMenu.style.top = (dropMenu.parentElement.getBoundingClientRect().height + 5) + 'px';
         }
-        console.log(dropMenu);
+        
         dropMenu.addEventListener('click', toggleDropMenu, {passive: false});
         if(userCont) userCont.addEventListener('click', toggleDropMenu, {passive: false});
 
         return dropMenu;
     }
 }
+
+const tasks = [];
 
 let otherSettings = {
     rounded: false, 
@@ -221,7 +223,6 @@ let hexSizes = {
     }
 }
 hexSizes.setBodyHeight(52 * 1.5);
-
 
 let hexPath = () => `M 0 ${hexSizes.TRIANGLE_HEIGHT} L ${hexSizes.HEXAGON_WIDTH/2} 0 L ${hexSizes.HEXAGON_WIDTH} ${hexSizes.TRIANGLE_HEIGHT} L ${hexSizes.HEXAGON_WIDTH} ${hexSizes.HEXAGON_HEIGHT-hexSizes.TRIANGLE_HEIGHT} L ${hexSizes.HEXAGON_WIDTH/2} ${hexSizes.HEXAGON_HEIGHT} L 0 ${hexSizes.HEXAGON_HEIGHT-hexSizes.TRIANGLE_HEIGHT} Z`;
 
@@ -295,7 +296,7 @@ const main = async () => {
         'trans': 'all .13s linear',
     }
     for(let color in defaultColors){
-        cssProps[color.toLowerCase().replace('_', '-')] = colors[color] || defaultColors[color];
+        cssProps[color.toLowerCase().replace(/_/g, '-',)] = colors[color] || defaultColors[color];
     }
     
     setCSSProps(Object.assign(cssProps, hexSizes.createCSSProps()));
@@ -381,8 +382,6 @@ const main = async () => {
             document.body.style.width = document.documentElement.clientWidth + 'px';
             document.body.style.height = document.documentElement.clientHeight + 'px';
         }
-
-        console.log(window.location.href)
     }
     
     
@@ -411,10 +410,12 @@ const main = async () => {
 
         setTimeout(() => {
             if(!transEnd){
-                deleteLoading()
+                deleteLoading();
             }
         }, 100)
     }
+
+    tasks.forEach(task => task());
 }
 window.addEventListener('load', main);
 

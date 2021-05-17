@@ -1,5 +1,5 @@
 
-window.addEventListener('settingsLoaded', () => {
+tasks.push(() => {
     document.body.style.setProperty('--max-row-w', document.querySelector('.user-content').offsetWidth + 'px');
 
     document.querySelector('.user-rating-cont').onclick = evt => {
@@ -62,4 +62,25 @@ window.addEventListener('settingsLoaded', () => {
         }
         setHexVisible(hexagon);
     });
+
+    const deleteBtn = document.querySelector('.user-delete'); 
+    if(deleteBtn){
+        deleteBtn.onclick = () => {
+            showAsk(() => {
+                fetch('/users/delete/i', {
+                    method: 'DELETE'
+                })
+                .then(res => {
+                    if(res.ok) return res.json();
+                    else showModal('An error occurred when deleting the profile', 'Please, try later. Status: ' + res.status);
+                })
+                .then(res => {
+                    if(res && res.success) window.location.href = '/';
+                    else showModal('An error occurred when deleting the profile', 'Please, try later.');
+                })
+                .catch(err => showModal('An error occurred when deleting the profile', err));
+                
+            }, 'You will not be able to cancel this action. Now, if you delete your account nobody can\'t restore it')
+        }
+    }
 });

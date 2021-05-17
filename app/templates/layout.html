@@ -1,3 +1,20 @@
+{% macro drop_menu(user) -%}
+  <div class="user-cont">
+    <span class="username"> {{ user.username }}</span>
+    <svg class="drop-menu-arrow" preserveAspectRatio="none" viewBox="0,0,100,100">
+      <polygon points="0,0 100,0 50,100"/>
+    </svg>
+  </div>
+  <div class="drop-menu">
+    <button type="button" href="{{ url_for('index') }}" class="back" onclick="window.location.href = `{{ url_for('index') }}`">Main</button>
+    <button class="users" onclick="window.location.href = `{{ url_for('users_all') }}`">Users list</button>
+    <button class="users" onclick="window.location.href = `{{ url_for('user', id=user.id) }}`">Profile</button>
+    <button class="auth logout" style="color: var(--red-c)">Logout</button>
+  </div>
+{%- endmacro %}
+
+
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -160,18 +177,7 @@
           {% endblock %}
         </div>
         {% if user %}
-          <div class="user-cont">
-            <span class="username"> {{ user.username }}</span>
-            <svg class="drop-menu-arrow" preserveAspectRatio="none" viewBox="0,0,100,100">
-              <polygon points="0,0 100,0 50,100"/>
-            </svg>
-          </div>
-          <div class="drop-menu">
-            <button class="back" onclick="window.location.href = `{{ url_for('index') }}`">Main</button>
-            <button class="users" onclick="window.location.href = `{{ url_for('users_all') }}`">Users list</button>
-            <button class="users" onclick="window.location.href = `{{ url_for('user', id=user.id) }}`">Profile</button>
-            <button class="auth logout" style="color: var(--red-c)">Logout</button>
-          </div>
+          {{ drop_menu(user) }}
         {% endif %}
       </div>
     </header>

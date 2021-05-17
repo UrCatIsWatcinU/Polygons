@@ -460,15 +460,47 @@ a{
     padding: 3px 3px ;
     border-radius: 3px;
     opacity: .7;
+    width: var(--role-size);
+    box-sizing: border-box;
+    text-align: center;
+}
+.user-in-list-cont{
+    padding: 5px;
+    position: relative;
+}
+.user-in-list-me{
+    background-color: var(--me-bgc);
+}
+.user-in-list-legend{
+    padding-bottom: 1.5px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid var(--main-c);
+}
+.user-in-list-legend::marker,
+.user-in-list-legend::-moz-list-number{
+    color: transparent;
 }
 .users-list{
     padding: 0 2em;
     margin: 0;
+    width: 100%;
+    box-sizing: border-box;
 }
 .user-in-list{
-    margin-bottom: 5px;
     display: flex;
     justify-content: space-between;
+}
+.user-in-list-hidden .user-in-list,
+.user-in-list-hidden::marker{
+    opacity: .5;
+}
+.user-in-list-info{
+    display: flex;
+    width: var(--info-size);
+    justify-content: space-between;
+}
+.user-in-list-btns{
+    margin-top: 5px;
 }
 .user-in-list .rating{
     margin-left: 20px;
@@ -477,6 +509,7 @@ a{
 .username{
     text-decoration: underline;
     user-select: none;
+    margin-left: 10px;
 }
 .user-cont{
     display: flex;
@@ -580,6 +613,12 @@ a{
     display: flex;
     justify-content: space-between;
     margin-bottom: 5px;
+}
+.user-btns{
+    margin-top: 10px;
+}
+.user-delete{
+    color: var(--red-c);
 }
 .user-info-item:last-child{
     margin: 0;

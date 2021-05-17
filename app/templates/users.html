@@ -1,22 +1,40 @@
 {% extends "layout.html" %}
 
+{% block head %}
+    <script src="{{ url_for('static', filename='other/users.js') }}"></script>
+{% endblock %}
+
 {% block content %}
     <h1>Users</h1>
-    <ol class="users-list">
-        {% for user_in_list in users %}
-            <li class="user-in-list-cont" id='u{{user_in_list.id}}'>
-                <div class="user-in-list">
-                    <div class="user-in-list-info">
-                        <span class="role">{{ user_in_list.role.name }}</span>
-                        <a href="{{ url_for('user', id=user_in_list.id) }}" class="username">{{ user_in_list.username }}</a>
-                        <span class="email">{{ user_in_list.email }}</span>
-                    </div>
-                    <span class="rating">{{ user_in_list.get_rating() }}</span>
+    <ol start="0" class="users-list">
+        <li class="user-in-list-cont user-in-list-legend">
+            <div class="user-in-list">
+                <div class="user-in-list-info">
+                    <span class="role">Role</span>
+                    <span class="username">Username</span>
                 </div>
-                {% if user.role.name == 'admin' %}
-                    <button class="user-delete">Delete</button>
-                {% endif %}
-            </li>
+                <span class="rating">Rating</span>
+            </div>
+        </li>
+        {% for user_in_list in users %}
+            {% if not user_in_list.is_hidden or user.role.name == 'admin' %}
+                <li class="user-in-list-cont {% if user_in_list.id == user.id %} user-in-list-me {% endif %} {% if user_in_list.is_hidden %} user-in-list-hidden {% endif %}" id='u{{user_in_list.id}}'>
+                    <div class="user-in-list">
+                        <div class="user-in-list-info">
+                            <span class="role">{{ user_in_list.role.name }}</span>
+                            <a href="{{ url_for('user', id=user_in_list.id) }}" class="username">{{ user_in_list.username }}</a>
+                        </div>
+                        <span class="rating">{{ user_in_list.get_rating() }}</span>
+                    </div>
+                    {% if user.role.name == 'admin' and user_in_list.id != user.id %}
+                        <div class="user-in-list-btns">
+                            <button class="user-in-list-delete">Delete</button>
+                            <button class="user-in-list-changeV">Change visibility</button>
+                        </div>
+                    {% endif %}
+                </li>
+            {% endif %}
+            
         {% endfor %}  
     </ol>
     <style>
@@ -26,15 +44,8 @@
             }
         }
     </style>
-    <script>
-        document.querySelectorAll('.user-delete').forEach(btn => {
-            btn.onclick = () => {
-                fetch('/users/delete/' + btn.parentElement.id.replace('u', ''), {
-                    method: 'DELETE'
-                });
+{% endblock %}
 
-                btn.parentElement.remove();
-            }
-        });
-    </script>
+{% block btns %}
+    <button class="user-toggle-visibility"> {% if user.is_hidden %}Show{% else %}Hide{% endif %} me in list</button>
 {% endblock %}

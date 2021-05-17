@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block head %}
-    <script src="{{url_for('static', filename='user/script.js')}}"></script>
+    <script src="{{url_for('static', filename='other/user.js')}}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='field/style.css') }}">
 {% endblock %}
 
@@ -39,6 +39,12 @@
                         <line x1="0%" y1="50%" x2="100%" y2="50%"></line>
                     </svg>
                 </div>
+            </div>
+            <div class="user-btns">
+                {% if owner.id == user.id %}
+                    <button class="user-delete">Delete profile</button>
+                {% endif %}
+                        
             </div>
         </div>
         <div class="user-chains">

@@ -24,12 +24,14 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'), nullable=False, default=1)
     settings = db.Column(db.String(400))
+    is_hidden =  db.Column(db.Boolean, default=False)
     
-    hexs = db.relationship('Hexagon', backref='author', lazy='dynamic')
-    chains = db.relationship('Chain', backref='author', lazy='dynamic')
+    hexs = db.relationship('Hexagon', backref='author', lazy='dynamic', cascade="all, delete-orphan")
+    chains = db.relationship('Chain', backref='author', lazy='dynamic', cascade="all, delete-orphan")
     complaints = db.relationship('Complaint', backref='author', lazy='dynamic', cascade="all, delete-orphan")
     comments = db.relationship('Comment', backref='author', lazy='dynamic', cascade="all, delete-orphan")
-    ratings = db.relationship('Comment', backref='target', lazy='dynamic', cascade="all, delete-orphan")
+    ratings_changes = db.relationship('UserRating', foreign_keys=[UserRating.user_who_change_id], backref='author', lazy='dynamic', cascade="all, delete-orphan")
+    ratings = db.relationship('UserRating', foreign_keys=[UserRating.user_id], backref='target', lazy='dynamic', cascade="all, delete-orphan")
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

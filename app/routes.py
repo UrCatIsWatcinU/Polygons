@@ -148,7 +148,7 @@ def logout():
 @login_required
 def users_all():    
     users = User.query.all()
-    return render_template('users.html', users=sorted(users, key=lambda u: u.get_rating(), reverse=True), user=current_user)
+    return render_template('users.html', users=sorted(users, key=lambda u: u.get_rating(), reverse=True), user=current_user, title="Users list")
 
 @app.route('/users/<id>')
 def user(id):
@@ -167,6 +167,23 @@ def user(id):
         return hexs or []
 
     return render_template('user.html', title=owner.username, owner=owner, allowed_change=allowed_change, hexs_sort_fn=hexs_sort_fn, user=user)
+@app.route('/users/<id>/change_visibility', methods=['PUT'])
+@login_required
+def change_visibility(id):
+    user = None
+    if id == 'i':
+        user = User.query.get(current_user.id) 
+    else:
+        user = User.query.get(id)
+        
+    if user.id == current_user.id or current_user.role.name == 'admin':
+        user.is_hidden = not user.is_hidden
+        db.session.add(user)
+        db.session.commit() 
+        return json.dumps({'success': True})
+
+    return json.dumps({'success': False})
+
 
 @app.route('/users/<id>/rating/change', methods=['POST'])
 @login_required
@@ -200,10 +217,15 @@ def give_current_user():
 @app.route('/users/delete/<id>', methods=['DELETE'])
 @login_required
 def delete_user(id):
-    if current_user.role_id != 2:
-        return "<h1>You don't have access</h1"
     
-    user = User.query.get_or_404(id)
+    user = None
+    if id == 'i':
+        user = User.query.get(current_user.id)
+    else:
+        if current_user.role_id != 2:
+            return json.dumps({"success": False})
+        user = User.query.get_or_404(id)
+        
     db.session.delete(user)
     db.session.commit()
     return json.dumps({"success":True})
