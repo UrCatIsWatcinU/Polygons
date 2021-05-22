@@ -8,6 +8,10 @@ function hexToRgb(color, alpha = 1){
     let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color);
     return result ? `rgba(${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}, ${alpha})` : null;
 } 
+
+/** 
+*    @return {HTMLElement}
+*/
 function setClassName(elem, classList){
     elem.classList.add(...classList.split(/[(\s+)(,\s+)]/));
     return elem
@@ -140,8 +144,6 @@ function createDropMenu(dropMenu = null, userCont = null){
 
             if(!isDropMenu){
                 isDropMenu = true;
-                
-                dropMenu.style.opacity = 1;
 
                 document.addEventListener('click', closeDropMenu);
                 userCont.classList.add('drop-menu-opened');
@@ -152,7 +154,6 @@ function createDropMenu(dropMenu = null, userCont = null){
             function closeDropMenu(){
                 if(isDropMenu){
                     isDropMenu = false;
-                    dropMenu.style.opacity = 0;
     
                     document.removeEventListener('click', closeDropMenu);
                 }
@@ -293,7 +294,7 @@ const main = async () => {
         'red-c': '#f52e2e',
         'font': font.family,
         'font-size': font.size,
-        'trans': 'all .13s linear',
+        'trans': 'all .2s ease',
     }
     for(let color in defaultColors){
         cssProps[color.toLowerCase().replace(/_/g, '-',)] = colors[color] || defaultColors[color];
@@ -392,6 +393,12 @@ const main = async () => {
             sessionStorage.clear();
         }
     }
+
+    if(document.querySelector('.header-img')){
+        document.querySelector('.header-img').onclick = () => {
+            window.location.href = '/';
+        }
+    }
     
     createDropMenu();
 
@@ -422,3 +429,34 @@ window.addEventListener('load', main);
 socket.on('reload', () => {
     window.location.href = '/'
 });
+
+
+const loading = `<div class="inline-loading loading">
+<svg class='loading-svg' version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+  viewBox="0 0 52 12" enable-background="new 0 0 0 0" xml:space="preserve">
+  <circle stroke="none" cx="6" cy="6" r="6">
+    <animate
+      attributeName="opacity"
+      dur="1s"
+      values="0;1;0"
+      repeatCount="indefinite"
+      begin="0.1"/>    
+  </circle>
+  <circle stroke="none" cx="26" cy="6" r="6">
+    <animate
+      attributeName="opacity"
+      dur="1s"
+      values="0;1;0"
+      repeatCount="indefinite" 
+      begin="0.2"/>       
+  </circle>
+  <circle stroke="none" cx="46" cy="6" r="6">
+    <animate
+      attributeName="opacity"
+      dur="1s"
+      values="0;1;0"
+      repeatCount="indefinite" 
+      begin="0.3"/>     
+  </circle>
+</svg>
+</div>`

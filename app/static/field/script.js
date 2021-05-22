@@ -1227,7 +1227,7 @@ window.addEventListener('load', async () => {
                 
                 scrollBtns.append(plusScrollBtn, minusScrollBtn);
                 document.body.append(scrollBtns)
-                // scrollBtns.style.bottom = `calc(50% - ${scrollBtns.offsetHeight / 2}px)`
+                scrollBtns.style.bottom = `calc(50% - ${scrollBtns.offsetHeight / 2}px)`;
             
                 document.documentElement.addEventListener('keydown', evt => {
                     if(evt.key == '=' && (evt.ctrlKey || evt.metaKey)){

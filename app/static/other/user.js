@@ -79,8 +79,14 @@ tasks.push(() => {
                     else showModal('An error occurred when deleting the profile', 'Please, try later.');
                 })
                 .catch(err => showModal('An error occurred when deleting the profile', err));
-                
+
             }, 'You will not be able to cancel this action. Now, if you delete your account nobody can\'t restore it')
+        }
+    }
+    const chatBtn = document.querySelector('.user-chat');
+    if(chatBtn){
+        chatBtn.onclick = () => {
+            window.location.href = '/messages?with=' + window.location.href.match(/\d+$/)[0]
         }
     }
 });

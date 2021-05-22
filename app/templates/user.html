@@ -43,8 +43,9 @@
             <div class="user-btns">
                 {% if owner.id == user.id %}
                     <button class="user-delete">Delete profile</button>
+                {% else %}
+                    <button class="user-chat">Open chat</button>
                 {% endif %}
-                        
             </div>
         </div>
         <div class="user-chains">

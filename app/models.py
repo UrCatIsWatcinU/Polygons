@@ -32,6 +32,9 @@ class User(UserMixin, db.Model):
     comments = db.relationship('Comment', backref='author', lazy='dynamic', cascade="all, delete-orphan")
     ratings_changes = db.relationship('UserRating', foreign_keys=[UserRating.user_who_change_id], backref='author', lazy='dynamic', cascade="all, delete-orphan")
     ratings = db.relationship('UserRating', foreign_keys=[UserRating.user_id], backref='target', lazy='dynamic', cascade="all, delete-orphan")
+    messages = db.relationship('Message', backref='author', lazy='dynamic', cascade="all, delete-orphan")
+    chats_memberships = db.relationship('ChatMember', backref='member', lazy='dynamic', cascade="all, delete-orphan")
+
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -107,3 +110,34 @@ class Chain(db.Model):
     hexs = db.relationship('Hexagon', backref='chain', lazy='dynamic', cascade="all, delete-orphan")
     comments = db.relationship('Comment', backref='chain', lazy='dynamic', cascade="all, delete-orphan")
     rating_changes = db.relationship('RatingChange', backref='chain', lazy='dynamic', cascade="all, delete-orphan")
+
+
+class Chat(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), index=True)
+    created_by = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
+
+    members = db.relationship('ChatMember', backref='chat', lazy='dynamic', cascade="all, delete-orphan")
+    messages = db.relationship('Message', backref='chat', lazy='dynamic', cascade="all, delete-orphan")
+
+    def get_last_message(self):
+        return
+
+class ChatMember(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
+    chat_id = db.Column(db.Integer, db.ForeignKey('chat.id'), index=True)
+    chat_role_id = db.Column(db.Integer, db.ForeignKey('chat_role.id'), default=1, index=True)
+    last_seen = db.Column(db.DateTime, default=datetime.utcnow)
+
+class ChatRole(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(20), index=True)
+    members = db.relationship('ChatMember', backref='role', lazy='dynamic', cascade="all, delete-orphan")
+
+class Message(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
+    chat_id = db.Column(db.Integer, db.ForeignKey('chat.id'), index=True)
+    text = db.Column(db.Text)
+    date = db.Column(db.DateTime, default=datetime.utcnow, index=True)

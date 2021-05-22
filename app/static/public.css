@@ -180,10 +180,11 @@ a{
     border: 1px var(--main-c) solid;
     opacity: 0;
     overflow: hidden;
-
+    
     display: flex;
     flex-direction: column;
     align-items: center;
+    pointer-events: none;
 }
 .drop-menu-arrow{
     height: .7em;
@@ -194,6 +195,10 @@ a{
 }
 .drop-menu-opened .drop-menu-arrow{
     transform: rotate(-90deg);
+}
+.drop-menu-opened .drop-menu{
+    opacity: 1;
+    pointer-events: auto;
 }
 .drop-menu button{
     min-width: 100%;
@@ -415,10 +420,14 @@ a{
 .header-img{
     height: 100%;
     fill: var(--dark-main-c);
+    cursor: pointer;
 }
 .btns{
     display: flex;
     position: relative;
+}
+.local-btns{
+    margin-right: 10px;
 }
 
 .main-logo{
@@ -458,6 +467,7 @@ a{
     font-size: .7em;
     border: .5px var(--black-c) solid;
     padding: 3px 3px ;
+    margin-right: 10px;
     border-radius: 3px;
     opacity: .7;
     width: var(--role-size);
@@ -509,14 +519,13 @@ a{
 .username{
     text-decoration: underline;
     user-select: none;
-    margin-left: 10px;
+    font-size: .9em;
 }
 .user-cont{
     display: flex;
     align-items: center;
-    font-size: .9em;
     cursor: pointer;
-    padding: 0 7.5px;
+    position: relative;
 }
 .complaint{
     position: relative;

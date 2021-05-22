@@ -7,8 +7,8 @@ from threading import Timer
 
 from app import app, socketio, db
 from app.forms import LoginForm, RegistrationForm
-from app.models import Chain, Comment, Complaint, Hexagon, Image, RatingChange, User, Categ, UserRating
-from app.lib import create_dir, delete_dir
+from app.models import Chain, Chat, ChatMember, ChatRole, Comment, Complaint, Hexagon, Image, Message, RatingChange, User, Categ, UserRating
+from app.lib import create_dir, delete_dir, serialize
 
 from flask import render_template, redirect, url_for, request
 from flask_socketio import emit
@@ -166,7 +166,7 @@ def user(id):
         list(hexs).sort(key=lambda hex: hex.num)
         return hexs or []
 
-    return render_template('user.html', title=owner.username, owner=owner, allowed_change=allowed_change, hexs_sort_fn=hexs_sort_fn, user=user)
+    return render_template('user.html', title=owner.username if owner.id != user.id else 'Profile', owner=owner, allowed_change=allowed_change, hexs_sort_fn=hexs_sort_fn, user=user)
 @app.route('/users/<id>/change_visibility', methods=['PUT'])
 @login_required
 def change_visibility(id):
@@ -188,6 +188,8 @@ def change_visibility(id):
 @app.route('/users/<id>/rating/change', methods=['POST'])
 @login_required
 def change_user_rating(id):
+    user = User.query.get_or_404(id)
+
     user_rating_change = UserRating.query.filter_by(user_who_change_id=current_user.id, user_id=id).first()
 
     change_num = 0
@@ -202,10 +204,8 @@ def change_user_rating(id):
             db.session.delete(user_rating_change)
     
     db.session.commit()
-    
-    rating = db.session.execute(select([func.sum(UserRating.change)]).where(UserRating.user_id == id)).first().values()[0] or 0
 
-    return json.dumps({'success': True, 'num': rating, 'change': change_num})
+    return json.dumps({'success': True, 'num': user.get_rating(), 'change': change_num})
 
 @app.route('/users/i')
 def give_current_user():
@@ -225,11 +225,171 @@ def delete_user(id):
         if current_user.role_id != 2:
             return json.dumps({"success": False})
         user = User.query.get_or_404(id)
-        
+
     db.session.delete(user)
     db.session.commit()
     return json.dumps({"success":True})
 
+
+admins_chat_roles = ['admin']
+@app.route('/chats')
+@login_required
+def messages():
+    return render_template('messages.html', title='Messages', user=current_user, chats=[m.chat for m in current_user.chats_memberships])
+    
+app.route('/chats/roles')
+@login_required
+def get_chat_roles():
+    return json.dumps([serialize(role) for role in ChatRole.query.all()])
+
+@app.route('/chats/new', methods=['POST'])
+@login_required
+def create_chat():
+    raw_chat = request.get_json(True)
+    chat = Chat(name=raw_chat['name'], created_by=current_user.id)
+    db.session.add(chat)
+    db.session.commit()
+
+    first_chat_member = ChatMember(user_id=current_user.id, chat_id=chat.id, chat_role_id=2)
+
+    chat_members =[]
+    for raw_member in raw_chat['members']:
+        user = User.query.filter_by(username=raw_member['username']).first()
+        if user:
+            chat_members.append(ChatMember(chat_id=chat.id, user_id = user.id))
+
+    db.session.add_all([first_chat_member] + chat_members)
+    db.session.commit()
+    return({'success': True, 'id': chat.id, 'firtsMemberId': first_chat_member.id})
+
+@app.route('/chats/<id>/delete', methods=['DELETE'])
+@login_required
+def delete_chat(id):
+    chat = Chat.query.get_or_404(id)
+
+    current_user_membership = ChatMember.query.filter_by(chat_id=chat.id, user_id=current_user.id).first()
+    if not current_user_membership or current_user_membership.role.name != 'admin':
+        return  json.dumps({'success': False, 'message': 'Access denied'})
+
+    db.session.delete(chat)
+    db.session.commit()
+    return json.dumps({"success":True})
+
+
+prepare_user_to_send = lambda m: {
+    **serialize(m, ['chat_role_id', 'user_id']),
+    'role': {
+        'id': m.chat_role_id,    
+        'name': m.role.name
+    },
+    'user':{
+        'id': m.user_id , 
+        'name': m.member.username,
+    }
+}
+@app.route('/chats/<id>/members')
+@login_required 
+def get_chat_members(id):
+    chat = Chat.query.get_or_404(id)
+    return json.dumps([prepare_user_to_send(m) for m in chat.members])
+
+@app.route('/chats/<id>/members/i')
+@login_required 
+def get_me_of_members(id):
+    chat = Chat.query.get_or_404(id)
+    i = ChatMember.query.filter_by(chat_id=chat.id, user_id=current_user.id).first_or_404()
+
+    return json.dumps(prepare_user_to_send(i))
+
+@app.route('/chats/<id>/add_member', methods=['POST'])
+@login_required
+def add_chat_member(id):
+    raw_member = request.get_json(True)
+    chat = Chat.query.get_or_404(id)
+    user = User.query.filter_by(username=raw_member['user']).first()
+
+    if not user:
+        return json.dumps({'success': True, 'message': 'No such user'})
+
+    if ChatMember.query.filter_by(user_id=user.id, chat_id=chat.id).first():
+        return json.dumps({'success': False, 'message': 'This user alredy is a member of this chat'})
+
+    current_user_membership = ChatMember.query.filter_by(chat_id=chat.id, user_id=current_user.id).first()
+    if not current_user_membership or current_user_membership.role.name not in admins_chat_roles:
+        return  json.dumps({'success': False, 'message': 'Access denied'})
+    
+    member = ChatMember(user_id=user.id, chat_role_id=raw_member['role'], chat_id=chat.id)
+    db.session.add(member)
+    db.session.commit()
+    return json.dumps({'success': True, **prepare_user_to_send(member)})
+
+@app.route('/chats/members/<id>/delete', methods=['DELETE'])
+@login_required
+def delete_chat_member(id):
+    member = ChatMember.query.get_or_404(id)
+    chat = Chat.query.get(member.chat_id)
+    
+    current_user_membership = ChatMember.query.filter_by(chat_id=chat.id, user_id=current_user.id).first()
+    if not current_user_membership or (current_user.id != member.user_id and current_user_membership.role.name not in admins_chat_roles):
+        return  json.dumps({'success': False})
+        
+    db.session.delete(member)
+    db.session.commit()
+
+    if not len(list(chat.members.all())):
+        db.session.delete(chat)
+        db.session.commit()
+        
+
+    return json.dumps({'success': True})
+
+@app.route('/chats/members/<id>/update', methods=['PUT'])
+@login_required
+def update_chat_member(id):
+    updation = request.get_json(True)
+    member = ChatMember.query.get_or_404(id)
+    member.chat_role_id = updation['chat_role_id']
+    return json.dumps({'success': True})
+
+prepare_message_to_send = lambda message: {
+    **serialize(message, ['user_id']),
+    'user': {
+        'id': message.user_id,
+        'username': message.author.username
+    }
+}
+@app.route('/chats/<id>/messages')
+@login_required 
+def get_chat_messages(id):
+    chat = Chat.query.get_or_404(id)
+
+    return json.dumps([prepare_message_to_send(message) for message in chat.messages])
+
+@socketio.on('new-message')
+def create_chat_message(raw_message):
+    chat = Chat.query.get(raw_message['chatId'])
+    user = User.query.get(raw_message['userId'])
+
+    if(user and chat):
+        message = Message(chat_id=chat.id, user_id=user.id, text=raw_message['text'])
+        db.session.add(message)
+        db.session.commit()
+
+
+    emit('new-message', json.dumps(prepare_message_to_send(message)))
+
+@socketio.on('delete-message')
+def delete_chat_messages(id):
+    message = Message.query.get(id)
+
+    current_user_membership = ChatMember.query.filter_by(chat_id=message.chat.id, user_id=current_user.id).first()
+    if not current_user_membership or (current_user.id != message.user_id and current_user_membership.role.name not in admins_chat_roles):
+        return
+
+    db.session.delete(message)
+    db.session.commit()
+
+    emit('delete-message-' + str(id), '')
 
 
 
@@ -278,18 +438,13 @@ def fields(categ_name):
 
 prepare_hex_to_send = lambda hex: {
     "uuid": hex.id,
-    "selector": hex.selector,
-    "num": hex.num,
-    "innerText": hex.inner_text,
-    "chainId": hex.chain_id,
-    "userId": hex.user_id,
+    **serialize(hex, ['id', 'categ_id', 'about', 'created_at']),
     "username": User.query.get(hex.user_id).username if User.query.get(hex.user_id) else 'none',
     "creationDate": time.mktime(hex.created_at.timetuple()),
-    'BGImg': hex.BG_img,
     "imgs": list(map(lambda img: {
         "uuid": img.id,
+        "isBG": img.is_BG,
         "url": f"static/uploadedImgs/{hex.categ.name}/{hex.chain.id}/{hex.id}/{img.id}.{img.ext}",
-        "isBG": img.is_BG
     }, hex.imgs)) if hex.imgs else [],
 }
 @app.route('/hexs/<categ_name>')
@@ -541,6 +696,7 @@ def get_comments(id):
         'userId': comment.user_id,
         'username': comment.author.username
     }, Chain.query.get_or_404(id).comments)))
+
 @app.route('/chains/<id>/comments/new', methods=['POST'])
 @login_required
 def create_comment(id):
