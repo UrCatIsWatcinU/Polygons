@@ -438,9 +438,10 @@ def fields(categ_name):
 
 prepare_hex_to_send = lambda hex: {
     "uuid": hex.id,
-    **serialize(hex, ['id', 'categ_id', 'about', 'created_at']),
+    **serialize(hex, ['id', 'categ_id', 'about', 'created_at', 'BG_img']),
     "username": User.query.get(hex.user_id).username if User.query.get(hex.user_id) else 'none',
     "creationDate": time.mktime(hex.created_at.timetuple()),
+    "BGImg": hex.BG_img,
     "imgs": list(map(lambda img: {
         "uuid": img.id,
         "isBG": img.is_BG,
@@ -580,7 +581,7 @@ def new_hex(categ_name):
             if not hex_to_check:
                 return
 
-            if not str(hex_to_check.inner_text):
+            if not str(hex_to_check.inner_text) and not str(hex_to_check.BG_img):
                 hexs_to_delete = []
                 if hex_to_check.num == 1:
                     print(f'Delete empty chain {hex_to_check.chain_id} after 30m')

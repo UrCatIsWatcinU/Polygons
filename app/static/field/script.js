@@ -1025,7 +1025,7 @@ window.addEventListener('load', async () => {
                         hexagon[prop] = hex[prop];
                     });
                     hexagon.imgs = hex.imgs ? !hex.imgs.length ? [] : hex.imgs : [];
-
+                    
                     if(hex.BGImg){
                         createBgHex(hexagon, hex.BGImg);
                     }
