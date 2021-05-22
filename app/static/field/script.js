@@ -1025,7 +1025,7 @@ window.addEventListener('load', async () => {
                         hexagon[prop] = hex[prop];
                     });
                     hexagon.imgs = hex.imgs ? !hex.imgs.length ? [] : hex.imgs : [];
-                    
+
                     if(hex.BGImg){
                         createBgHex(hexagon, hex.BGImg);
                     }
@@ -1154,7 +1154,7 @@ window.addEventListener('load', async () => {
             }
 
             if(!isTouchDevice()){
-                const SLIDE_SPEED = otherSettings.slideSpeed || 1.6;
+                const SLIDE_SPEED = 1;
                 const MIN_CHANGE = 20;
                 const slider = document.body;
                 let isDown = false;
