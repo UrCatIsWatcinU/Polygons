@@ -237,7 +237,7 @@ admins_chat_roles = ['admin']
 def messages():
     return render_template('messages.html', title='Messages', user=current_user, chats=[m.chat for m in current_user.chats_memberships])
     
-app.route('/chats/roles')
+@app.route('/chats/roles')
 @login_required
 def get_chat_roles():
     return json.dumps([serialize(role) for role in ChatRole.query.all()])
@@ -254,9 +254,15 @@ def create_chat():
 
     chat_members =[]
     for raw_member in raw_chat['members']:
-        user = User.query.filter_by(username=raw_member['username']).first()
+        user = None
+        print(raw_member)
+        if 'id' in raw_member.keys():
+            user = User.query.get(raw_member['id'])
+        else:
+            user = User.query.filter_by(username=raw_member['username']).first()
+
         if user:
-            chat_members.append(ChatMember(chat_id=chat.id, user_id = user.id))
+            chat_members.append(ChatMember(chat_id=chat.id, user_id = user.id, chat_role_id=(raw_member['role'] if 'role' in raw_member.keys() else 1)))
 
     db.session.add_all([first_chat_member] + chat_members)
     db.session.commit()
@@ -306,7 +312,12 @@ def get_me_of_members(id):
 def add_chat_member(id):
     raw_member = request.get_json(True)
     chat = Chat.query.get_or_404(id)
-    user = User.query.filter_by(username=raw_member['user']).first()
+    
+    user = None
+    if 'userId' in raw_member.values():
+        user = User.query.get(raw_member['userId'])
+    else:   
+        user = User.query.filter_by(username=raw_member['user']).first()
 
     if not user:
         return json.dumps({'success': True, 'message': 'No such user'})
@@ -348,7 +359,16 @@ def delete_chat_member(id):
 def update_chat_member(id):
     updation = request.get_json(True)
     member = ChatMember.query.get_or_404(id)
-    member.chat_role_id = updation['chat_role_id']
+
+    current_user_membership = ChatMember.query.filter_by(chat_id=member.chat.id, user_id=current_user.id).first()
+    if not current_user_membership or current_user_membership.role.name not in admins_chat_roles:
+        return  json.dumps({'success': False, 'message': 'Access denied'})
+
+    member.chat_role_id = updation['newRoleId']
+
+    db.session.add(member)
+    db.session.commit()
+
     return json.dumps({'success': True})
 
 prepare_message_to_send = lambda message: {

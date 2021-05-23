@@ -113,23 +113,71 @@ const changeChat = (id = null) => {
     if(!activeChatId){
         msgsTitle.innerText = 'Select chat';
         msgsCont.classList.remove('messages-cont-active');
-        return
+        return;
     }
 
-    const chat = document.querySelector('#c' + activeChatId);
-    msgsTitle.innerText = chat.getAttribute('chatname');
-    msgsCont.classList.add('messages-cont-active');
-
+    
     fetch(`/chats/${activeChatId}/messages`)
     .then(res => {
         if(!res.ok) return showModal('An erron occured while loading messages', 'Please try later. Status: ' + res.status);
         
         return res.json();
     })
-    .then(createMessages)
+    .then(res => {
+        createMessages(res);
+        
+        const chat = document.querySelector('#c' + activeChatId);
+        document.querySelectorAll('.chat').forEach(c => c.classList.remove('chat-active')); 
+        chat.classList.add('chat-active'); 
+        msgsTitle.innerText = chat.getAttribute('chatname');
+        msgsCont.classList.add('messages-cont-active');
+
+        msgsCont.querySelector('#newMsg').focus();
+    })
     .catch(err => {
         showModal('An erron occured while loading messages', err);
     });
+}
+
+let chatRoles;
+fetch('/chats/roles')
+.then(res => res.ok? res.json() : showModal('An erron occured while loading chat roles', 'Please try later. Status: ' + res.status))
+.then(res => {
+    if(!res || !res.length) return showModal('An erron occured while loading chat roles', 'Please try later');
+
+    chatRoles = res;
+    window.dispatchEvent(new Event('chatRolesLoaded'));
+})
+.catch(err => showModal('An erron occured while loading chat roles', err));
+
+let userChatWithId = 0;
+let needToCreateChatWith = false;
+const urlParams = new URLSearchParams(window.location.search);
+if(urlParams.get('with')){
+    userChatWithId = urlParams.get('with');
+    needToCreateChatWith = true;
+}
+const createChatWith = (evt) => {
+    console.log(evt.id);
+    if(!needToCreateChatWith) return;
+    
+    fetch('/chats/new', {
+        method: "POST",
+        body: JSON.stringify({
+            name: null,
+            members: [{
+                id: evt.id,
+                role: 2 
+            }]
+        })
+    })
+    .then(res => res.ok ? res.json() : showModal('An error occured while opening chat with user', 'Please try later. Status: ' + res.status))
+    .then(res => {
+        if(!res || !res.success) return showModal('An error occured while opening chat with user', 'Please try later');
+
+        window.location.reload();
+    })
+    .catch(err => showModal('An error occured while opening chat with user', err))
 }
 
 class ElChat extends HTMLDivElement{
@@ -151,9 +199,6 @@ class ElChat extends HTMLDivElement{
                 <line x1="50" y1="25" x2="50" y2="35"></line>
                 <line x1="50" y1="45" x2="50" y2="75"></line>`;
 
-            infoBtn.addEventListener('click', (evt) => {
-                evt.stopImmediatePropagation();
-
                 fetch(`/chats/${this.uuid}/members`)
                 .then(res => {
                     if(!res.ok){
@@ -171,149 +216,232 @@ class ElChat extends HTMLDivElement{
 
                     const isIChatAdmin = chatAdminsRoles.includes(myMembership.role.name);
 
-                    const chatAbout = showModal('', '', true);
-                    chatAbout.innerHTML = `<div class="modal-content chatAbout-modal-content">
-                        <div>
-                            <div class="chatAbout-header">
-                                <h2 class="modal-title chatAbout-title">Chat info</h2>
-                                <div class="chatAbot-dropMenu-cont">
-                                    <div class="drop-menu-bullets-cont">
-                                        <svg class="drop-menu-bullets" preserveAspectRatio="none" viewBox="0,0,40,150">
-                                            <circle cx="20" cy="20" r="17" ></circle>
-                                            <circle cx="20" cy="75" r="17" ></circle>
-                                            <circle cx="20" cy="130" r="17" ></circle>
-                                        </svg>
-                                    </div>
-                                    <div class="drop-menu">
-                                        ${isIChatAdmin ? `
-                                            <button class="chatAbout-delete" style="color: var(--red-c);">Delete chat</button>
-                                            <button class="chatAbout-addMember">Add member</button>`
-                                        : ''}
-                                        <button class="chatAbout-quit">Quit</button>
+                    this.members = members;
+                    if(members.length == 2 && !this.getAttribute('chatname')){
+                        this.with = members.filter(m => m.user.id != user.userId)[0].user;
+
+                        this.setAttribute('chatname', this.with.name);
+                        const chatTitle = this.querySelector('.chat-title');
+                        chatTitle.innerHTML = `<a href="/users/${this.with.id}"></a>`;
+                        chatTitle.firstElementChild.innerText = this.with.name;
+                        chatTitle.firstElementChild.addEventListener('click', evt => evt.stopImmediatePropagation(), {passive: false});
+
+                    }
+                    if(userChatWithId && needToCreateChatWith){
+                        if(this.with && userChatWithId == this.with.id){
+                            needToCreateChatWith = false;
+                            document.removeEventListener('createChatWith', createChatWith);
+                            
+                            changeChat(this.uuid);  
+                            history.pushState(null, null, '/chats'); 
+                        }else{
+                            console.log('ok');
+                            if(this == document.querySelector('.chats-cont').lastElementChild.previousElementSibling){
+                                const createWithChatEvent = new Event('createChatWith');
+                                createWithChatEvent.id = userChatWithId;
+                                document.dispatchEvent(createWithChatEvent)
+                            }
+                        }
+                    }
+
+                    this.myMembership = myMembership;
+
+                    infoBtn.addEventListener('click', (evt) => {
+                        evt.stopImmediatePropagation();
+                        const chatAboutBtns = isIChatAdmin  ? `
+                            <button class="chatAbout-delete" style="color: var(--red-c);">Delete chat</button>
+                            ${this.with ? '' : '<button class="chatAbout-addMember">Add member</button>'}`
+                        : '';
+        
+                        const chatAbout = showModal('', '', true);
+                        chatAbout.innerHTML = `<div class="modal-content chatAbout-modal-content">
+                            <div>
+                                <div class="chatAbout-header">
+                                    <h2 class="modal-title chatAbout-title">Chat info</h2>
+                                    <div class="chatAbot-dropMenu-cont">
+                                        <div class="drop-menu-bullets-cont">
+                                            <svg class="drop-menu-bullets" preserveAspectRatio="none" viewBox="0,0,40,150">
+                                                <circle cx="20" cy="20" r="17" ></circle>
+                                                <circle cx="20" cy="75" r="17" ></circle>
+                                                <circle cx="20" cy="130" r="17" ></circle>
+                                            </svg>
+                                        </div>
+                                        <div class="drop-menu">
+                                            ${chatAboutBtns}
+                                            ${this.with ? '' : '<button class="chatAbout-quit">Quit</button>'}
+                                        </div>
                                     </div>
                                 </div>
+                                <div class="chatAbout-content">
+                                    <h4 class="chatAbout-members-title">Members</h4>
+                                    <ol class="chatAbout-members"></ol>
+                                </div>
                             </div>
-                            <div class="chatAbout-content">
-                                <h4 class="chatAbout-members-title">Members</h4>
-                                <ol class="chatAbout-members"></ol>
+                            <div class="chatAbout-btns">
+                                <button class="chatAbout-close">Close</button>
                             </div>
-                        </div>
-                        <div class="chatAbout-btns">
-                            <button class="chatAbout-close">Close</button>
-                        </div>
-                    </div>`;
-
-                    createDropMenu(chatAbout.querySelector('.drop-menu'), chatAbout.querySelector('.chatAbot-dropMenu-cont'))
-
-                    const membersElem = chatAbout.querySelector('.chatAbout-members');
-                    const deleteMember = (id, memberElem = null, successCallback = null) => {
-                        fetch(`/chats/members/${id}/delete`, { method: 'DELETE' })
-                        .then(res => res.ok ? res.json() : showModal('An error occured while deleting chat member', 'Please try later. Status: ' + res.status))
-                        .then(res => {
-                            if(!res || !res.success) return showModal('An error occured while deleting chat member', 'Please try later');
-
-                            memberElem && memberElem.remove();
-
-                            successCallback && successCallback();
-                        })
-                        .catch(err => showModal('An error occured while deleting chat member', err))
-                    }
-                    const createMember = m => {
-                        const memberElem = setClassName(document.createElement('li'), 'chatAbout-member-cont');
-
-                        memberElem.innerHTML = `<div class="chatAbout-member">
-                            <span class="role">${m.role.name}</span>
-                            <a href="/users/${m.user.id}" class="username">${ m.user.name }</a>
                         </div>`;
-
-                        membersElem.append(memberElem);
-
-                        if(m.user.id != user.userId && isIChatAdmin){
-                            const deleteBtn = setClassName(document.createElementNS('http://www.w3.org/2000/svg', 'svg'), 'chatAbout-member-delete');
-                            deleteBtn.innerHTML = '<line x1="50%" y1="0%" x2="50%" y2="100%"></line><line x1="0%" y1="50%" x2="100%" y2="50%"></line>';
-                            memberElem.firstElementChild.append(deleteBtn);
-                    
-                            deleteBtn.onclick = () => {
-                                showAsk(() => {
-                                    deleteMember(m.id, memberElem)
-                                })
-                            };
+        
+                        createDropMenu(chatAbout.querySelector('.drop-menu'), chatAbout.querySelector('.chatAbot-dropMenu-cont'))
+        
+                        const membersElem = chatAbout.querySelector('.chatAbout-members');
+                        const deleteMember = (id, memberElem = null, successCallback = null) => {
+                            fetch(`/chats/members/${id}/delete`, { method: 'DELETE' })
+                            .then(res => res.ok ? res.json() : showModal('An error occured while deleting chat member', 'Please try later. Status: ' + res.status))
+                            .then(res => {
+                                if(!res || !res.success) return showModal('An error occured while deleting chat member', 'Please try later');
+        
+                                memberElem && memberElem.remove();
+                                members = members.filter(mToCheck => mToCheck.id != id )
+        
+                                successCallback && successCallback();
+                            })
+                            .catch(err => showModal('An error occured while deleting chat member', err))
                         }
-                    }
-                    members.forEach(createMember);
-                    
-                    chatAbout.querySelector('.chatAbout-close').onclick = hideModal;
-                    
-                    const actions = {
-                        delete: () => {
-                            showAsk(() => {
-                                fetch(`/chats/${this.uuid}/delete`, { method: 'DELETE' }).then((res) => 
-                                    res.ok ? res.json() : showModal('An error occured while deleting chat', 'Please try later. Status: ' + res.status)
-                                ).then(res => 
-                                    res.success ? window.location.reload() : showModal('An error occured while deleting chat', 'Please try later')
-                                ).catch(err => showModal('An error occured while deleting chat', err));
-                            });
-                        },
-                        addMember: () => {
-                            if(chatAbout.querySelector('.chatAbout-newMember')) return;
-                            const newMember = setClassName(document.createElement('div'), 'chatAbout-newMember');
-                            newMember.innerHTML = `
-                                <input placeholder="New user username" type="text" class="chatAbout-newMember-input" id="new-member">&nbsp;<button class="chatAbout-newMember">Add</button> 
-                            `;
+                        const createMember = (m, i) => {
+                            const memberElem = setClassName(document.createElement('li'), 'chatAbout-member-cont');
+                            
+                            const roleStr = this.with ? '' : `<span class="role">${m.role.name}</span>`;
 
-                            chatAbout.querySelector('.chatAbout-content').append(newMember);
-
-                            const newMemberBtn = newMember.querySelector('button');
-                            const newMemberInput = newMember.querySelector('#new-member');
-
-                            newMemberBtn.onclick = () => {
-                                if(!newMemberInput.value) return;
-
-                                newMemberBtn.style.height = newMemberBtn.offsetHeight + 'px' 
-                                newMemberBtn.style.width = newMemberBtn.offsetWidth + 'px' 
-                                newMemberBtn.innerHTML = loading;
-
-                                fetch(`/chats/${this.uuid}/add_member`, {
-                                    method: 'POST',
-                                    body: JSON.stringify({
-                                        user: newMemberInput.value,
-                                        role: 1
-                                    })
-                                }).then(res => res.ok ? res.json() : showModal('An error occured while adding chat member', 'Please try later. Status: ' + res.status))
-                                .then(res => {
-                                    if(!res || ! res.success){
-                                        if(!res.message) showModal('An error occured while adding chat member', 'Please try later')
-                                        else showModal('An error occured while adding chat member', res.message)
-                                        
-                                        return
+                            memberElem.innerHTML = `<div class="chatAbout-member">
+                                ${roleStr}
+                                <a href="/users/${m.user.id}" class="username">${ m.user.name }</a>
+                            </div>`;
+        
+                            membersElem.append(memberElem);
+        
+                            if(m.user.id != user.userId && isIChatAdmin && !this.with){
+                                const deleteBtn = setClassName(document.createElementNS('http://www.w3.org/2000/svg', 'svg'), 'chatAbout-member-delete');
+                                deleteBtn.innerHTML = '<line x1="50%" y1="0%" x2="50%" y2="100%"></line><line x1="0%" y1="50%" x2="100%" y2="50%"></line>';
+                                
+                                memberElem.addEventListener('click', (evt) => {
+                                    if(evt.target == memberElem.querySelector('.chatAbout-member-delete')){
+                                        showAsk(() => {
+                                            deleteMember(m.id, memberElem);
+                                        })
                                     }
-
-                                    delete res.success;
-
-                                    createMember(res);
-                                })
-                                .catch(err => showModal('An error occured while adding chat member', err))
-                                .finally(() => newMember.remove())
+                                }, {passive: false})
+        
+                                memberElem.firstElementChild.append(deleteBtn);
                             }
-                        },
-                        quit: () => {
-                            showAsk(() => {
-                                deleteMember(myMembership.id, null, () => {
-                                    window.location.reload();
-                                });
-                            });
+        
+                            if(isIChatAdmin){
+                                const role = memberElem.querySelector('.role');
+                                if(!role) return;
+                                role.style.cursor = 'pointer';
+        
+                                const createMemberRolesList =() => {
+                                    if(!chatRoles.length){
+                                        window.addEventListener('chatRolesLoaded', () => {
+                                            createMemberRolesList(); 
+                                        });
+                                        return;
+                                    }
+                                    const rolesStr = chatRoles.map(r => `<button class="role-select-btn" id="role${r.id}">${r.name}</button>`).join('');
+                                    memberElem.innerHTML += `<div class="drop-menu${i} role-select">
+                                        ${rolesStr}
+                                    </div>`;
+                                    createDropMenu(memberElem.querySelector('.drop-menu' + i), memberElem, memberElem.querySelector('.role'));
+        
+                                    memberElem.querySelectorAll('.role-select-btn').forEach(r => {
+                                        r.onclick = () => {
+                                            showAsk(() => {
+                                                fetch(`/chats/members/${m.id}/update`, {
+                                                    method: 'PUT',
+                                                    body: JSON.stringify({
+                                                        newRoleId: +r.id.replace('role', '')
+                                                    })
+                                                })
+                                                .then(res => res.ok ? res.json() : showModal('An error occured while updating chat user', 'Please try later. Status: ' + res.status))
+                                                .then(res => {
+                                                    if(!res || !res.success) return showModal('An error occured while updating chat user', 'Please try later');
+        
+                                                    memberElem.querySelector('.role').innerText = r.innerText;
+                                                })
+                                                .catch(err => showModal('An error occured while updating chat user', err))
+                                            }, 'Be careful not to give authority to users you can\'t trust', 'Do yor want change member role?');
+                                        }
+                                    });
+                                }
+                                createMemberRolesList();
+                            }
                         }
-                    }
-
-                    for(let action in actions){
-                        if(chatAbout.querySelector('.chatAbout-' + action)) 
-                            chatAbout.querySelector('.chatAbout-' + action).onclick = actions[action];   
-                    }
+                        members.forEach(createMember);
+                        
+                        chatAbout.querySelector('.chatAbout-close').onclick = hideModal;
+                        
+                        const actions = {
+                            delete: () => {
+                                showAsk(() => {
+                                    fetch(`/chats/${this.uuid}/delete`, { method: 'DELETE' }).then((res) => 
+                                        res.ok ? res.json() : showModal('An error occured while deleting chat', 'Please try later. Status: ' + res.status)
+                                    ).then(res => 
+                                        res.success ? window.location.reload() : showModal('An error occured while deleting chat', 'Please try later')
+                                    ).catch(err => showModal('An error occured while deleting chat', err));
+                                });
+                            },
+                            addMember: () => {
+                                if(chatAbout.querySelector('.chatAbout-newMember')) return;
+                                const newMember = setClassName(document.createElement('div'), 'chatAbout-newMember');
+                                newMember.innerHTML = `
+                                    <input placeholder="New user username" type="text" class="chatAbout-newMember-input" id="new-member">&nbsp;<button class="chatAbout-newMember">Add</button> 
+                                `;
+        
+                                chatAbout.querySelector('.chatAbout-content').append(newMember);
+        
+                                const newMemberBtn = newMember.querySelector('button');
+                                const newMemberInput = newMember.querySelector('#new-member');
+        
+                                newMemberBtn.onclick = () => {
+                                    if(!newMemberInput.value) return;
+        
+                                    newMemberBtn.style.height = newMemberBtn.offsetHeight + 'px' 
+                                    newMemberBtn.style.width = newMemberBtn.offsetWidth + 'px' 
+                                    newMemberBtn.innerHTML = loading;
+        
+                                    fetch(`/chats/${this.uuid}/add_member`, {
+                                        method: 'POST',
+                                        body: JSON.stringify({
+                                            user: newMemberInput.value,
+                                            role: 1
+                                        })
+                                    }).then(res => res.ok ? res.json() : showModal('An error occured while adding chat member', 'Please try later. Status: ' + res.status))
+                                    .then(res => {
+                                        if(!res || ! res.success){
+                                            if(!res.message) showModal('An error occured while adding chat member', 'Please try later')
+                                            else showModal('An error occured while adding chat member', res.message)
+                                            
+                                            return
+                                        }
+        
+                                        delete res.success;
+        
+                                        createMember(res);
+                                    })
+                                    .catch(err => showModal('An error occured while adding chat member', err))
+                                    .finally(() => newMember.remove())
+                                }
+                            },
+                            quit: () => {
+                                showAsk(() => {
+                                    deleteMember(myMembership.id, null, () => {
+                                        window.location.reload();
+                                    });
+                                });
+                            }
+                        }
+        
+                        for(let action in actions){
+                            if(chatAbout.querySelector('.chatAbout-' + action)) 
+                                chatAbout.querySelector('.chatAbout-' + action).onclick = actions[action];   
+                        }
+                        
+                    }, {passive: false})
                 })
                 .catch(err => {
                     showModal('An error occured while loading chat members', err);
                 })
-            }, {passive: false})
+
 
             this.append(infoBtn);
         }, 0);
@@ -323,6 +451,14 @@ class ElChat extends HTMLDivElement{
 customElements.define('el-chat', ElChat, {extends: 'div'})
 
 tasks.push(() => {
+    const chats = Array.from(document.querySelectorAll('.chat'));
+
+    if(chats.length){
+        document.addEventListener('createChatWith', createChatWith);
+    }else{
+        createChatWith({id: userChatWithId})
+    }
+
     const headerHeight = document.querySelector('header').offsetHeight;
     document.body.style.paddingTop = headerHeight + 'px';
 
@@ -417,6 +553,7 @@ tasks.push(() => {
         }
     }
 
+    
     if(document.documentElement.clientWidth < 550){
         
     }

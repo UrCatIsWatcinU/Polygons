@@ -131,7 +131,7 @@ function hideModal(){
     }
 }
 
-function createDropMenu(dropMenu = null, userCont = null){
+function createDropMenu(dropMenu = null, userCont = null, attachElem = null){
     if(!dropMenu) dropMenu = document.querySelector('.drop-menu');
     if(!userCont) userCont = document.querySelector('.user-cont');
 
@@ -141,10 +141,10 @@ function createDropMenu(dropMenu = null, userCont = null){
 
         const toggleDropMenu = (evt) => {
             evt.stopPropagation();
-
+            
             if(!isDropMenu){
                 isDropMenu = true;
-
+                
                 document.addEventListener('click', closeDropMenu);
                 userCont.classList.add('drop-menu-opened');
             }else{
@@ -163,8 +163,11 @@ function createDropMenu(dropMenu = null, userCont = null){
             dropMenu.style.top = (dropMenu.parentElement.getBoundingClientRect().height + 5) + 'px';
         }
         
-        dropMenu.addEventListener('click', toggleDropMenu, {passive: false});
-        if(userCont) userCont.addEventListener('click', toggleDropMenu, {passive: false});
+        if(userCont && !attachElem) userCont.addEventListener('click', toggleDropMenu, {passive: false});
+        
+        if(attachElem) userCont.addEventListener('click', (evt) => {
+            if(evt.target == attachElem) toggleDropMenu(evt);
+        }, {passive: false});
 
         return dropMenu;
     }

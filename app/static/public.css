@@ -1,7 +1,8 @@
 /* user select restricts */
 button, h1, h2, h3, label,
 .hexagon,
-.hexagon-about-controls{
+.hexagon-about-controls,
+.role{
     user-select: none;
 }
 /* user select restricts */
@@ -170,6 +171,7 @@ a{
     z-index: 5;
     display: flex;
 }
+.role-select,
 .drop-menu{
     position: absolute;
     top: 27px;
@@ -185,6 +187,7 @@ a{
     flex-direction: column;
     align-items: center;
     pointer-events: none;
+    z-index: 10;
 }
 .drop-menu-arrow{
     height: .7em;
@@ -196,16 +199,18 @@ a{
 .drop-menu-opened .drop-menu-arrow{
     transform: rotate(-90deg);
 }
-.drop-menu-opened .drop-menu{
+.drop-menu-opened .drop-menu,
+.drop-menu-opened .role-select{
     opacity: 1;
     pointer-events: auto;
 }
+.role-select button,
 .drop-menu button{
     min-width: 100%;
     width: max-content;
     border-width: 0px;
     margin: 0;
-    /* background-color: transparent; */
+    background-color: var(--body-bgc);
 }
 
 

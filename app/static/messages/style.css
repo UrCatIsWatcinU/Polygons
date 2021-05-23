@@ -32,10 +32,15 @@
     height: 100%;
     border-right: 1px solid var(--main-c);
     padding: 10px;
-    padding-top: 0;
     box-sizing: border-box;
     background-color: var(--about-bgc);
     border-radius: 5px 0 5px 5px;
+    overflow: auto;
+    --webkit-scrollbar-width: none;
+    scrollbar-width: none;
+}
+.chats-cont::-webkit-scrollbar{
+    display: none;
 }
 .chat{
     padding: 1em;
@@ -44,6 +49,9 @@
     width: 100%;
     box-sizing: border-box;
     position: relative;
+}
+.chat-active{
+    background-color: var(--my-message-bgc);
 }
 .chat-add{
     margin-top: 10px;
@@ -77,7 +85,7 @@
     overflow: hidden;
 }
 .messages-cont-active{
-    pointer-events: auto;
+    pointer-events: unset;
 }
 .messages-cont > *{
     padding: 0 0 0 20px;
@@ -222,16 +230,23 @@
 }
 .chatAbout-member-delete{
     top: unset;
+    z-index: 11;
 }
 .chatAbout-members{
     margin: 0;
     padding: 0 1.5em;
     margin-bottom: 20px;
+    position: relative;
 }
 .chatAbout-members-title{
     font-weight: normal;
     margin: 0;
     margin-bottom: 10px;
+}
+.role-select{
+    left: 1.5em;
+    right: unset;
+    top: unset !important;
 }
 
 .chatAbout-newMember{

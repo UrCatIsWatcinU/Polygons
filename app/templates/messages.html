@@ -4,7 +4,7 @@
     {% if chat.name %}
         {{ chat.name }}
     {% else %}
-        {% for membership in chat.members %} {{ membership.user.name if membership.user.name != user.name else '' }} {% endfor %}
+        {{''}}
     {% endif %}
 {%- endmacro %}
 

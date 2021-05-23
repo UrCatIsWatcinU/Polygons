@@ -86,7 +86,7 @@ tasks.push(() => {
     const chatBtn = document.querySelector('.user-chat');
     if(chatBtn){
         chatBtn.onclick = () => {
-            window.location.href = '/messages?with=' + window.location.href.match(/\d+$/)[0]
+            window.location.href = '/chats?with=' + window.location.href.match(/\d+$/)[0]
         }
     }
 });
