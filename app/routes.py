@@ -4,6 +4,7 @@ import shutil
 import time
 import re
 from threading import Timer
+from datetime import datetime
 
 from app import app, socketio, db
 from app.forms import LoginForm, RegistrationForm
@@ -16,7 +17,7 @@ from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 from flask_sqlalchemy import sqlalchemy
 from sqlalchemy import func
-from sqlalchemy.sql.expression import select
+from sqlalchemy.sql.expression import select, true
 
 
 @app.route('/')
@@ -167,6 +168,20 @@ def user(id):
         return hexs or []
 
     return render_template('user.html', title=owner.username if owner.id != user.id else 'Profile', owner=owner, allowed_change=allowed_change, hexs_sort_fn=hexs_sort_fn, user=user)
+
+@app.route('/users/<id>/json')
+def user_json(id):
+    user = User.query.get(id)
+    
+    if not user:
+        user = User.query.filter_by(username=id).first_or_404()
+
+
+    return json.dumps({
+        'id': user.id,
+        'name': user.username
+    })
+
 @app.route('/users/<id>/change_visibility', methods=['PUT'])
 @login_required
 def change_visibility(id):
@@ -354,6 +369,22 @@ def delete_chat_member(id):
 
     return json.dumps({'success': True})
 
+@app.route('/chats/<id>/members/last_seen', methods=['PUT'])
+@login_required
+def last_seen_chat_member(id):
+    chat = Chat.query.get_or_404(id)
+
+    member = ChatMember.query.filter_by(user_id=current_user.id, chat_id=chat.id).first()
+    if not member:
+        return json.dumps({'success': False})
+
+    member.last_seen = datetime.utcnow()
+
+    db.session.add(member)
+    db.session.commit()
+
+    return json.dumps({'success': True})
+
 @app.route('/chats/members/<id>/update', methods=['PUT'])
 @login_required
 def update_chat_member(id):
@@ -382,8 +413,14 @@ prepare_message_to_send = lambda message: {
 @login_required 
 def get_chat_messages(id):
     chat = Chat.query.get_or_404(id)
+    member = ChatMember.query.filter_by(user_id=current_user.id, chat_id=chat.id).first()
+    if not member:
+        return json.dumps({'success': False})
 
-    return json.dumps([prepare_message_to_send(message) for message in chat.messages])
+    unreaded_messages = [m.id for m in Message.query.filter(Message.chat_id == chat.id, Message.date > member.last_seen, Message.user_id != current_user.id).all()]
+    
+
+    return json.dumps([{**prepare_message_to_send(message), 'isUnread': (message.id in unreaded_messages)} for message in chat.messages])
 
 @socketio.on('new-message')
 def create_chat_message(raw_message):
@@ -396,11 +433,13 @@ def create_chat_message(raw_message):
         db.session.commit()
 
 
-    emit('new-message', json.dumps(prepare_message_to_send(message)))
+    socketio.emit('new-message', json.dumps({**prepare_message_to_send(message), 'isUnread': True}))
+    socketio.emit('lastMessageUpdate', {'chatId': chat.id, 'body': str(message)})
 
 @socketio.on('delete-message')
 def delete_chat_messages(id):
     message = Message.query.get(id)
+    chat = message.chat
 
     current_user_membership = ChatMember.query.filter_by(chat_id=message.chat.id, user_id=current_user.id).first()
     if not current_user_membership or (current_user.id != message.user_id and current_user_membership.role.name not in admins_chat_roles):
@@ -409,7 +448,8 @@ def delete_chat_messages(id):
     db.session.delete(message)
     db.session.commit()
 
-    emit('delete-message-' + str(id), '')
+    socketio.emit('delete-message-' + str(id), '')
+    socketio.emit('lastMessageUpdate', {'chatId': message.chat_id, 'body': str(chat.get_last_message())})
 
 
 

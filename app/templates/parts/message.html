@@ -1,0 +1,5 @@
+<div class="message-represent mesage-content">
+    <span class="message-user">{{ message.author.username|striptags }}:</span>
+    <span class="message-text">{{ message.text |truncate(10)| striptags }}</span>
+</div>
+<span class="message-represent-date message-date" date="{{ message.date }}"> </span>

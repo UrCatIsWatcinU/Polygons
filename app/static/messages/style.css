@@ -58,6 +58,26 @@
 }
 .chat-title{
     margin: 0;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+}
+.chat-title a {
+    font-size: unset;
+}
+.chat-unreadMsgs{
+    --size: 1.7em;
+    font-weight: normal;
+    font-size: .7em;
+    display: flex;
+    margin-left: 7.5px;
+    justify-content: center;
+    align-items: center;
+    width: var(--size);
+    height: var(--size);
+    background-color: var(--main-c);
+    color: var(--white-c);
+    border-radius: 50%;
 }
 .chat-open-info{
     --size: 20px;
@@ -178,6 +198,14 @@
     position: absolute;
     right: 5px;
     top: 5px;
+}
+
+.message-represent{
+    font-size: .8em;
+}
+.message-represent .message-user{
+    font-size: unset;
+    text-decoration: none;
 }
 
 

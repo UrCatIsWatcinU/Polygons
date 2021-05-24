@@ -117,6 +117,19 @@ function showModal(title, body, empty = false){
     return modal;
 }
 
+const showFlash = (message) => {
+    let flash = setClassName(document.createElement('div'), 'flash');
+    flash.innerText = message;
+
+    document.body.append(flash);
+    setTimeout(() => {
+        flash.style.opacity = 1;
+    }, 0)
+    setTimeout(() => {
+        flash.style.opacity = 0;
+    }, 3000)
+}
+
 function hideModal(){
     modal = document.querySelector('.modal');
     

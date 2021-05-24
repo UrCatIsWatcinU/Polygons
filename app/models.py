@@ -5,6 +5,7 @@ from flask_login import UserMixin
 from datetime import datetime
 from sqlalchemy import func
 from sqlalchemy.sql.expression import select
+from flask import render_template
 
 
 
@@ -121,7 +122,7 @@ class Chat(db.Model):
     messages = db.relationship('Message', backref='chat', lazy='dynamic', cascade="all, delete-orphan")
 
     def get_last_message(self):
-        return
+        return db.session.query(Message).filter_by(chat_id=self.id).order_by(db.desc(Message.date)).first()
 
 class ChatMember(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -141,3 +142,6 @@ class Message(db.Model):
     chat_id = db.Column(db.Integer, db.ForeignKey('chat.id'), index=True)
     text = db.Column(db.Text)
     date = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    
+    def __repr__(self):
+        return render_template('parts/message.html', message=self)

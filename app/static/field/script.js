@@ -1588,16 +1588,7 @@ window.addEventListener('load', async () => {
                     contextmenu.querySelector('.copy').onclick = () => {
                         let link = window.location.href + '?' + giveHexSelector(hexagon).replace(/\s+/, '');
                         const ifCopySuccess = () => {
-                            let flash = setClassName(document.createElement('div'), 'flash');
-                            flash.innerText = 'Copied';
-
-                            document.body.append(flash);
-                            setTimeout(() => {
-                                flash.style.opacity = 1;
-                            }, 0)
-                            setTimeout(() => {
-                                flash.style.opacity = 0;
-                            }, 3000)
+                            showFlash('Copied');
                         }
                         if (!navigator.clipboard) {
                             let textArea = document.createElement("textarea");
