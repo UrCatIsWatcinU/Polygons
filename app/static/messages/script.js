@@ -98,9 +98,11 @@ socket.on('new-message', msg => {
     createMessage(msg)
 
     const chat = document.querySelector('#c' + msg.chatId);
-    chat.messages.push(msg)
-    chat.unreadMsgsElem.innerText = ++chat.unreadedMsgs;
-    chat.unreadMsgsElem.style.opacity = 1;
+    if(msg.isUnread && msg.user.id != user.userId){
+        chat.unreadMsgsElem.style.opacity = 1;
+        chat.unreadMsgsElem.innerText = ++chat.unreadedMsgs
+    }
+    
 });
 socket.on('lastMessageUpdate', msg => {
     const chat = document.querySelector('#c'+ msg.chatId);
