@@ -111,7 +111,7 @@ const createMessage = (message) => {
             .then(res => res.ok && res.json())
             .then(res => {
                 if(!res || !res.id || !res.hexs[0]){
-                    msgText.innerHTML = msgText.innerHTML.replace(`[${entity}]`, `<span class="disabled-link">[${entity}]</span>`)
+                    msgText.innerHTML = msgText.innerHTML.replace(`[${entity}]`, `<span class="disabled-link">[${entity}]</span>`);
                     return;
                 } 
 
@@ -154,7 +154,9 @@ const createMessage = (message) => {
 
                         messages.scrollTop = messages.scrollHeight
                     })
-                    .catch(err => err);
+                    .catch(err => {
+                        msgText.innerHTML = msgText.innerHTML.replace(`[${entity}]`, `<span class="disabled-link">[${entity}]</span>`);
+                    });
                 }
             } 
         });
