@@ -34,12 +34,12 @@
     <div class="app">
         <div class="chats-cont">
             {% for chat in chats %}
-                <div id='c{{ chat.id }}' class="chat" is="el-chat" chatname="{{ get_chat_name(chat) | trim }}">
+                <el-chat id='c{{ chat.id }}' class="chat" chatname="{{ get_chat_name(chat) | trim }}">
                     <h4 class="chat-title">{{ get_chat_name(chat) }} <span class="chat-unreadMsgs"></span> </h4>
                     <div class="last-message">
                         {{ (chat.get_last_message() or '') | safe }}
                     </div>
-                </div>
+                </el-chat>
             {% endfor %}
             <button class="chat-add">Add chat</button>
         </div>

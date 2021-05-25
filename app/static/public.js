@@ -200,7 +200,7 @@ const createBgHex = (hexagon, url) => {
     <mask id="hexagon-bgImg-mask">
         <path fill="#fff" d="${hexPath()}"></path>
     </mask>
-    <image mask="url(#hexagon-bgImg-mask)" href="/${url}" preserveAspectRatio="xMidYMid slice" width="100%" height="100%"></image>`;
+    <image draggable="false" style="pointer-events: none;" mask="url(#hexagon-bgImg-mask)" href="/${url}" preserveAspectRatio="xMidYMid slice" width="100%" height="100%"></image>`;
 }
 
 const tasks = [];

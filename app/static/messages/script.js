@@ -296,7 +296,7 @@ const createChatWith = (evt) => {
     .catch(err => showModal('An error occured while opening chat with user', err))
 }
 
-class ElChat extends HTMLDivElement{
+class ElChat extends HTMLElement{
     constructor() {
         super();
         
@@ -612,7 +612,7 @@ class ElChat extends HTMLDivElement{
     }
 }
 
-customElements.define('el-chat', ElChat, {extends: 'div'});
+customElements.define('el-chat', ElChat);
 
 hexSizes.setBodyHeight(30);
 tasks.push(() => {

@@ -1100,7 +1100,7 @@ window.addEventListener('load', async () => {
             
             // создание сетки
             let rowsStr = '';
-            let hexagonStr = `<el-hexagon class="hexagon">
+            let hexagonStr = `<el-hexagon draggable="false" class="hexagon">
             <div class="hexagon-num">0</div>
             </el-hexagon>`.repeat(GRID_WIDTH);
             for(let i = 1; i <= GRID_HEIGHT; i+=2){
