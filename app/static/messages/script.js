@@ -307,7 +307,7 @@ class ElChat extends HTMLElement{
             if(activeChatId != this.uuid) changeChat(this.uuid);
         });
         
-        fetch(`/chats/${this.uuid}//members/i`)
+        fetch(`/chats/${this.uuid}/members/i`)
         .then(res => res.ok && res.json())
         .then(res => {
             if(!res || !res.role) return showModal('An erron occured while loading your chat role', 'Please try later');
