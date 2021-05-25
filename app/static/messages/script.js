@@ -110,7 +110,7 @@ const createMessage = (message) => {
             fetch(`/chains/${id}/json`)
             .then(res => res.ok && res.json())
             .then(res => {
-                if(!res || !res.id){
+                if(!res || !res.id || !res.hexs[0]){
                     msgText.innerHTML = msgText.innerHTML.replace(`[${entity}]`, `<span class="disabled-link">[${entity}]</span>`)
                     return;
                 } 
