@@ -11,7 +11,7 @@ if(!user){
         user = res;
         sessionStorage.setItem(user, JSON.stringify(user));
 
-        document.dispatchEvent('userLoaded');
+        document.dispatchEvent(new Event('userLoaded'));
     })
     .catch(err => {
         showModal('An erron occured while loading profile', err)
