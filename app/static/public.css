@@ -713,6 +713,12 @@ a{
         width: 80%;
     }
 }
+@media (max-width: 480px){
+    .user-info{
+        width: 100%;
+        box-sizing: border-box;
+    }
+}
 @media (max-width: 430px){
     html{
         font-size: .9em;
