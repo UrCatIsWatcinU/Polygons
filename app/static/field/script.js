@@ -932,7 +932,7 @@ window.addEventListener('load', async () => {
                 hexagon.imgs = [];
             }
             
-            class ElHexagon extends HTMLDivElement{
+            class ElHexagon extends HTMLElement{
                 constructor() {
                     super();
                 }
@@ -941,7 +941,7 @@ window.addEventListener('load', async () => {
                 }
             }
             
-            customElements.define('el-hexagon', ElHexagon, {extends: 'div'});
+            customElements.define('el-hexagon', ElHexagon);
         
             const deleteHex = hexagon => {
                 let deletedHexs = [];
@@ -998,35 +998,39 @@ window.addEventListener('load', async () => {
         
                 let parsedHexs = [];
                 for(let hex of savedHexs){
-                    let hexagon = document.querySelector(hex.selector);
-                    if(!hexagon || !hexagon.classList || hexagon.classList.contains('hexagon-visible')) continue;
-                    setHexVisible(hexagon);      
-                    
-                    if(hex.innerText){
-                        let editedField = createEditedField(hexagon); 
+                    try{
+                        let hexagon = document.querySelector(hex.selector);
+                        if(!hexagon || !hexagon.classList || hexagon.classList.contains('hexagon-visible')) continue;
+                        setHexVisible(hexagon);      
                         
-                        editedField.innerText = hex.innerText;
+                        if(hex.innerText){
+                            let editedField = createEditedField(hexagon); 
+                            
+                            editedField.innerText = hex.innerText;
+                        }
+                        
+                        hexagon.querySelector('.hexagon-num').innerText = hex.num;
+                        hexagon.style.setProperty('--bgc', hexsColors[((hex.num-1) - hexsColors.length * (Math.ceil((hex.num-1) / hexsColors.length) - 1)) - 1]);
+                        
+                        if(hex.num == 1){
+                            hexagon.classList.add('hexagon-first');
+                            hexagon.style.setProperty('--bgc', colors.MAIN_C);
+                        }
+    
+                        ['chainId', 'userId', 'username', 'creationDate', 'uuid', 'num'].forEach(prop => {
+                            hexagon[prop] = hex[prop];
+                        });
+                        hexagon.imgs = hex.imgs ? !hex.imgs.length ? [] : hex.imgs : [];
+    
+                        if(hex.BGImg){
+                            createBgHex(hexagon, hex.BGImg);
+                        }
+    
+                        visibleHexs.push(hexagon);
+                        parsedHexs.push(hexagon);   
+                    }catch(err){
+                        console.log(err);
                     }
-                    
-                    hexagon.querySelector('.hexagon-num').innerText = hex.num;
-                    hexagon.style.setProperty('--bgc', hexsColors[((hex.num-1) - hexsColors.length * (Math.ceil((hex.num-1) / hexsColors.length) - 1)) - 1]);
-                    
-                    if(hex.num == 1){
-                        hexagon.classList.add('hexagon-first');
-                        hexagon.style.setProperty('--bgc', colors.MAIN_C);
-                    }
-
-                    ['chainId', 'userId', 'username', 'creationDate', 'uuid', 'num'].forEach(prop => {
-                        hexagon[prop] = hex[prop];
-                    });
-                    hexagon.imgs = hex.imgs ? !hex.imgs.length ? [] : hex.imgs : [];
-
-                    if(hex.BGImg){
-                        createBgHex(hexagon, hex.BGImg);
-                    }
-
-                    visibleHexs.push(hexagon);
-                    parsedHexs.push(hexagon);   
                 }
         
                 return parsedHexs
@@ -1096,9 +1100,9 @@ window.addEventListener('load', async () => {
             
             // создание сетки
             let rowsStr = '';
-            let hexagonStr = `<div is="el-hexagon" class="hexagon">
+            let hexagonStr = `<el-hexagon class="hexagon">
             <div class="hexagon-num">0</div>
-            </div>`.repeat(GRID_WIDTH);
+            </el-hexagon>`.repeat(GRID_WIDTH);
             for(let i = 1; i <= GRID_HEIGHT; i+=2){
                 rowsStr += `
                 <div id="r${i}" class="row">${hexagonStr}</div>

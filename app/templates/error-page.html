@@ -4,7 +4,7 @@
 {% endblock %}
 
 {% block head %}
-    <script>io = () => ({on: () => null})</script>
+    <script>io = () => ({on: () => null}); roundPathCorners = () => null;</script>
     <script src="{{ url_for('static', filename='tinycolor.js') }}"></script>
     <script src="{{ url_for('static', filename='public.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='public.css') }}">
