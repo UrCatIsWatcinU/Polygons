@@ -150,8 +150,11 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {{ loading_head() }}
-    {{ public_scripts() }}
-    {{ public_static() }}
+    {% block head_sources %}
+      {{ public_scripts() }}
+      {{ public_static() }}
+    {% endblock %}
+    
     {% block head %}
     {% endblock %}
     <title>Library Hexagon | {{title}}</title>
@@ -210,13 +213,12 @@
       
       <div class="local-btns">
         {% if not user %}
-        {% if title != 'Login' %}
-            <button class="auth" onclick="window.location.href = `{{ url_for('login') }}`">Login</button>
-        {% endif %}
-        {% if title != 'Register' %}
-            <button class="auth" onclick="window.location.href = `{{ url_for('registration') }}`">Register</button>
-        {% endif %}
-        
+          {% if title != 'Login' %}
+              <button class="auth" onclick="window.location.href = `{{ url_for('login') }}`">Login</button>
+          {% endif %}
+          {% if title != 'Register' %}
+              <button class="auth" onclick="window.location.href = `{{ url_for('registration') }}`">Register</button>
+          {% endif %}
         {% endif %}
         
         {% block btns %}

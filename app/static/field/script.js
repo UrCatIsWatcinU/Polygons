@@ -400,9 +400,11 @@ window.addEventListener('load', async () => {
                                 deleteCommentBtn.innerHTML = '<line x1="50%" y1="0%" x2="50%" y2="100%"></line><line x1="0%" y1="50%" x2="100%" y2="50%"></line>';
                                 commentElem.append(deleteCommentBtn);
                                 deleteCommentBtn.onclick = () => {
-                                    fetch('/chains/comments/delete/' + commentElem.id.replace('comment', ''), {
-                                        method: 'DELETE'
-                                    });
+                                    showAsk(() => {
+                                        fetch('/chains/comments/delete/' + commentElem.id.replace('comment', ''), {
+                                            method: 'DELETE'
+                                        });
+                                    })
                                 }
                             }
             
@@ -706,13 +708,13 @@ window.addEventListener('load', async () => {
                                 if(res.success){
                                     if(res.change == -1){
                                         minus.style.opacity = 0;
-                                        minus.style.pointerEvents = 'null';
+                                        minus.style.pointerEvents = 'none';
                                         
                                         plus.style.opacity = 1;
                                         plus.style.pointerEvents = 'auto';
                                     }else if(res.change == 1){
                                         plus.style.opacity = 0;
-                                        plus.style.pointerEvents = 'null';
+                                        plus.style.pointerEvents = 'none';
             
                                         minus.style.opacity = 1;
                                         minus.style.pointerEvents = 'auto';
@@ -990,14 +992,7 @@ window.addEventListener('load', async () => {
         
                 return deletedHexs;
             }
-            
-            const createBgHex = (hexagon, url) => {
-                hexagon.querySelector('.polygon').innerHTML = `
-                <mask id="hexagon-bgImg-mask">
-                    <use href="#hex-path"></use>
-                </mask>
-                <image mask="url(#hexagon-bgImg-mask)" href="/${url}" preserveAspectRatio="xMidYMid slice" width="100%" height="100%"></image>`;
-            }
+
             function parseHexsFromJson(savedHexs){    
                 if(!savedHexs.length) return [];
         
@@ -1101,24 +1096,13 @@ window.addEventListener('load', async () => {
             
             // создание сетки
             let rowsStr = '';
-            for(let i = 1; i <= GRID_HEIGHT; i++){
-                let hexagonStr = `<div is="el-hexagon" class="hexagon">
-                <div class="hexagon-num">0</div>
-                </div>`;
-                
-                // let row = setClassName(document.createElement('div'), 'row');
-                // row.id = 'r' + i;
-                // if(i % 2 == 0){
-                    //     row.classList.add('row-moved');
-                // }
-                // hexsCont.append(row);
-                
-                // row.innerHTML = hexagonStr.repeat(GRID_WIDTH);
-                let rowClass = "row";
-                if(i % 2 == 0){
-                    rowClass += " row-moved"
-                }
-                rowsStr += `<div id="r${i}" class="${rowClass}">${hexagonStr.repeat(GRID_WIDTH)}</div>`
+            let hexagonStr = `<div is="el-hexagon" class="hexagon">
+            <div class="hexagon-num">0</div>
+            </div>`.repeat(GRID_WIDTH);
+            for(let i = 1; i <= GRID_HEIGHT; i+=2){
+                rowsStr += `
+                <div id="r${i}" class="row">${hexagonStr}</div>
+                <div id="r${i+1}" class="row row-moved">${hexagonStr}</div>`;
             }
             
             hexsCont.innerHTML = rowsStr;
@@ -1162,7 +1146,7 @@ window.addEventListener('load', async () => {
                 let startX, scrollLeft, startY, scrollTop;
     
                 slider.addEventListener('mousedown', (e) => {   
-                    if(e.buttons != 1 || document.querySelector('.modal') && getComputedStyle(document.querySelector('.modal')).display != 'none') return;
+                    if(document.querySelector('.contextmenu') || e.buttons != 1 || document.querySelector('.modal') && getComputedStyle(document.querySelector('.modal')).display != 'none') return;
                     isDown = true;
                     startX = e.pageX - slider.offsetLeft;
                     scrollLeft = slider.scrollLeft;
@@ -1429,27 +1413,31 @@ window.addEventListener('load', async () => {
                     hexagon.isContextmenu = true;
                     let hexDate = new Date(hexagon.creationDate * 1000);
                     contextmenu.innerHTML = ` 
-                    <div style="margin-bottom: 5px;" class="contextmenu-item copy">Copy link</div> 
-                    <div class="contextmenu-item complain">Complain</div>
+                    <div style="margin-bottom: 5px;" class="contextmenu-item send-btn">Send to chat</div> 
+                    <div style="margin-bottom: 5px;" class="contextmenu-item copy-btn">Copy link</div> 
+                    <div class="contextmenu-item complain-btn">Complain</div>
                     <hr class="contextmenu-line">
                     <div style="margin-bottom: 5px" class="contextmenu-item contextmenu-info">Author: <a href="/users/${hexagon.userId}">${hexagon.username}</a></div>
+                    <div style="margin: 5px 0;" class="contextmenu-item contextmenu-info">Chain: ${hexagon.chainId}</div>
+                    <div style="margin: 5px 0;" class="contextmenu-item contextmenu-info">Uid: ${hexagon.uuid}</div>
                     <div style="" class="contextmenu-item contextmenu-info">Date: ${hexDate.toLocaleDateString()}</div>`;
 
                     if(!hexagon.userId || (user.userId == hexagon.userId) || user.userRole == 2){
                         contextmenu.insertAdjacentHTML('afterbegin', `
                         <div style="margin-bottom: 5px;" class="delete-btn contextmenu-item">Delete</div>
-                        <div style="margin-bottom: 5px;" class="contextmenu-item edit">Edit</div>
+                        <div style="margin-bottom: 5px;" class="contextmenu-item edit-btn">Edit</div>
                         ${user.userRole == 2 ? '<div style="margin-bottom: 5px;" class="move-btn contextmenu-item">Move</div>' : ''}`);
                     }
 
                     
                     if(user.userRole == 2){
-                        contextmenu.innerHTML += `<div style="margin: 5px 0;" class="contextmenu-item contextmenu-info">Chain: ${hexagon.chainId}</div>`;
+                        // contextmenu.innerHTML += ``;
                         contextmenu.innerHTML += `<div style="margin-bottom: 5px;" class="contextmenu-item contextmenu-info">Row: ${hexagon.rowId}</div>`;
                         contextmenu.innerHTML += `<div class="contextmenu-item contextmenu-info">Column: ${hexagon.id.replace('h', '')}</div>`;
                     }
-                    if(contextmenu.querySelector('.delete-btn')){
-                        contextmenu.querySelector('.delete-btn').onclick = () => {
+
+                    const actions = {
+                        delete: () => {
                             showAsk(() => {
                                 let virtualVisibleHexs = [...visibleHexs];
                                 
@@ -1459,18 +1447,16 @@ window.addEventListener('load', async () => {
                                     categ: document.title,
                                     data: JSON.stringify(virtualVisibleHexs.filter(hex => !visibleHexs.includes(hex)).map(giveHexSelector))
                                 });
-                            }, 'If you delete this hexagon, all the following hexagons in the chain will be deleted along with it' + (hexagon.num == 1 ? '\n\nThis is first hexagon of the chain, if you delete it, the chain and all comments to it will be deleted' : ''));
-                        }
-                    }
-                    if(contextmenu.querySelector('.move-btn')){
-                        contextmenu.querySelector('.move-btn').onclick = () => {
+                            }, 'If you delete this hexagon, all the following hexagons in the chain will be deleted along with it' + (hexagon.num == 1 ? '\n\nThis is first hexagon of the chain, if you delete it, the chain and all comments to it will be deleted' : ''))
+                        },
+                        move: () => {
                             fetch('/categs/names').then(async res => {
                                 if(!res.ok) return showModal('An error occurred while loading category names', 'Try later');
                                 
                                 res = await res.json();
                                 if(!res.success) return showModal('An error occurred while loading category names', 'Try later');
                                 const categNamesStr = res.categs.map(categ => `<option ${categ.name == document.title ? 'disabled' : ''} value="${categ.id}|${categ.name}">id: ${categ.id} | name: ${categ.name}</option>`).join('');
-
+    
                                 let moveModal = showModal('', '', true);
                                 moveModal.onclick = null;
                                 moveModal = moveModal.firstElementChild;
@@ -1509,70 +1495,71 @@ window.addEventListener('load', async () => {
                                             categId: selectedCategStr.split('|')[0],
                                             newRow: +document.querySelector('#moveModal-row').value,
                                             newHex: +document.querySelector('#moveModal-hex').value,
-
+    
                                         })
                                     }).then(res => {
                                         if(!res.ok) return showModal('An error occurred while moving the chain', 'Please try again. Status: ' + res.status);
+                                        
+                                        const nextCategUrl = new URL(`/fields/${selectedCategStr.split('|')[1]}`, window.location.origin)
+                                        nextCategUrl.searchParams.append('selector', `#r${document.querySelector('#moveModal-row').value} #h${document.querySelector('#moveModal-hex').value}`);
 
-                                        window.location.href = '/fields/' + selectedCategStr.split('|')[1] + '?' + `#r${document.querySelector('#moveModal-row').value} #h${document.querySelector('#moveModal-hex').value}`;
+                                        window.location = nextCategUrl;
                                     });
                                 }
-
+    
                                 moveModal.querySelector('.moveModal-close').onclick = moveModal.querySelector('.close-button').onclick = hideModal;
-                            });
-                        }
-                    }
-                    
-                    contextmenu.querySelector('.complain').onclick = () => {
-                        let complaint = showModal('','', true);
-                        complaint.onclick = null;
-                        complaint = complaint.firstElementChild;
-                        complaint.classList.add('complaint');
+                            })
+                        },
+                        complain: () => {
+                            let complaint = showModal('','', true);
+                            complaint = complaint.firstElementChild;
+                            complaint.classList.add('complaint');
 
-                        complaint.innerHTML = `
-                        <h1 class="complaint-title">Complaint</h1>
-                        <svg class="complaint-close"><line x1="50%" y1="0%" x2="50%" y2="100%"></line><line x1="0%" y1="50%" x2="100%" y2="50%"></line></svg>
-                        <div class="complaint-textarea">
-                            <label for="complaint-text">Text</label> 
-                            <br> 
-                            <textarea id="complaint-text" autofocus maxlength="400" spellcheck="true" wrap="soft"></textarea>
-                        </div>
-                        <div class="btn-cont" style="display: flex;">
-                            <button class="send-button">Send</button>
-                            <button class="close-button">Close</button>
-                        </div>
-                        `;
+                            console.log(complaint);
 
-                        complaint.querySelector('.send-button').onclick = async () => {
-                            try{
-                                let res = await fetch('/complaints/new', {
-                                    method: 'POST',
-                                    body:JSON.stringify({
-                                        hexagon: {
-                                            selector: giveHexSelector(hexagon),
-                                            categ: document.title
-                                        },
-                                        text: complaint.querySelector('#complaint-text').value
+                            complaint.innerHTML = `
+                            <h1 class="complaint-title">Complaint</h1>
+                            <svg class="complaint-close"><line x1="50%" y1="0%" x2="50%" y2="100%"></line><line x1="0%" y1="50%" x2="100%" y2="50%"></line></svg>
+                            <div class="complaint-textarea">
+                                <label for="complaint-text">Text</label> 
+                                <br> 
+                                <textarea id="complaint-text" autofocus maxlength="400" spellcheck="true" wrap="soft"></textarea>
+                            </div>
+                            <div class="btn-cont" style="display: flex;">
+                                <button class="send-button">Send</button>
+                                <button class="close-button">Close</button>
+                            </div>
+                            `;
+
+                            complaint.querySelector('.send-button').onclick = async () => {
+                                try{
+                                    let res = await fetch('/complaints/new', {
+                                        method: 'POST',
+                                        body:JSON.stringify({
+                                            hexagon: {
+                                                selector: giveHexSelector(hexagon),
+                                                categ: document.title
+                                            },
+                                            text: complaint.querySelector('#complaint-text').value
+                                        })
                                     })
-                                })
 
-                                if(res.ok){
-                                    res = await res.json();
+                                    if(res.ok){
+                                        res = await res.json();
 
-                                    if(res.success) showModal('Your complaint has been successfully recorded', 'It will soon be reviewed by the administration');
-                                    else showModal('An error occurred while recording the complaint', 'Try later');
-                                }else{
-                                    showModal('An error occurred while recording the complaint', 'Try later');
+                                        if(res.success) showModal('Your complaint has been successfully recorded', 'It will soon be reviewed by the administration');
+                                        else showModal('An error occurred while recording the complaint', 'Try later');
+                                    }else{
+                                        showModal('An error occurred while recording the complaint', 'Try later');
+                                    }
+                                }catch(err){
+                                    showModal('An error occurred while sending the complaint', err);
                                 }
-                            }catch(err){
-                                showModal('An error occurred while sending the complaint', err);
-                            }
-                        };
-                        complaint.querySelector('.close-button').onclick = hideModal;
-                        complaint.querySelector('.complaint-close').onclick = hideModal;
-                    }
-                    if(contextmenu.querySelector('.edit')){
-                        contextmenu.querySelector('.edit').addEventListener('click', (evt) => {
+                            };
+                            complaint.querySelector('.close-button').onclick = hideModal;
+                            complaint.querySelector('.complaint-close').onclick = hideModal;
+                        },
+                        edit: () => {
                             console.log(hexagon);
                             hexagon.dispatchEvent(new Event('stopClearing'));
 
@@ -1583,47 +1570,56 @@ window.addEventListener('load', async () => {
                             }else{
                                 hexagon.dispatchEvent(new Event('dblclick'));
                             }
-                        }, {passive:false, capture: true})
-                    }
-                    contextmenu.querySelector('.copy').onclick = () => {
-                        let link = window.location.href + '?' + giveHexSelector(hexagon).replace(/\s+/, '');
-                        const ifCopySuccess = () => {
-                            showFlash('Copied');
-                        }
-                        if (!navigator.clipboard) {
-                            let textArea = document.createElement("textarea");
-                            textArea.setAttribute('value', link);
-                            textArea.value = link;
-
-                            textArea.style.position = "fixed";
-                            // textArea.style.visibility = "hidden";
-
-                            document.body.appendChild(textArea);
-
-                            setTimeout(() => {
-                                textArea.focus();
-                                textArea.select();
+                        },
+                        copy: () => {
+                            let link = new URL(window.location.pathname, window.location.origin);
+                            link.searchParams.append('hexId', hexagon.uuid);
                             
-                                try {
-                                    let success = document.execCommand('copy');
-                                    if(success){
-                                        ifCopySuccess();
-                                    }else{
-                                        showModal('Was not possible to copy the link');
+                            if (!navigator.clipboard) {
+                                let textArea = document.createElement("textarea");
+                                textArea.setAttribute('value', link);
+                                textArea.value = link;
+
+                                textArea.style.position = "fixed";
+                                // textArea.style.visibility = "hidden";
+
+                                document.body.appendChild(textArea);
+
+                                setTimeout(() => {
+                                    textArea.focus();
+                                    textArea.select();
+                                
+                                    try {
+                                        let success = document.execCommand('copy');
+                                        if(success){
+                                            showFlash('Copied');
+                                        }else{
+                                            showModal('Was not possible to copy the link');
+                                        }
+                                    } catch (err) {
+                                        showModal('Was not possible to copy the link', err);
                                     }
-                                } catch (err) {
-                                    showModal('Was not possible to copy the link', err);
-                                }
-                            
-                                document.body.removeChild(textArea); 
-                            }, 10)           
-                        }else{
-                            window.navigator.clipboard.writeText(link)
-                            .then(ifCopySuccess)
-                            .catch(err => {
-                                showModal('Something went wrong', err);
-                            });
+                                
+                                    document.body.removeChild(textArea); 
+                                }, 10)           
+                            }else{
+                                window.navigator.clipboard.writeText(link)
+                                .then(() => showFlash('Copied'))
+                                .catch(err => {
+                                    showModal('Something went wrong', err);
+                                });
+                            }
+                        },
+                        send: () => {
+                            const nextLink = new URL('/chats', window.location.origin); 
+                            nextLink.searchParams.append('send', `[hex ${hexagon.uuid}]`);
+                            window.location = nextLink;
                         }
+                    } 
+
+                    for(let action in actions){
+                        if(contextmenu.querySelector(`.${action}-btn`)) 
+                            contextmenu.querySelector(`.${action}-btn`).addEventListener('click', actions[action], {passive: false})
                     }
                 }
                 contextmenu.style.top = evt.clientY + 'px';
@@ -1637,7 +1633,6 @@ window.addEventListener('load', async () => {
             
             const backup = () => {
                 localStorage.setItem('userScroll-' + document.title, JSON.stringify({x: document.body.scrollLeft, y: document.body.scrollTop}));
-                
             }
             window.onunload = backup;
             window.addEventListener('beforeunload', (evt) => {
@@ -1672,35 +1667,32 @@ window.addEventListener('load', async () => {
                 }
             })
             
-            if(window.location.href.split('?#r')[1]){
-                let selector = window.location.href.split('?')[1];
-                let isFromSearch = selector.includes('%20');
-                selector = selector.replace(/\s+/g, '').replace('%20', '').split(/#/).filter(s => s);
+            const urlParams = new URLSearchParams(window.location.search);
+            let foundedHex = null;
+            window.addEventListener('hexsLoaded', () => {
+                if(urlParams.get('selector')){
+                    foundedHex = document.querySelector(urlParams.get('selector'));
+                }else if(urlParams.get('hexId')){
+                    foundedHex = visibleHexs.filter(hex => hex.uuid == urlParams.get('hexId'))[0];
+                }   
 
-                let foundedHex = document.querySelector(`#${selector[0]} #${selector[1]}`);
-                
-                // window.scrollTo(foundedHex.offsetLeft - (document.documentElement.clientWidth - foundedHex.offsetWidth/2) / 2, 0);
-                // foundedHex.scrollIntoView(true)
-                // window.scrollBy(0, -(document.documentElement.clientHeight - foundedHex.offsetHeight/2)/2);
-
-                foundedHex.scrollIntoView({
-                    block: 'center',
-                    inline: 'center'
-                })
-                
-                foundedHex.classList.add('founded-polygon');
-                
-                setTimeout(() => {
-                    foundedHex.classList.remove('founded-polygon');
-                    if(isFromSearch) window.location.href = window.location.href.replace(window.location.href.split('?')[1], '#no-elem');
-                }, 4000)
-                
-            }else{
-                let scrollCoords = JSON.parse(localStorage.getItem('userScroll-' + document.title) || `{"x": ${document.body.scrollWidth / 2}, "y":  ${document.body.scrollHeight / 2}}`);
-                // document.body.scrollLeft = scrollCoords.x;
-                // document.body.scrollTop = scrollCoords.y;
-                document.body.scrollTo(scrollCoords.x, scrollCoords.y)
-            }   
+                if(foundedHex){
+                    foundedHex.scrollIntoView({
+                        block: 'center',
+                        inline: 'center'
+                    })
+                    
+                    foundedHex.classList.add('founded-polygon');
+                    
+                    setTimeout(() => {
+                        foundedHex.classList.remove('founded-polygon');
+                        history.pushState(null, null, '/fields/' + document.title); 
+                    }, 4000)
+                }else{
+                    let scrollCoords = JSON.parse(localStorage.getItem('userScroll-' + document.title) || `{"x": ${document.body.scrollWidth / 2}, "y":  ${document.body.scrollHeight / 2}}`);
+                    document.body.scrollTo(scrollCoords.x, scrollCoords.y)
+                }
+            });
 
             try{
                 let res = await fetch('/chains/' + document.title);
@@ -1715,8 +1707,10 @@ window.addEventListener('load', async () => {
                 console.log(res.body);
                 for(let chain of res.body){
                     chain.hexs = parseHexsFromJson(chain.hexs); 
-                    chains.push(chain)
+                    chains.push(chain);
                 }
+
+                window.dispatchEvent(new Event('hexsLoaded'));
             }catch(err){
                 showModal('An error occurred when loading hexagons', err);
             }

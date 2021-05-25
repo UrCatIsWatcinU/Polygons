@@ -1,7 +1,7 @@
 {% import "layout.html" as layout %}
 
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
@@ -16,13 +16,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='field/style.css') }}">
 </head>
 <body class="while-loading field">
-  <div class="modal">
-    <div class="modal-content">
-      <h2 class="modal-title"></h2>
-      <p class="modal-body"></p>
-      <button>Close</button>
-    </div>
-  </div>
+  {{ layout.modal() }}
   {{ layout.loading() }}
   <div class="hexsCont"></div>
   <div class="controls">

@@ -58,7 +58,7 @@
 {% endblock %}
 
 {% block btns %}
-    {% if is_auth %}
+    {% if user %}
         {% if user.role.name == 'admin' %}
             <button class="new-categ-btn">New categ</button>
             <button class="complaints" onclick="window.location.href = `{{ url_for('get_complaints') }}`">Complaints</button>

@@ -33,6 +33,13 @@ body {
     transition: var(--trans);
     transition-property: filter, transform, opacity, visibility, color;
     font-family: var(--font), sans-serif;
+    scrollbar-width: thin;
+    scrollbar-color: var(--scroll-thumb-c);
+    --webkit-scrollbar-width: thin;
+    outline: none;
+}
+*:focus{
+    outline: none;
 }
 .main{
     overflow: hidden;
@@ -49,6 +56,16 @@ body {
     padding: 0 var(--aside-pad);
     overflow-y: auto;
     height: calc(100% - 20px);
+}
+
+::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+    background-color: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background-color: var(--scroll-thumb-c);
+    border-radius: 2px;
 }
 
 
@@ -135,6 +152,10 @@ h1{
 }
 a{
     color: inherit;
+}
+.disabled-link{
+    opacity: .5;
+    cursor: not-allowed;
 }
 
 
@@ -310,12 +331,6 @@ a{
     box-sizing: border-box;
     padding-left:var(--categ-trH);
     padding-top: calc(var(--categ-totalH) / 2 + 10px);
-
-    scrollbar-width: none;
-    --webkit-scrollbar-width: none;
-}
-.categs::-webkit-scrollbar{
-    display: none;
 }
 .categs-row{
     display: flex;
@@ -673,6 +688,11 @@ a{
     .main-logo{
         width: 80%;
     }
+    .ask-content,
+    .modal-content{
+        width: 60%;
+        max-width: unset;
+    }
 }
 @media (max-width: 580px){
     body{
@@ -687,6 +707,11 @@ a{
     .complaint-num{
         left: 3px;
     }
+
+    .ask-content,
+    .modal-content{
+        width: 80%;
+    }
 }
 @media (max-width: 430px){
     html{
@@ -694,8 +719,7 @@ a{
     }
     .ask-content,
     .modal-content{
-        max-width: 90vw;
-        width: max-content;
+        width: 90%;
     }
 }
 @media (max-width: 365px){

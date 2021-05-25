@@ -22,6 +22,7 @@
     display: grid;
     grid-template-areas: 'chats messages messages messages messages';
     grid-template-columns: minmax(200px, max-content) repeat(4, 1fr);  
+    grid-template-rows: 1fr;
     overflow: hidden;
 }
 .chats-cont{
@@ -36,11 +37,6 @@
     background-color: var(--about-bgc);
     border-radius: 5px 0 5px 5px;
     overflow: auto;
-    --webkit-scrollbar-width: none;
-    scrollbar-width: none;
-}
-.chats-cont::-webkit-scrollbar{
-    display: none;
 }
 .chat{
     padding: 1em;
@@ -115,12 +111,8 @@
     box-sizing: border-box;
     padding-top: 10px;
     overflow-y: auto;
-    --webkit-scrollbar-width: none;
-    scrollbar-width: none;
 }
-.messages::-webkit-scrollbar{
-    display: none;
-}
+
 .messages-cont-active .messages-empty{
     display: none;
 }
@@ -139,7 +131,9 @@
     background-color: var(--about-bgc);
     border-radius: 0 5px 5px 0;
 }
-
+.back-to-chats{
+    display: none;
+}
 .message-form{
     display: flex;
     align-items: center;
@@ -154,7 +148,7 @@
     margin-right: 10px;
     resize: vertical;
     width: 100%;
-}
+}   
 
 .message-cont{
     display: flex;
@@ -180,16 +174,29 @@
     text-decoration: underline;
     font-size: .8em;
 }
+.message-text{
+    width: 100%;
+    overflow: hidden;
+    overflow-wrap: break-word;
+}
 .message-date{
     position: absolute;
     bottom: 5px;
     right: 5px;
     font-size: .8em;
 }
+.message-attachment-inText{
+    color: var(--main-c);
+    user-select: none;
+}
+.message-attachment-inText:hover,
+.attachment-active{
+    filter: brightness(1.1);    
+}
 .chatAbout-member-delete,
 .message-delete{
     --size: 1em;
-    transform: rotate(45deg);
+    transform: rotate(45deg) !important;
     stroke: var(--main-c);
     stroke-width: 1.5px;
     width: var(--size);
@@ -198,6 +205,32 @@
     position: absolute;
     right: 5px;
     top: 5px;
+}
+.touch-device .chatAbout-member-delete,
+.touch-device .message-delete{
+    --size: 1.3em
+}
+.attachments{
+    display: flex;
+    flex-wrap: wrap;
+    max-height: 150px;
+    overflow-y: auto;
+}
+.attachment{
+    opacity: 1;
+    --pad: 0;
+    margin: 5px;
+}
+.attachment.hexagon{
+    cursor: pointer;
+    font-size: .7em;
+}
+.hexagon-editedField{
+    top: var(--triangle-height);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: transparent;
 }
 
 .message-represent{
@@ -299,4 +332,50 @@
     .app{
         grid-template-columns: minmax(150px, max-content) repeat(4, 1fr);  
     }
+}
+@media (max-width: 500px){
+    .app{
+        grid-template-columns: 1fr;  
+        grid-template-areas: 'chats';
+    }
+    .chats-cont{
+        width: 100%;
+        border-radius: 5px;
+        border: none;
+    }
+    .messages-cont{
+        width: 0;
+        height: 0;
+    }
+    .app-messages{
+        grid-template-areas: 'messages';
+    }
+    .app-messages .chats-cont{
+        width: 0;
+        height: 0;
+        padding: 0;
+    }
+    .app-messages .messages-cont{
+        width: unset;
+        height: 100%;
+    }
+    .app-messages .messages-title{
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+    }
+    .app-messages .back-to-chats{
+        display: unset;
+        width: .8em;
+        height: 1em;
+        stroke: var(--main-c);
+        stroke-width: .3em;
+        fill: transparent;
+        margin-right: 10px;
+        cursor: pointer;
+    }
+}
+
+.chats-closed{
+    width: 0;
 }

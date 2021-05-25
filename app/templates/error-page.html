@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+
+{% block head_sources %}
+{% endblock %}
+
+{% block head %}
+    <script>io = () => ({on: () => null})</script>
+    <script src="{{ url_for('static', filename='tinycolor.js') }}"></script>
+    <script src="{{ url_for('static', filename='public.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='public.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.png') }}" type="image/png">
+{% endblock %}
+
+{% block content %}
+    <h1>{{ error_message }}</h1>
+    <p>{{ error_description }}</p>
+    <div class="btn-cont">
+        <button onclick="history.back();" class="back-btn">Back</button>
+        {% if user and user.id != 1 %}
+            <!-- <button onclick="window.location.href = `/chats?with=1`" class="chat-admin">Open chat with admin</button> -->
+            <button class="chat-admin">Open chat with admin</button>
+        {% endif %}
+        
+    </div>
+    <style>
+        .app{
+            height: 60%;
+            width: max-content;
+        }
+        h1{
+            font-size: 3em;
+        }
+        p{
+            margin-top: 0;
+        }
+        .btn-cont{
+            width: 100%;
+            display: flex;
+        }
+    </style>
+    <script>
+        tasks.push(() => {
+            document.querySelector('.chat-admin').onclick = () => {
+                const chatsURL = new URL('/chats', window.location.origin);
+                chatsURL.searchParams.append('with', 1);
+                chatsURL.searchParams.append('send', `There is {{error_message}} [link here:${window.location.href}]`);
+
+                window.location = chatsURL;
+            }
+        });
+    </script>
+{% endblock %}

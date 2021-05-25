@@ -1,14 +1,3 @@
-*{
-  scrollbar-width: none;
-  --webkit-scrollbar-width: none;
-  outline: none;
-}
-*:focus{
-  outline: none;
-}
-*::-webkit-scrollbar{
-  display: none;
-}
 html{
   overflow: hidden;
 }
@@ -21,10 +10,6 @@ html{
   white-space: nowrap;
   display: block;
   position: relative;
-}
-.field.active,
-.field.active .hexsCont{
-  cursor: grabbing;
 }
 .scroll-btns{
   position: fixed;
@@ -111,12 +96,6 @@ html{
   stroke-width: 2px;
 }
 .hexagon-turned .hexagon-editedField{
-  /* transform: rotate(270deg);
-  height: calc(var(--hexagon-width) - 2px);
-  width: calc(var(--body-height) - 2px);
-  bottom: unset;
-  left: var(--body-height);
-  left: 0; */
   writing-mode: vertical-rl;
   transform: rotate(180deg);
 }

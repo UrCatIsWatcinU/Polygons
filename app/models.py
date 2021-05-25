@@ -26,6 +26,7 @@ class User(UserMixin, db.Model):
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'), nullable=False, default=1)
     settings = db.Column(db.String(400))
     is_hidden =  db.Column(db.Boolean, default=False)
+    # is_verify = db.Column(db.Boolean, default=False)
     
     hexs = db.relationship('Hexagon', backref='author', lazy='dynamic', cascade="all, delete-orphan")
     chains = db.relationship('Chain', backref='author', lazy='dynamic', cascade="all, delete-orphan")
@@ -45,7 +46,6 @@ class User(UserMixin, db.Model):
 
     def get_rating(self):
         return db.session.execute(select([func.sum(UserRating.change)]).where(UserRating.user_id == self.id)).first().values()[0] or 0
-
 
 class Role(db.Model):
     id = db.Column(db.Integer, primary_key=True)

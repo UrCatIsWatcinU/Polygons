@@ -37,7 +37,16 @@ const setCSSProps = (cssProps, prefix='', units='') => {
         document.body.style.setProperty(`--${prefix}${prop}`, cssProps[prop] + units)
     }
 }
-const setHexVisible = hexagon => {
+const setHexVisible = (hexagon, num) => {
+    if(num){
+        hexagon.style.setProperty('--bgc', hexsColors[((num-1) - hexsColors.length * (Math.ceil((num-1) / hexsColors.length) - 1)) - 1]);
+        if(num == 1){
+            hexagon.classList.add('hexagon-first');
+            hexagon.style.setProperty('--bgc', colors.MAIN_C);
+        }
+    }
+
+
     hexagon.style.transition = 'inherit';
     hexagon.classList.add('hexagon-visible');
     
@@ -186,6 +195,14 @@ function createDropMenu(dropMenu = null, userCont = null, attachElem = null){
     }
 }
 
+const createBgHex = (hexagon, url) => {
+    hexagon.querySelector('.polygon').innerHTML = `
+    <mask id="hexagon-bgImg-mask">
+        <path fill="#fff" d="${hexPath()}"></path>
+    </mask>
+    <image mask="url(#hexagon-bgImg-mask)" href="/${url}" preserveAspectRatio="xMidYMid slice" width="100%" height="100%"></image>`;
+}
+
 const tasks = [];
 
 let otherSettings = {
@@ -245,6 +262,7 @@ let hexPath = () => `M 0 ${hexSizes.TRIANGLE_HEIGHT} L ${hexSizes.HEXAGON_WIDTH/
 
 const main = async () => {
     if(isIOS()) document.body.classList.add('ios')
+    if(isTouchDevice()) document.body.classList.add('touch-device')
     
     let mainLogo = document.querySelector('.header-img.big');
     let smallLogo = document.querySelector('.header-img.small');
@@ -315,6 +333,8 @@ const main = async () => {
     for(let color in defaultColors){
         cssProps[color.toLowerCase().replace(/_/g, '-',)] = colors[color] || defaultColors[color];
     }
+
+    cssProps['scroll-thumb-c'] = tinycolor(colors.BLACK_C).setAlpha(.1);
     
     setCSSProps(Object.assign(cssProps, hexSizes.createCSSProps()));
     
@@ -335,7 +355,7 @@ const main = async () => {
             let neededHex;
             
             if(hexs.ok){
-                hexs = await hexs.json()
+                hexs = await hexs.json();
     
                 let first = keywords.shift()
                 for(let hex of hexs.body){
@@ -358,16 +378,15 @@ const main = async () => {
                                 return
                             }
                         }
-                    })
+                    });
                 }
             }
             
             if(neededHex){
-                if(window.location.pathname.replace(/\/?fields\//, '') == neededHex.categ){
-                    let foundedHex = document.querySelector(neededHex.selector);
-            
-                    // window.scrollTo(foundedHex.offsetLeft-(document.documentElement.clientWidth - foundedHex.offsetWidth/2) / 2, 0);
-                    // window.scrollBy(0, -(document.documentElement.clientHeight - foundedHex.offsetHeight/2)/2);
+                const visibleHexs = Array.from(document.querySelectorAll('.hexagon-visible'))
+                let foundedHex = visibleHexs && visibleHexs.filter(hex => hex.uuid == neededHex.id)[0];
+                
+                if(foundedHex){
                     foundedHex.scrollIntoView({
                         behavior: 'smooth',
                         block: 'center',
@@ -378,10 +397,10 @@ const main = async () => {
                     
                     setTimeout(() => {
                         foundedHex.classList.remove('founded-polygon');
-                    }, 4000)  
-                }else{ 
-                    window.location.href = `/fields/${neededHex.categ}?${neededHex.selector.replace(/\s+/g, '')}`;
-                } 
+                    }, 4000);  
+                }else{
+                    window.location.href = '/hexs/' + neededHex.id;
+                }
             }
         }
 

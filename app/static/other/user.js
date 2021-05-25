@@ -52,16 +52,7 @@ tasks.push(() => {
         }
     }
 
-    Array.from(document.querySelectorAll('.hexagon')).forEach(hexagon => {
-        const num = +hexagon.id.replace('h', '');
-
-        hexagon.style.setProperty('--bgc', hexsColors[((num-1) - hexsColors.length * (Math.ceil((num-1) / hexsColors.length) - 1)) - 1]);
-        if(num == 1){
-            hexagon.classList.add('hexagon-first');
-            hexagon.style.setProperty('--bgc', colors.MAIN_C);
-        }
-        setHexVisible(hexagon);
-    });
+    document.querySelectorAll('.hexagon').forEach(setHexVisible);
 
     const deleteBtn = document.querySelector('.user-delete'); 
     if(deleteBtn){

@@ -459,68 +459,67 @@ window.addEventListener('load', async () => {
                     const checkHexVisibility = (r, h) => document.querySelector(`#r${r} #h${h}`) ? document.querySelector(`#r${r} #h${h}`).classList.contains('hexagon-visible') : false;
                     let rId = hexagon.rowId;
                     let hId = +hexagon.id.replace('h', '');
-                    
                     if(!isIOS()){
                         if(checkHexVisibility(rId, hId + 1) && checkHexVisibility(rId, hId - 1)){
                             if(hexagon.parentElement.classList.contains('row-moved')){
                                 if(checkHexVisibility(rId - 1 , hId) || checkHexVisibility(rId - 1, hId + 1)){
-                                    hexagonAbout.style.top = (HEXAGON_HEIGHT + 5) + 'px';
+                                    hexagonAbout.style.top = (hexSizes.HEXAGON_HEIGHT + 5) + 'px';
                                 }else if(checkHexVisibility(rId + 1, hId) || checkHexVisibility(rId + 1, hId + 1)){
                                     hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5) + 'px';
                                 }else{
-                                    hexagonAbout.style.top = (HEXAGON_HEIGHT + 5) + 'px';
+                                    hexagonAbout.style.top = (hexSizes.HEXAGON_HEIGHT + 5) + 'px';
                                 }
                             }else{
                                 if(checkHexVisibility(rId - 1 , hId) || checkHexVisibility(rId - 1, hId - 1)){
-                                    hexagonAbout.style.top = (HEXAGON_HEIGHT + 5) + 'px';
+                                    hexagonAbout.style.top = (hexSizes.HEXAGON_HEIGHT + 5) + 'px';
                                 }else if(checkHexVisibility(rId + 1, hId) || checkHexVisibility(rId + 1, hId - 1)){
                                     hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5) + 'px';
                                 }else{
-                                    hexagonAbout.style.top = (HEXAGON_HEIGHT + 5) + 'px';
+                                    hexagonAbout.style.top = (hexSizes.HEXAGON_HEIGHT + 5) + 'px';
                                 }
                             }
                         }else if(checkHexVisibility(rId, hId + 1)){
                             hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
                         }else if(checkHexVisibility(rId, hId - 1)){
-                            hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
+                            hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
                         }else{
                             if(hexagon.parentElement.classList.contains('row-moved')){
                                 if(checkHexVisibility(rId + 1, hId) && checkHexVisibility(rId + 1, hId+ 1)){
                                     hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5 - TRIANGLE_HEIGHT) + 'px';
                                     if(checkHexVisibility(rId - 1, hId)){
                                         hexagonAbout.style.bottom = 0
-                                        hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
+                                        hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
                                     }else if(checkHexVisibility(rId - 1, hId + 1)){
                                         hexagonAbout.style.bottom = 0
                                         hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
                                     }else{
-                                        hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
+                                        hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
                                     }
                                 }else if(checkHexVisibility(rId + 1, hId)){
-                                    hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
+                                    hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
                                 }else if(checkHexVisibility(rId + 1, hId + 1)){
                                     hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
                                 }else{
-                                    hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
+                                    hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
                                 }
                             }else{
                                 if(checkHexVisibility(rId + 1, hId - 1) && checkHexVisibility(rId + 1, hId)){
                                     hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5 - TRIANGLE_HEIGHT) + 'px';
                                     if(checkHexVisibility(rId - 1, hId)){
                                         hexagonAbout.style.bottom = 0
-                                        hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
+                                        hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
                                     }else if(checkHexVisibility(rId - 1, hId + 1)){
                                         hexagonAbout.style.bottom = 0
                                         hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
                                     }else{
-                                        hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
+                                        hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
                                     }
                                 }else if(checkHexVisibility(rId + 1, hId - 1)){
-                                    hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
+                                    hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
                                 }else if(checkHexVisibility(rId + 1, hId)){
                                     hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
                                 }else{
-                                    hexagonAbout.style.left = (HEXAGON_WIDTH + 7.5) + 'px'
+                                    hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
                                 }
                             }
                         }
@@ -538,13 +537,6 @@ window.addEventListener('load', async () => {
                 return editedField;
             }
 
-            const createBgHex = (hexagon, url) => {
-                hexagon.querySelector('.polygon').innerHTML = `
-                <mask id="hexagon-bgImg-mask">
-                    <path fill="#fff" d="${hexPath()}"></path>
-                </mask>
-                <image mask="url(#hexagon-bgImg-mask)" href="/${url}" preserveAspectRatio="xMidYMid slice" width="100%" height="100%"></image>`;
-            }
             function parseHexsFromJson(savedHexs){    
                 if(!savedHexs.length) return [];
         
@@ -597,15 +589,14 @@ window.addEventListener('load', async () => {
             let hexsCont = document.querySelector('.hexsCont');
             hexsCont.style.opacity = 1;
             
-            // document.documentElement.style.width = (GRID_WIDTH * HEXAGON_WIDTH + HEXAGON_WIDTH/2) + 'px';
+            // document.documentElement.style.width = (GRID_WIDTH * hexSizes.HEXAGON_WIDTH + hexSizes.HEXAGON_WIDTH/2) + 'px';
             
             // создание сетки
             let rowsStr = '';
+            let hexagonStr = `<div class="hexagon">
+            <div class="hexagon-num">0</div>
+            </div>`.repeat(GRID_WIDTH);
             for(let i = 1; i <= GRID_HEIGHT; i+=2){
-                let hexagonStr = `<div class="hexagon">
-                <div class="hexagon-num">0</div>
-                </div>`.repeat(GRID_WIDTH);
-                
                 rowsStr += `
                 <div id="r${i}" class="row">${hexagonStr}</div>
                 <div id="r${i+1}" class="row row-moved">${hexagonStr}</div>`;
@@ -743,19 +734,6 @@ window.addEventListener('load', async () => {
             window.onerror = (msg) => {
                 backup();
             };
-            
-            try{
-                let res = await fetch('/chains/' + document.title);
-                if(!res.ok) return showModal('An error occurred when loading hexagons', 'Please try later. Status: ' + res.status);
-                res = await res.json();
-
-                for(let chain of res.body){
-                    chain.hexs = parseHexsFromJson(chain.hexs); 
-                    chains.push(chain)
-                }
-            }catch(err){
-                showModal('An error occurred when loading hexagons', err);
-            }
         
             socket.on('hexs', (data) => {
                 if(data.categ != document.title) return;
@@ -776,30 +754,47 @@ window.addEventListener('load', async () => {
                 }
             })
 
-            if(window.location.href.split('?#r')[1]){
-                let selector = window.location.href.split('?')[1];
-                let isFromSearch = selector.includes('%20');
-                selector = selector.replace(/\s+/g, '').replace('%20', '').split(/#/).filter(s => s);
-                let foundedHex = document.querySelector(`#${selector[0]} #${selector[1]}`);
-                
-                foundedHex.scrollIntoView({
-                    block: 'center',
-                    inline: 'center'
-                })
-                
-                foundedHex.classList.add('founded-polygon');
-                
-                setTimeout(() => {
-                    foundedHex.classList.remove('founded-polygon');
-                    if(isFromSearch) window.location.href = window.location.href.replace(window.location.href.split('?')[1], '#no-elem');
-                }, 4000)
-                
-            }else{
-                let scrollCoords = JSON.parse(localStorage.getItem('userScroll-' + document.title) || `{"x": ${document.body.scrollWidth / 2}, "y":  ${document.body.scrollHeight / 2}}`);
-                document.body.scrollLeft = scrollCoords.x;
-                document.body.scrollTop = scrollCoords.y;
+            const urlParams = new URLSearchParams(window.location.search);
+            let foundedHex = null;
+            window.addEventListener('hexsLoaded', () => {
+                if(urlParams.get('selector')){
+                    foundedHex = document.querySelector(urlParams.get('selector'));
+                }else if(urlParams.get('hexId')){
+                    foundedHex = visibleHexs.filter(hex => hex.uuid == urlParams.get('hexId'))[0];
+                }   
+
+                if(foundedHex){
+                    foundedHex.scrollIntoView({
+                        block: 'center',
+                        inline: 'center'
+                    })
+                    
+                    foundedHex.classList.add('founded-polygon');
+                    
+                    setTimeout(() => {
+                        foundedHex.classList.remove('founded-polygon');
+                        history.pushState(null, null, '/fields/' + document.title); 
+                    }, 4000)
+                }else{
+                    let scrollCoords = JSON.parse(localStorage.getItem('userScroll-' + document.title) || `{"x": ${document.body.scrollWidth / 2}, "y":  ${document.body.scrollHeight / 2}}`);
+                    document.body.scrollTo(scrollCoords.x, scrollCoords.y)
+                }
+            });
+
+            try{
+                let res = await fetch('/chains/' + document.title);
+                if(!res.ok) return showModal('An error occurred when loading hexagons', 'Please try later. Status: ' + res.status);
+                res = await res.json();
+
+                for(let chain of res.body){
+                    chain.hexs = parseHexsFromJson(chain.hexs); 
+                    chains.push(chain)
+                }
+
+                window.dispatchEvent(new Event('hexsLoaded'));
+            }catch(err){
+                showModal('An error occurred when loading hexagons', err);
             }
-            hexsCont.style.borderWidth = 'unset';
         }
 
         if(!isTransEnd) main();

@@ -14,10 +14,25 @@ from app.lib import create_dir, delete_dir, serialize
 from flask import render_template, redirect, url_for, request
 from flask_socketio import emit
 from flask_login import current_user, login_user, logout_user, login_required
-from werkzeug.urls import url_parse
+from werkzeug.urls import url_encode, url_parse
 from flask_sqlalchemy import sqlalchemy
 from sqlalchemy import func
-from sqlalchemy.sql.expression import select, true
+from sqlalchemy.sql.expression import select
+
+@app.errorhandler(404)
+def not_found_error(error):
+    user = None
+    if current_user and current_user.is_authenticated:
+        user = current_user
+    return render_template('error-page.html', error_message='404 not found', error_description='If you write URL manually, check if it is correct', user=user, title='404'), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    db.session.rollback()
+    user = None
+    if current_user and current_user.is_authenticated:
+        user = current_user
+    return render_template('error-page.html', user=user, title='500', error_title='500 internal error', error_description='Some troubles happend on server. Please send message to admin'), 500
 
 
 @app.route('/')
@@ -109,6 +124,16 @@ def get_categs_names():
             "id": categ.id
         }, Categ.query.all())) 
     })
+
+@app.route('/categs/<id>')
+@login_required
+def get_categ(id):
+    categ = Categ.query.get(id)
+
+    if not categ:
+        categ = Categ.query.filter_by(name=id).first_or_404()
+    
+    return json.dumps({'name': categ.name, 'id': categ.id})
 
 
 @app.route('/registration', methods=['GET', 'POST'])
@@ -224,7 +249,7 @@ def change_user_rating(id):
 
 @app.route('/users/i')
 def give_current_user():
-    if(current_user and current_user.is_authenticated):
+    if current_user and current_user.is_authenticated:
         return json.dumps({'userId': current_user.id, 'userRole': current_user.role_id, 'username': current_user.username})
     else:
         return json.dumps({'err': 'no user'})
@@ -297,7 +322,7 @@ def delete_chat(id):
     return json.dumps({"success":True})
 
 
-prepare_user_to_send = lambda m: {
+prepare_cmember_to_send = lambda m: {
     **serialize(m, ['chat_role_id', 'user_id']),
     'role': {
         'id': m.chat_role_id,    
@@ -312,7 +337,7 @@ prepare_user_to_send = lambda m: {
 @login_required 
 def get_chat_members(id):
     chat = Chat.query.get_or_404(id)
-    return json.dumps([prepare_user_to_send(m) for m in chat.members])
+    return json.dumps([prepare_cmember_to_send(m) for m in chat.members])
 
 @app.route('/chats/<id>/members/i')
 @login_required 
@@ -320,7 +345,7 @@ def get_me_of_members(id):
     chat = Chat.query.get_or_404(id)
     i = ChatMember.query.filter_by(chat_id=chat.id, user_id=current_user.id).first_or_404()
 
-    return json.dumps(prepare_user_to_send(i))
+    return json.dumps(prepare_cmember_to_send(i))
 
 @app.route('/chats/<id>/add_member', methods=['POST'])
 @login_required
@@ -347,7 +372,7 @@ def add_chat_member(id):
     member = ChatMember(user_id=user.id, chat_role_id=raw_member['role'], chat_id=chat.id)
     db.session.add(member)
     db.session.commit()
-    return json.dumps({'success': True, **prepare_user_to_send(member)})
+    return json.dumps({'success': True, **prepare_cmember_to_send(member)})
 
 @app.route('/chats/members/<id>/delete', methods=['DELETE'])
 @login_required
@@ -520,9 +545,8 @@ def get_hexs(categ_name):
     if categ_name == 'all':
         all_hexs = Hexagon.query.all()
         hexs_to_send = list(map(lambda hex: {
-            "selector": hex.selector,
+            "id": hex.id,
             "innerText": hex.inner_text,
-            "categ": hex.categ.name,
             "chainId": hex.chain_id,
             "num": hex.num
         }, all_hexs))
@@ -535,6 +559,17 @@ def get_hexs(categ_name):
 @app.route('/hexs/<id>/about')
 def get_hex_about(id): 
     return Hexagon.query.get_or_404(id).about if Hexagon.query.get_or_404(id).about else ''
+
+@app.route('/hexs/<int:id>')
+def get_hex(id):
+    hex = Hexagon.query.get_or_404(id)
+
+    return redirect(f'/fields/{hex.categ.name}?' + url_encode({'hexId': id}))
+@app.route('/hexs/<int:id>/json')
+def get_hex_json(id):
+    hex = Hexagon.query.get_or_404(id)
+    
+    return json.dumps(prepare_hex_to_send(hex))
 
 @app.route('/hexs/<id>/about/change', methods=['POST'])
 @login_required
@@ -718,7 +753,12 @@ def handle_hexs(data):
 
 
 
-
+prepare_chain_to_send = lambda chain: {
+    'id': chain.id,
+    'userId': chain.user_id,
+    'hexs': [prepare_hex_to_send(hex) for hex in chain.hexs]
+}
+    
 @app.route('/chains/<categ_name>')
 def get_chains(categ_name):
     userId = 0
@@ -731,11 +771,7 @@ def get_chains(categ_name):
     
     chains_to_send = []
     for chain in Chain.query.filter_by(categ_id=categ.id).all():
-        chains_to_send.append({
-            'id': chain.id,
-            'userId': chain.user_id,
-            'hexs': list(map(prepare_hex_to_send, chain.hexs))
-        })
+        chains_to_send.append(prepare_chain_to_send(chain))
 
     return json.dumps({"body": chains_to_send, "userId": userId, "userRole": userRole})
 
@@ -749,6 +785,13 @@ def create_chain(categ_name):
     db.session.commit()
 
     return json.dumps({'success': True, 'chainId': chain.id, 'userId': chain.user_id}) 
+
+@app.route('/chains/<int:id>/json')
+def get_chain_json(id):
+    chain = Chain.query.get_or_404(id)
+    
+    return json.dumps(prepare_chain_to_send(chain))
+
 @app.route('/chains/<id>/comments')
 def get_comments(id):
     return json.dumps(list(map(lambda comment: {
@@ -821,22 +864,25 @@ def change_rating(id):
 
     return json.dumps({'success': True, 'num': rating, 'change': change_num})
 
+def get_rId(selector):
+    return int(selector.split(' ')[0].replace('#r', ''))
+def get_hId(selector):
+    return int(selector.split(' ')[1].replace('#h', ''))
+def change_hex_selector(selector, r_offset, h_offset):
+    changed_r = re.sub(r"(?<=r)\d", selector, str(get_rId(selector) + r_offset))
+    changed_h = re.sub(r"(?<=h)\d", selector, str(get_hId(selector) + h_offset))
+    return f"#r{changed_r} #h{changed_h}"
 @app.route('/chains/<chain_id>/move', methods=['POST'])
 @login_required
 def chain_move(chain_id):
-    def get_rId(selector):
-        return int(selector.split(' ')[0].replace('#r', ''))
-    def get_hId(selector):
-        return int(selector.split(' ')[1].replace('#h', ''))
-    def change_hex_selector(selector, r_offset, h_offset):
-        changed_r = re.sub(r"(?<=r)\d", selector, str(get_rId(selector) + r_offset))
-        changed_h = re.sub(r"(?<=h)\d", selector, str(get_hId(selector) + h_offset))
-        return f"#r{changed_r} #h{changed_h}"
     
     chain = Chain.query.get_or_404(chain_id)
 
+
     categ_id = request.get_json(True)['categId']
 
+    new_categ = Categ.query.get(categ_id)
+    
     r_offset = request.get_json(True)['newRow'] - get_rId(chain.hexs[0].selector)
     h_offset = request.get_json(True)['newHex'] - get_hId(chain.hexs[0].selector)
 
@@ -847,6 +893,10 @@ def chain_move(chain_id):
     chain.categ_id = categ_id
     for hex in chain.hexs:
         hex.selector = change_hex_selector(hex.selector, r_offset, h_offset)
+        
+        if hex.BG_img:
+            hex.BG_img = hex.BG_img.replace(hex.categ.name, new_categ.name)
+        
         hex.categ_id = categ_id
         db.session.add(hex)
 
