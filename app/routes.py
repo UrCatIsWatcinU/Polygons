@@ -30,7 +30,6 @@ def get_locale():
 def block_method():
     ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr) 
     ip_ban_list = db.session.execute(select(BannedIp.addr)).scalars().all()
-    print(ip)
     if ip in ip_ban_list:
         abort(403)
 
@@ -47,7 +46,7 @@ def internal_error(error):
     user = None
     if current_user and current_user.is_authenticated:
         user = current_user
-    return render_template('error-page.html', user=user, title='500', error_title='500 internal error', error_description=_('Some troubles happend on server. Please send message to admin')), 500
+    return render_template('error-page.html', user=user, title='500', error_message='500 internal error', error_description=_('Some troubles happend on server. Please send message to admin')), 500
 
 @app.route('/favicon.ico')
 def get_favicon():
