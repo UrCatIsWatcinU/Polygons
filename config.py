@@ -1,4 +1,5 @@
 import os
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Config(object):
@@ -12,5 +13,6 @@ class Config(object):
 
     MAIL_SERVER = 'localhost'
     MAIL_PORT = 25
-    MAIL_USE_TLS = 1
+    MAIL_USE_TLS = False
+    MAIL_USE_SSL = True
     
