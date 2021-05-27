@@ -11,8 +11,10 @@ class Config(object):
     MAX_CONTENT_LENGTH = 3 * 1024 * 1024
     LANGUAGES = ['en', 'ru']
 
-    MAIL_SERVER = 'localhost'
-    MAIL_PORT = 25
-    MAIL_USE_TLS = False
-    MAIL_USE_SSL = False
+    MAIL_USERNAME = os.getenv('MAIL_USERNAME', 'noreply@libhex.com')
+    MAIL_PASSWORD = os.getenv('MAIL_PASSWORD', '')
+    MAIL_DEFAULT_SENDER = os.getenv('MAIL_DEFAULT_SENDER', 'noreply@libhex.com')
+    MAIL_SERVER = os.getenv('MAIL_SERVER', 'localhost')
+    MAIL_PORT = int(os.getenv('MAIL_PORT', '25'))
+    MAIL_USE_SSL = int(os.getenv('MAIL_USE_SSL', False))
     
