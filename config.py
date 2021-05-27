@@ -11,6 +11,6 @@ class Config(object):
     LANGUAGES = ['en', 'ru']
 
     MAIL_SERVER = 'localhost'
-    MAIL_PORT = 110
-    MAIL_USE_TSL = True
+    MAIL_PORT = 995
+    MAIL_USE_TSL = 1
     
