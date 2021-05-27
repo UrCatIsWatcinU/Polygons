@@ -202,13 +202,11 @@ def registration():
 
         db.session.add(user)
         db.session.commit()
-        try:
-            send_email('Library Hexagon: your confrimation link', 'info', [user.email], 
-                render_template('parts/confirm-email.txt', user=user), 
-                render_template('parts/confirm-email.html', user=user)
-            )
-        except:
-            db.session.rollback()
+        
+        send_email('Library Hexagon: your confrimation link', 'info', [user.email], 
+            render_template('parts/confirm-email.txt', user=user), 
+            render_template('parts/confirm-email.html', user=user)
+        )
             
         return redirect(url_for('login'))
 
