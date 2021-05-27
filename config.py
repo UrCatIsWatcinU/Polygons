@@ -12,5 +12,5 @@ class Config(object):
 
     MAIL_SERVER = 'localhost'
     MAIL_PORT = 995
-    MAIL_USE_TLS = True
+    MAIL_USE_TSL = True
     
