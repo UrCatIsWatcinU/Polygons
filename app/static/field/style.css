@@ -126,9 +126,6 @@ html{
 .hexagon-innerNum .hexagon-editedField{
   text-indent: 22px;
 }
-.hexagon-rounded polygon{
-  border-radius: 20px;
-}
 
 .hexagon-editedField{
   height: unset;
@@ -423,7 +420,7 @@ html{
 
 .settings{
   height: 70%;
-  width: min-content;
+  width: max-content;
   max-width: unset;
   overflow: hidden;
   display: flex;
@@ -432,13 +429,17 @@ html{
   /* padding-bottom: calc(1.5em + 5px * 2 + 25px); */
   position: relative;
   margin: 0 5vw;
+  box-sizing: border-box;
 }
 .settings-title{
   margin-bottom: 10px;
 }
 .settings-cont{
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
   margin-bottom: 10px;
+  box-sizing: border-box;
+  /* width: calc(100% + 20px); */
 }
 .moveModal-close,
 .complaint-close,

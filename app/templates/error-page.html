@@ -5,6 +5,7 @@
 
 {% block head %}
     <script>io = () => ({on: () => null}); roundPathCorners = () => null;</script>
+    <script src="{{ url_for('static', filename='i18n.js') }}"></script>
     <script src="{{ url_for('static', filename='tinycolor.js') }}"></script>
     <script src="{{url_for('static', filename='fontsloader.js')}}"></script>
     <script src="{{ url_for('static', filename='public.js') }}"></script>
@@ -16,10 +17,9 @@
     <h1>{{ error_message }}</h1>
     <p>{{ error_description }}</p>
     <div class="btn-cont">
-        <button onclick="history.back();" class="back-btn">Back</button>
+        <button onclick="history.back();" class="back-btn">{{ _('Back') }}</button>
         {% if user and user.id != 1 %}
-            <!-- <button onclick="window.location.href = `/chats?with=1`" class="chat-admin">Open chat with admin</button> -->
-            <button class="chat-admin">Open chat with admin</button>
+            <button class="chat-admin">{{ _('Open chat with admin') }}</button>
         {% endif %}
         
     </div>

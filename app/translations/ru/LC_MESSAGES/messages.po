@@ -1,0 +1,184 @@
+
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2021-05-27 16:31+0300\n"
+"PO-Revision-Date: 2021-05-27 11:49+0000\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ru\n"
+"Language-Team: Russian\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10 >= 2 &&"
+" n%10<=4 &&(n%100<10||n%100 >= 20)? 1 : 2)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.1\n"
+
+#: app/forms.py:9 app/forms.py:15 app/templates/users.html:14
+msgid "Username"
+msgstr "Имя пользователя"
+
+#: app/forms.py:10 app/forms.py:17
+msgid "Password"
+msgstr "Пароль"
+
+#: app/forms.py:11
+msgid "Remember Me"
+msgstr "Запомнить меня"
+
+#: app/forms.py:12
+msgid "Submit"
+msgstr "Отправить"
+
+#: app/forms.py:16 app/templates/user.html:20
+msgid "Email"
+msgstr "E-mail"
+
+#: app/forms.py:18
+msgid "Repeat password"
+msgstr "Повторите пароль"
+
+#: app/forms.py:19 app/templates/layout.html:220
+#: app/templates/noedite-field.html:27 app/templates/registration.html:8
+msgid "Register"
+msgstr "Регистрация"
+
+#: app/forms.py:24
+msgid "Username is used"
+msgstr "Имя пользователя занято"
+
+#: app/forms.py:29
+msgid "Email is used"
+msgstr "E-mail используется"
+
+#: app/routes.py:33
+msgid "If you write URL manually, check if it is correct"
+msgstr "Если вы набрали ссылку вручную, проверьте её правильность"
+
+#: app/routes.py:41
+msgid "Some troubles happend on server. Please send message to admin"
+msgstr "На сервере произошла ошибка, пожалуйста, напишите администратору"
+
+#: app/routes.py:363 app/routes.py:415 app/routes.py:466
+msgid "Access denied"
+msgstr "Доступ запрещен"
+
+#: app/routes.py:408
+msgid "No such user"
+msgstr "Нет такого пользователя"
+
+#: app/routes.py:411
+msgid "This user alredy is a member of this chat"
+msgstr "Пользователь уже состоит в этом чате"
+
+#: app/routes.py:978
+msgid "No such hexagon"
+msgstr "Нет такого шестиугольника "
+
+#: app/templates/error-page.html:19 app/templates/noedite-field.html:25
+msgid "Back"
+msgstr "Назад"
+
+#: app/templates/error-page.html:21
+msgid "Open chat with admin"
+msgstr "Открыть чат с админом"
+
+#: app/templates/field.html:25 app/templates/index.html:45
+#: app/templates/noedite-field.html:23
+msgid "Search"
+msgstr "Поиск"
+
+#: app/templates/field.html:27
+msgid "Settings"
+msgstr "Настройки"
+
+#: app/templates/layout.html:3
+msgid "Main"
+msgstr "Главная"
+
+#: app/templates/layout.html:8
+msgid "Users list"
+msgstr "Пользователи"
+
+#: app/templates/layout.html:12
+msgid "Profile"
+msgstr "Профиль"
+
+#: app/templates/layout.html:16
+msgid "Messages"
+msgstr "Сообщения"
+
+#: app/templates/layout.html:31
+msgid "Logout"
+msgstr "Выйти"
+
+#: app/templates/layout.html:217 app/templates/login.html:4
+#: app/templates/noedite-field.html:26
+msgid "Login"
+msgstr "Вход в систему"
+
+#: app/templates/messages.html:44
+msgid "Add chat"
+msgstr "Добавить чат"
+
+#: app/templates/messages.html:51
+msgid "Select chat"
+msgstr "Выберите чат"
+
+#: app/templates/messages.html:55
+msgid "First select one of chats"
+msgstr "Сначала выберите чат"
+
+#: app/templates/messages.html:60
+msgid "Send"
+msgstr "Отправить"
+
+#: app/templates/user.html:24
+msgid "Chains count"
+msgstr "Количество цепочек"
+
+#: app/templates/user.html:28
+msgid "Hexs count"
+msgstr "Количество шестиугольников"
+
+#: app/templates/user.html:32 app/templates/users.html:16
+msgid "Rating"
+msgstr "Рейтинг"
+
+#: app/templates/user.html:45
+msgid "Delete profile"
+msgstr "Удалить профиль"
+
+#: app/templates/user.html:47
+msgid "Open chat"
+msgstr "Открыть чат"
+
+#: app/templates/users.html:8
+msgid "Users"
+msgstr "Пользователи"
+
+#: app/templates/users.html:13
+msgid "Role"
+msgstr "Роль"
+
+#: app/templates/users.html:31
+msgid "Delete"
+msgstr "Удалить"
+
+#: app/templates/users.html:32
+msgid "Change visibility"
+msgstr "Изменить видимость"
+
+#: app/templates/users.html:50
+msgid "Show"
+msgstr "Показать"
+
+#: app/templates/users.html:50
+msgid "Hide"
+msgstr "Скрыть"
+
+#: app/templates/users.html:50
+msgid "me in list"
+msgstr "меня в этом списке"
+

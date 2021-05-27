@@ -80,12 +80,30 @@ window.addEventListener('load', async () => {
         
         let user = JSON.parse(sessionStorage.getItem('user'));
         if(user.userRole != 2) return false
-        contextmenu.innerHTML = '<div class="contextmenu-item">Delete</div>';
+        contextmenu.innerHTML = `
+        <div class="contextmenu-item delete-btn">Delete</div>
+        <div style="margin-top: 5px;" class="contextmenu-item"><label for="add-image">Add image</label> <input type="file" id="add-image" style="display:none;"></div>`;
 
-        contextmenu.firstElementChild.onclick = () => {
-            showAsk(() => {     
-                fetch('/categ/delete/' + hexagon.innerText, {method: 'DELETE'});
+        const actions = {
+            delete: () => {
+                showAsk(() => {     
+                    fetch('/categ/delete/' + hexagon.innerText, {method: 'DELETE'});
+                });
+            }
+        }
+
+        
+        const imageInput = contextmenu.querySelector('#add-image')
+        imageInput.oninput = () => {
+            if(!imageInput.files || imageInput.files.length > 1) return;
+
+            uploadFile(imageInput.files, `/categs/${hexagon.id.replace('cat', '')}/uploadBG`, () => {
+                window.location.reload();
             });
+        }
+
+        for(let action in actions){
+            if(contextmenu.querySelector(action + '-btn')) contextmenu.querySelector('btn-' + action).onclick = actions[action];
         }
 
         contextmenu.style.top = evt.clientY + 'px';
@@ -129,13 +147,23 @@ window.addEventListener('load', async () => {
     categs.forEach(categ => {
         let polygon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         polygon.classList.add('polygon');
-        polygon.setAttribute('preserveAspectRatio', 'none');
-        // polygon.setAttribute('transform', `rotate(90, ${hexSizes.HEXAGON_HEIGHT / 2}, ${hexSizes.HEXAGON_WIDTH / 2})`)
-        polygon.innerHTML = `<path class="categ-path" d="${categPath}"></path>`;
+        categ.prepend(polygon); 
+        
+        if(categ.getAttribute('BG-img')){
+            createBgHex(categ, categ.getAttribute('BG-img').replace(/^\//, ''), categPath)
+        }else{
+            polygon.innerHTML = `<path class="categ-path" d="${categPath}"></path>`;
+        }
 
-        categ.prepend(polygon);
 
         categ.addEventListener('click', async (evt) => {
+            if(isHexagonActive){
+                evt.preventDefault();
+                evt.stopImmediatePropagation();
+
+                return;
+            }
+
             if(evt.ctrlKey || evt.metaKey){
                 let user = JSON.parse(sessionStorage.getItem('user') || '{}')
                 if(user.userRole != 2) return
@@ -151,12 +179,6 @@ window.addEventListener('load', async () => {
             }
             
         }, {passive:false, capture:true});
-
-        categ.addEventListener('click', () => {
-            if(!isHexagonActive){
-                window.location.href = '/fields/' + categ.innerText.trim();
-            }
-        })
     });
     const showCategs = (hexsInRow = 5) => {
         if(categs && categs.length >= hexsInRow){

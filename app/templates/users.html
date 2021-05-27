@@ -5,15 +5,15 @@
 {% endblock %}
 
 {% block content %}
-    <h1>Users</h1>
+    <h1>{{_('Users')}}</h1>
     <ol start="0" class="users-list">
         <li class="user-in-list-cont user-in-list-legend">
             <div class="user-in-list">
                 <div class="user-in-list-info">
-                    <span class="role">Role</span>
-                    <span class="username">Username</span>
+                    <span class="role">{{_('Role')}}</span>
+                    <span class="username">{{ _('Username') }}</span>
                 </div>
-                <span class="rating">Rating</span>
+                <span class="rating">{{ _('Rating') }}</span>
             </div>
         </li>
         {% for user_in_list in users %}
@@ -30,6 +30,7 @@
                         <div class="user-in-list-btns">
                             <button class="user-in-list-delete">Delete</button>
                             <button class="user-in-list-changeV">Change visibility</button>
+                            <button class="user-in-list-ban">Ban</button>
                         </div>
                     {% endif %}
                 </li>
@@ -47,5 +48,5 @@
 {% endblock %}
 
 {% block btns %}
-    <button class="user-toggle-visibility"> {% if user.is_hidden %}Show{% else %}Hide{% endif %} me in list</button>
+    <button class="user-toggle-visibility"> {% if user.is_hidden %}{{ _('Show') }}{% else %}{{ _('Hide') }}{% endif %} {{ _('me in list') }}</button>
 {% endblock %}

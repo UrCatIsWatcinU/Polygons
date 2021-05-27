@@ -1,5 +1,186 @@
 const socket = io();
 
+translate.add({
+    contextmenu:{
+        create: 'Create here',
+        delete: 'Delete',
+        not: 'Not here',
+        edit: 'Edit',
+        send: 'Send to chat',
+        copy: 'Copy link',
+        copyMsgs: {
+            s: 'Copied',
+            uns: 'Was not possible to copy the link'
+        },
+        complain: 'Complaint',
+        user: 'Author',
+        chain: 'Chain',
+        uid: 'Uid',
+        date: 'Date'
+    },
+    defaults: {
+        askTitle: 'Are you sure?',
+        askBody: 'You will not be able to cancel this action',
+        y: 'Yes',
+        n: 'No'
+    },
+    specific: {
+        hexDeletionAskBody: 'If you delete this hexagon, all the following hexagons in the chain will be deleted along with it',
+        hexDeletionAskBodyAddon: '\n\nThis is first hexagon of the chain, if you delete it, the chain and all comments to it will be deleted'
+    },
+    hexAbout: {
+        images: 'Images',
+        content: 'Content',
+        comments: 'Comments',
+        yourComment: 'Your comment'
+    },
+    complaint: {
+        text: 'Text',
+        successT: 'Your complaint has been successfully recorded',
+        successB: 'It will soon be reviewed by the administration'
+    },
+    sets: {
+        h1: 'Settings',
+        themeC: 'Theme colors',
+        hexsC: 'Hexagons colors',
+        font: 'Font',
+        fontF: 'Family from',
+        fontS: 'Size',
+        fontEG: 'Font settings example',
+        other: 'Other settings',
+        check: {
+            R: 'Rounded corners',
+            B: 'Borders',
+            T: 'Turned hexagons',
+            I: 'Inner numeration',
+            Z: 'Zoom with ctrl button',
+            S: 'Slide speed'
+        },
+        save: 'Save',
+        reset: 'Reset'
+    },
+    chats: {
+        chooseToSend: 'Choose chat to send ',
+        select: 'Select chat'
+    },
+    chatAbout: {
+        h1: 'Chat info',
+        delete: 'Delete',
+        addMember: 'Add member',
+        add: 'Add',
+        quit: 'Quit',
+        changeRoleMsg: 'Be careful when change member role, not to give authority to users you can\'t trust',
+        members: 'Members',
+
+    },
+    newChat: {
+        h1: 'Create chat',
+        name: 'Name',
+        membs: 'Members separated by comma',
+        create: 'Create chat'
+    },
+    btns: {
+        send: 'Send',
+        close: 'Close'
+    },
+    ptl: 'Please try later',
+    ptls: 'Please try later. Status: '
+}, 'en');
+
+translate.add({
+    contextmenu:{
+        create: 'Создать',
+        delete: 'Удалить',
+        edit: 'Изменить',
+        send: 'Отправить',
+        copy: 'Ссылка',
+        complain: 'Пожаловаться',
+        user: 'Автор',
+        chain: 'Цепочка',
+        uid: 'Uid',
+        date: 'Дата'
+    },
+    defaults: {
+        askTitle: 'Вы уверены?',
+        askBody: 'Вы не сможете отменить это действие',
+        y: 'Да',
+        n: 'Нет'
+    },
+    specific: {
+        hexDeletionAskBody: 'При удалении шестиугольника все следующие после него также удалятся и информация будет утерена',
+        hexDeletionAskBodyAddon: '\n\nЭто первый шестиугольник в цепочке, и если вы удалите его, то все коментарии к цепочке будут удалены'
+    },
+    hexAbout: {
+        images: 'Картинки',
+        content: 'Контент',
+        comments: 'Комментарии',
+        yourComment: 'Ваш комментарий'
+    },
+    complaint: {
+        text: 'Текст жалобы',
+        successT: 'Ваша жалоба успешно записана',
+        successB: 'В скором времени она будет рассмотрена администрацией'
+    },
+    chats: {
+        chooseToSend: 'Выберите чат для отправки ',
+        select: 'Выберите чат'
+    },
+    sets: {
+        h1: 'Настройки',
+        themeC: 'Цвета темы',
+        hexsC: 'Цвета шестиугольников',
+        font: 'Шрифт',
+        fontF: 'Название шрифта с ',
+        fontS: 'Размер',
+        fontEG: 'Пример текста с этим шрифтом',
+        other: 'Остальное',
+        check: {
+            R: 'Закругленные края',
+            B: 'Рамки',
+            T: 'Повернутые шестиугольники',
+            I: 'Нумерация внутри',
+            Z: 'Зум только с зажатым ctrl',
+            S: 'Скорость навигации'
+        },
+        save: 'Сохранить',
+        reset: 'Сбросить'
+    },
+    chatAbout: {
+        h1: 'Информация о чате',
+        delete: 'Удалить',
+        addMember: 'Новый участник',
+        add: 'Добавить',
+        quit: 'Покинуть чат',
+        changeRoleMsg: 'Будте аккуратны, когда меняете роль участника. Не давайте прав управления чатом людям, которым не можете доверять',
+        members: 'Участники',
+
+    },
+    newChat: {
+        h1: 'Новый чат',
+        name: 'Название',
+        membs: 'Участники, разделенные запятыми',
+        create: 'Создать чат'
+    },
+    btns: {
+        send: 'Отправить',
+        close: 'Закрыть'
+    },
+    ptl: 'Пожалуйста, попробуйте позже',
+    ptls: 'Пожалуйста, попробуйте позже. Статус: ',
+    errors: {
+        common: 'Возникла ошибка',
+        loading: 'Возникла ошибка при запросе',
+    }
+}, 'ru');
+
+const allowedLangs = ['ru'];
+
+const currentShortLocale = window.navigator.language.split('-')[0];
+document.documentElement.setAttribute('lang', currentShortLocale);
+
+translate.setLocale(allowedLangs.includes(currentShortLocale) ? currentShortLocale : 'en');
+
+
 function getRand(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -57,7 +238,7 @@ const setHexVisible = (hexagon, num) => {
     </svg>`);
 }
 
-const showAsk = (yesCallback, body='You will not be able to cancel this action', title = 'Are you sure?', noCallback = () => {document.querySelector('.ask').remove()}) => {
+const showAsk = (yesCallback, body=translate('defaults.askBody'), title = translate('defaults.askTitle'), noCallback = () => {document.querySelector('.ask').remove()}) => {
     let ask = document.createElement('div');
     ask.className = 'ask';
     ask.innerHTML = `
@@ -68,9 +249,9 @@ const showAsk = (yesCallback, body='You will not be able to cancel this action',
     </div>`;
 
     let yBtn = document.createElement('button');
-    yBtn.innerText = 'Yes';
+    yBtn.innerText = translate('defaults.y');
     let nBtn = document.createElement('button');
-    nBtn.innerText = 'No';
+    nBtn.innerText = translate('defaults.n');;
 
     yBtn.addEventListener('click', yesCallback);
     yBtn.addEventListener('click', () => {document.querySelector('.ask').remove()});
@@ -98,7 +279,7 @@ function showModal(title, body, empty = false){
         <div class="modal-content">
             <h2 class="modal-title"></h2>
             <p class="modal-body"></p>
-            <button>Close</button>
+            <button>${translate('btns.close')}</button>
         </div>`;   
 
         if(needToClose){
@@ -118,7 +299,13 @@ function showModal(title, body, empty = false){
                 }
             }
         }
-        
+        if(currentShortLocale != 'en'){
+            const titleToCheck = title.toLowerCase();
+            if(titleToCheck.includes('error')){
+                title = titleToCheck.includes('loading') ? translate('errors.loading') : translate('errors.common') 
+            } 
+        }
+
         modal.querySelector('.modal-title').innerText = title;
         modal.querySelector('.modal-body').innerText = body;
     }
@@ -195,12 +382,55 @@ function createDropMenu(dropMenu = null, userCont = null, attachElem = null){
     }
 }
 
-const createBgHex = (hexagon, url) => {
-    hexagon.querySelector('.polygon').innerHTML = `
-    <mask id="hexagon-bgImg-mask">
-        <path fill="#fff" d="${hexPath()}"></path>
-    </mask>
-    <image draggable="false" style="pointer-events: none;" mask="url(#hexagon-bgImg-mask)" href="/${url}" preserveAspectRatio="xMidYMid slice" width="100%" height="100%"></image>`;
+const uploadFile = (files, url, successCB, evt=null) => {
+    if(!window.FileReader){
+        showModal('Cannot upload file', 'Your browser don\'t support files uploads');
+        return;
+    }
+    const MAX_SIZE = 3000000;
+    const EXTENTIONS = ['png', 'jpg', 'jpeg', 'gif'];
+    
+    if(evt){    
+        evt.preventDefault();
+        evt.stopImmediatePropagation();
+    }
+
+    if(files.length > 1){
+        showModal('Choose one file');
+        return;
+    }
+    
+    let file = files[0];
+    
+    if(!EXTENTIONS.map(ext => `image/${ext}`).includes(file.type)){
+        showModal('Wrong file format', `Please choose file with one of these extentions:\n ${EXTENTIONS.map(ext => ext.toUpperCase()).join(', ')}`);
+        return;
+    }
+    if(file.size > MAX_SIZE){
+        showModal('Big file', 'Max file size is ' + MAX_SIZE / 1000000 + 'MB')
+    }
+
+    const fileForm = new FormData();
+    file.arrayBuffer().then(result => {
+        const blob = new Blob([result], {type: file.type});
+        fileForm.append('file', blob, 'BG');
+
+        fetch(url, {
+            method: 'POST',
+            body: fileForm
+        }).then(res => {
+            if(!res.ok){
+                showModal('An error occurred while uploading the image', 'Please try again. Status: ' + res.status);
+            }else{
+                return res.json()
+            }
+        }).then(imgUploadRes => {
+            if(!imgUploadRes || !imgUploadRes.success) return showModal('An error occurred while uploading the image', 'Please try again');
+            successCB(imgUploadRes);
+        });
+    }); 
+
+    return file;
 }
 
 const tasks = [];
@@ -259,6 +489,13 @@ let hexSizes = {
 hexSizes.setBodyHeight(52 * 1.5);
 
 let hexPath = () => `M 0 ${hexSizes.TRIANGLE_HEIGHT} L ${hexSizes.HEXAGON_WIDTH/2} 0 L ${hexSizes.HEXAGON_WIDTH} ${hexSizes.TRIANGLE_HEIGHT} L ${hexSizes.HEXAGON_WIDTH} ${hexSizes.HEXAGON_HEIGHT-hexSizes.TRIANGLE_HEIGHT} L ${hexSizes.HEXAGON_WIDTH/2} ${hexSizes.HEXAGON_HEIGHT} L 0 ${hexSizes.HEXAGON_HEIGHT-hexSizes.TRIANGLE_HEIGHT} Z`;
+const createBgHex = (hexagon, url, path = hexPath()) => {
+    hexagon.querySelector('.polygon').innerHTML = `
+    <mask id="hexagon-bgImg-mask">
+        <path fill="#fff" d="${path}"></path>
+    </mask>
+    <image draggable="false" style="pointer-events: none;" mask="url(#hexagon-bgImg-mask)" href="/${url}" preserveAspectRatio="xMidYMid slice" width="100%" height="100%"></image>`;
+}
 
 const main = async () => {
     if(isIOS()) document.body.classList.add('ios')

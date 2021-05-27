@@ -1,19 +1,19 @@
 {% macro drop_menu(user, add_btns = [], btns = [
   {
-    'name': 'Main',
+    'name': _('Main'),
     'href': url_for('index'),
     'class': 'back'
   },  
   {
-    'name': 'Users list',
+    'name': _('Users list'),
     'href': url_for('users_all')
   },  
   {
-    'name': 'Profile',
+    'name': _('Profile'),
     'href': url_for('user', id=user.id)
   },  
   {
-    'name': 'Messages',
+    'name': _('Messages'),
     'href': url_for('messages')
   } 
 ], title = '') -%}
@@ -28,7 +28,7 @@
           <button class="drop-menu-button {{ btn.class or '' }}" onclick="window.location.href = `{{ btn.href }}`">{{ btn.name }}</button>
         {% endif %}
       {% endfor %}
-      <button class="auth logout" style="color: var(--red-c)">Logout</button>
+      <button class="auth logout" style="color: var(--red-c)">{{ _('Logout') }}</button>
     </div>
   </div>
 {%- endmacro %}
@@ -86,6 +86,7 @@
 {%- endmacro %}
 
 {% macro public_scripts() -%}
+  <script src="{{url_for('static', filename='i18n.js')}}"></script>
   <script src="{{url_for('static', filename='customElementsPolyfill.js')}}"></script>
   <script src="{{url_for('static', filename='jscolor.js')}}"></script>
   <script src="{{url_for('static', filename='socketio.js')}}"></script>
@@ -159,7 +160,7 @@
     {% endblock %}
     <title>Library Hexagon | {{title}}</title>
 </head>
-<body class="main while-loading">
+<body class="main while-loading"> 
   {{ loading() }}
   {{ modal() }}
   <header class="header">
@@ -210,14 +211,13 @@
       <div></div>
     {% endif %}
     <div class="btns">
-      
       <div class="local-btns">
         {% if not user %}
           {% if title != 'Login' %}
-              <button class="auth" onclick="window.location.href = `{{ url_for('login') }}`">Login</button>
+              <button class="auth" onclick="window.location.href = `{{ url_for('login') }}`">{{ _('Login') }}</button>
           {% endif %}
           {% if title != 'Register' %}
-              <button class="auth" onclick="window.location.href = `{{ url_for('registration') }}`">Register</button>
+              <button class="auth" onclick="window.location.href = `{{ url_for('registration') }}`">{{ _('Register') }}</button>
           {% endif %}
         {% endif %}
         

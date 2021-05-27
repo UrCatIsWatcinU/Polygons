@@ -17,19 +17,19 @@
                 <span class="user-id">{{ owner.id }}</span>
             </div>
             <div class="user-info-item">
-                <span>Email:</span>&nbsp;
+                <span>{{ _('Email') }}:</span>&nbsp;
                 <span>{{ owner.email }}</span>
             </div>
             <div class="user-info-item">
-                <span>Chains count:</span>&nbsp;
+                <span>{{ _('Chains count') }}:</span>&nbsp;
                 <span>{{ owner.chains.count() }}</span>
             </div>
             <div class="user-info-item">
-                <span>Hexs count:</span>&nbsp;
+                <span>{{ _('Hexs count') }}:</span>&nbsp;
                 <span>{{ owner.hexs.count() }}</span>
             </div>
             <div class="user-info-item">
-                <span>Rating:</span>&nbsp;
+                <span>{{ _('Rating') }}:</span>&nbsp;
                 <div class="user-rating-cont">
                     <svg class="user-rating-btn rating-plus" style="{% if allowed_change == -1  %} pointer-events: none; opacity: 0; {% endif %} {% if not user %} display: none; {% endif %}">
                         <line x1="50%" y1="0%" x2="50%" y2="100%"></line><line x1="0%" y1="50%" x2="100%" y2="50%"></line>
@@ -42,9 +42,9 @@
             </div>
             <div class="user-btns">
                 {% if owner.id == user.id %}
-                    <button class="user-delete">Delete profile</button>
+                    <button class="user-delete">{{ _('Delete profile') }}</button>
                 {% else %}
-                    <button class="user-chat">Open chat</button>
+                    <button class="user-chat">{{ _('Open chat') }}</button>
                 {% endif %}
             </div>
         </div>

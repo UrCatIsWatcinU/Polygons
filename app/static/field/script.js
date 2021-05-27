@@ -55,7 +55,7 @@ window.addEventListener('load', async () => {
                             font = settings.font;
                         }
                     }else{
-                        showModal('An error occurred while loading the settings', 'Please try later. The settings are set to default');
+                        showModal('An error occurred while loading the settings', translate('ptl'));
                     }
                 }
             }
@@ -155,9 +155,9 @@ window.addEventListener('load', async () => {
                     hexagonAbout.innerHTML = `
                     <div class="hexagon-about-controls">
                         <div class="hexagon-about-controls-btns">
-                            <span class="hexagon-about-btn contentBtn">Content</span>
-                            <span class="hexagon-about-btn imagesBtn">Images</span>
-                            <span class="hexagon-about-btn commentsBtn">Comments</span>
+                            <span class="hexagon-about-btn contentBtn">${translate('hexAbout.content')}</span>
+                            <span class="hexagon-about-btn imagesBtn">${translate('hexAbout.images')}</span>
+                            <span class="hexagon-about-btn commentsBtn">${translate('hexAbout.comments')}</span>
                         </div>
                         <div class="hexagon-about-rating"> 
                             <svg class="hexagon-about-rating-btn rating-plus">
@@ -173,9 +173,9 @@ window.addEventListener('load', async () => {
                     <div class="hexagon-about-comments" style="display: none">
                         <div class="hexagon-about-comments-cont"></div>
                         <div class="hexagon-about-comments-form">
-                            <label class="hexagon-about-comments-label" for="newComment">Your comment: </label><br>
+                            <label class="hexagon-about-comments-label" for="newComment">${translate('hexAbout.yourComment')}: </label><br>
                             <textarea id="newComment" class="hexagon-about-comments-input"></textarea>
-                            <div class="hexagon-about-comments-btns"><button class="send-comment">Send</button></div>
+                            <div class="hexagon-about-comments-btns"><button class="send-comment">${translate('btns.send')}</button></div>
                         </div>
                     </div>`;
                     let activeAboutTab = 'content';
@@ -219,11 +219,11 @@ window.addEventListener('load', async () => {
                             fetch(`/hexs/imgs/delete/` + imgObj.uuid, {
                                 method: 'DELETE'
                             }).then(res => {
-                                if(!res.ok) return showModal('An error occurred while deleting the image', 'Please try again. Status: ' + res.status);
+                                if(!res.ok) return showModal('An error occurred while deleting the image', translate('ptls') + res.status);
             
                                 return res.json();
                             }).then(deleteImgRes => {
-                                if(!deleteImgRes.success) return showModal('An error occurred while deleting the image', 'Please try again');
+                                if(!deleteImgRes.success) return showModal('An error occurred while deleting the image', translate('ptl'));
             
                                 hexagon.imgs.splice(hexagon.imgs.indexOf(imgObj), 1);
                                 createImages();
@@ -531,57 +531,18 @@ window.addEventListener('load', async () => {
                         hexagonAbout.addEventListener('drop', (evt) => {
                             if(activeAboutTab != 'images') return;
                             hexagonAbout.classList.remove('hexagon-about-drag');
-                            if(!window.FileReader){
-                                showModal('Cannot upload file', 'Your browser don\'t support files uploads');
-                                return;
-                            }
-                            const MAX_SIZE = 3000000;
-                            const EXTENTIONS = ['png', 'jpg', 'jpeg', 'gif'];
-            
                             evt.preventDefault();
-                            evt.stopImmediatePropagation();
+                            uploadFile(evt.dataTransfer.files, `/hexs/${hexagon.uuid}/imgs/upload`,(imgUploadRes) => {
+                                delete imgUploadRes.success;
             
-                            if(evt.dataTransfer.files.length > 1){
-                                showModal('Drag one file');
-                                return
-                            }
-                            
-                            let file = evt.dataTransfer.files[0];
-                            
-                            if(!EXTENTIONS.map(ext => `image/${ext}`).includes(file.type)){
-                                showModal('Wrong file format', `Please drag file with one of these extentions:\n ${EXTENTIONS.map(ext => ext.toUpperCase()).join(', ')}`);
-                                return;
-                            }
-                            if(file.size > MAX_SIZE){
-                                showModal('Big file', 'Max file size is ' + MAX_SIZE / 1000000 + 'MB')
-                            }
-            
-                            const fileForm = new FormData();
-                            file.arrayBuffer().then(result => {
-                                const blob = new Blob([result], {type: file.type});
-                                fileForm.append('file', blob, file.name);
-            
-                                fetch(`/hexs/${hexagon.uuid}/imgs/upload`, {
-                                    method: 'POST',
-                                    body: fileForm
-                                }).then(res => {
-                                    if(!res.ok) return showModal('An error occurred while uploading the image', 'Please try again. Status: ' + res.status);
-            
-                                    return res.json()
-                                }).then(imgUploadRes => {
-                                    if(!imgUploadRes || !imgUploadRes.success) return showModal('An error occurred while uploading the image', 'Please try again');
-                                    
-                                    delete imgUploadRes.success;
-            
-                                    hexagon.imgs.push(imgUploadRes);
-            
-                                    const images = document.querySelector('.hexagon-about-images');
-                                    if(images){
-                                        images.remove(); 
-                                    } 
-                                    createImages();
-                                });
-                            }); 
+                                hexagon.imgs.push(imgUploadRes);
+        
+                                const images = document.querySelector('.hexagon-about-images');
+                                if(images){
+                                    images.remove(); 
+                                } 
+                                createImages();
+                            }, evt);
                         }, {passive: false});
                         
                         hexagonAbout.ondragleave = () => {
@@ -860,62 +821,20 @@ window.addEventListener('load', async () => {
                 hexagon.addEventListener('dragover', (evt) => {
                     if(user.userId != hexagon.userId && user.userRole != 2) return;     
                     evt.preventDefault();
-                    console.log(hexagon.querySelector('.hexagon-about'))
                     if(!canCreateBgHex()) return;
+
                     hexagon.classList.add('hexagon-drag');
                 }, {passive: false, capture: true});
                 
                 hexagon.addEventListener('drop', (evt) => {
                     hexagon.classList.remove('hexagon-drag');
-                    if(!window.FileReader){
-                        showModal('Cannot upload file', 'Your browser don\'t support files uploads');
-                        return;
-                    }
-                    const MAX_SIZE = 3000000;
-                    const EXTENTIONS = ['png', 'jpg', 'jpeg', 'gif'];
+                    uploadFile(evt.dataTransfer.files,`/hexs/${hexagon.uuid}/imgs/upload`, (imgUploadRes) => {
+                        delete imgUploadRes.success;
             
-                    if(user.userId != hexagon.userId && user.userRole != 2) return;     
-                    evt.preventDefault();
-                    if(!canCreateBgHex()) return;
-            
-                    if(evt.dataTransfer.files.length > 1){
-                        showModal('Drag one file');
-                        return;
-                    }
-                    
-                    let file = evt.dataTransfer.files[0];
-                    
-                    if(!EXTENTIONS.map(ext => `image/${ext}`).includes(file.type)){
-                        showModal('Wrong file format', `Please drag file with one of these extentions:\n ${EXTENTIONS.map(ext => ext.toUpperCase()).join(', ')}`);
-                        return;
-                    }
-                    if(file.size > MAX_SIZE){
-                        showModal('Big file', 'Max file size is ' + MAX_SIZE / 1000000 + 'MB')
-                    }
-            
-                    const fileForm = new FormData();
-                    file.arrayBuffer().then(result => {
-                        const blob = new Blob([result], {type: file.type});
-                        fileForm.append('file', blob, 'BG');
-            
-                        fetch(`/hexs/${hexagon.uuid}/imgs/upload`, {
-                            method: 'POST',
-                            body: fileForm
-                        }).then(res => {
-                            if(!res.ok){
-                                showModal('An error occurred while uploading the image', 'Please try again. Status: ' + res.status);
-                            }else{
-                                return res.json()
-                            }
-                        }).then(imgUploadRes => {
-                            if(!imgUploadRes || !imgUploadRes.success) return showModal('An error occurred while uploading the image', 'Please try again');
-                            delete imgUploadRes.success;
-            
-                            hexagon.imgs.push(imgUploadRes);
-            
-                            createBgHex(hexagon, imgUploadRes.url);
-                        });
-                    }); 
+                        hexagon.imgs.push(imgUploadRes);
+        
+                        createBgHex(hexagon, imgUploadRes.url);
+                    }, evt);
                 }, {passive: false});
                 
                 hexagon.ondragleave = () => {
@@ -1038,10 +957,10 @@ window.addEventListener('load', async () => {
 
             function sendHexsCreationReq(hexs, needToCheckFirsts = true){
                 const useResData = async data => {
-                    if(!data.ok) return showModal('An error occurred while creating the hexagon', 'Please try again later. Status: ' + data.status);
+                    if(!data.ok) return showModal('An error occurred while creating the hexagon', translate('ptls') + data.status);
                     
                     data = await data.json();
-                    if(!data.success) return showModal('An error occurred while creating the hexagon', 'Please try again later');
+                    if(!data.success) return showModal('An error occurred while creating the hexagon', translate('ptl'));
 
                     data.hexs.forEach(hex => {
                         let hexToSetId = document.querySelector(hex.selector);
@@ -1068,11 +987,11 @@ window.addEventListener('load', async () => {
                     firstHexs.forEach(async firstHex => {
                         try{
                             let newChainRes = await fetch(`/chains/${document.title}/new`);
-                            if(!newChainRes.ok) return showModal('An error occurred while creating the hexagon', 'Please try again later. Status: ' + newChainRes.status)
+                            if(!newChainRes.ok) return showModal('An error occurred while creating the hexagon', translate('ptls') + newChainRes.status)
                             
                             newChainRes = await newChainRes.json();
 
-                            if(!newChainRes.success) return showModal('An error occurred while creating the hexagon', 'Please try again later');
+                            if(!newChainRes.success) return showModal('An error occurred while creating the hexagon', translate('ptl'));
                             
                             let newChainHexs = hexs.filter(hex => hex.chainId == firstHex.chainId);
                             newChainHexs.forEach(hexToCreate => {
@@ -1140,7 +1059,7 @@ window.addEventListener('load', async () => {
             const clearContextMenus = () => {
                 document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});
             }
-
+            
             if(!isTouchDevice()){
                 const SLIDE_SPEED = 1;
                 const MIN_CHANGE = 20;
@@ -1375,10 +1294,10 @@ window.addEventListener('load', async () => {
                         if(user.userRole != 2 && getChain(hex.chainId).userId != user.userId) noCreate = true; 
                     }
                     if(noCreate){
-                        contextmenu.innerHTML = 'Not here';
+                        contextmenu.innerHTML = translate('contextmenu.not');
                         contextmenu.style.color = 'var(--red-c)' 
                     }else{
-                        contextmenu.innerHTML = 'Create here';
+                        contextmenu.innerHTML = translate('contextmenu.create');
                         
                         contextmenu.onclick = () => {
                             
@@ -1421,10 +1340,10 @@ window.addEventListener('load', async () => {
                     <div style="margin-bottom: 5px;" class="contextmenu-item copy-btn">Copy link</div> 
                     <div class="contextmenu-item complain-btn">Complain</div>
                     <hr class="contextmenu-line">
-                    <div style="margin-bottom: 5px" class="contextmenu-item contextmenu-info">Author: <a href="/users/${hexagon.userId}">${hexagon.username}</a></div>
-                    <div style="margin: 5px 0;" class="contextmenu-item contextmenu-info">Chain: ${hexagon.chainId}</div>
-                    <div style="margin: 5px 0;" class="contextmenu-item contextmenu-info">Uid: ${hexagon.uuid}</div>
-                    <div style="" class="contextmenu-item contextmenu-info">Date: ${hexDate.toLocaleDateString()}</div>`;
+                    <div style="margin-bottom: 5px" class="contextmenu-item contextmenu-info">${translate('contextmenu.user')}: <a href="/users/${hexagon.userId}">${hexagon.username}</a></div>
+                    <div style="margin: 5px 0;" class="contextmenu-item contextmenu-info">${translate('contextmenu.chain')}: ${hexagon.chainId}</div>
+                    <div style="margin: 5px 0;" class="contextmenu-item contextmenu-info">${translate('contextmenu.uid')}: ${hexagon.uuid}</div>
+                    <div style="" class="contextmenu-item contextmenu-info">${translate('contextmenu.date')}: ${hexDate.toLocaleDateString()}</div>`;
 
                     if(!hexagon.userId || (user.userId == hexagon.userId) || user.userRole == 2){
                         contextmenu.insertAdjacentHTML('afterbegin', `
@@ -1451,7 +1370,7 @@ window.addEventListener('load', async () => {
                                     categ: document.title,
                                     data: JSON.stringify(virtualVisibleHexs.filter(hex => !visibleHexs.includes(hex)).map(giveHexSelector))
                                 });
-                            }, 'If you delete this hexagon, all the following hexagons in the chain will be deleted along with it' + (hexagon.num == 1 ? '\n\nThis is first hexagon of the chain, if you delete it, the chain and all comments to it will be deleted' : ''))
+                            }, translate('specific.hexDeletionAskBody') + (hexagon.num == 1 ? translate('specific.hexDeletionAskBodyAddon') : ''))
                         },
                         move: () => {
                             fetch('/categs/names').then(async res => {
@@ -1502,7 +1421,7 @@ window.addEventListener('load', async () => {
     
                                         })
                                     }).then(res => {
-                                        if(!res.ok) return showModal('An error occurred while moving the chain', 'Please try again. Status: ' + res.status);
+                                        if(!res.ok) return showModal('An error occurred while moving the chain', translate('ptls') + res.status);
                                         
                                         const nextCategUrl = new URL(`/fields/${selectedCategStr.split('|')[1]}`, window.location.origin)
                                         nextCategUrl.searchParams.append('selector', `#r${document.querySelector('#moveModal-row').value} #h${document.querySelector('#moveModal-hex').value}`);
@@ -1522,16 +1441,16 @@ window.addEventListener('load', async () => {
                             console.log(complaint);
 
                             complaint.innerHTML = `
-                            <h1 class="complaint-title">Complaint</h1>
+                            <h1 class="complaint-title">${translate('contextmenu.complain')}</h1>
                             <svg class="complaint-close"><line x1="50%" y1="0%" x2="50%" y2="100%"></line><line x1="0%" y1="50%" x2="100%" y2="50%"></line></svg>
                             <div class="complaint-textarea">
-                                <label for="complaint-text">Text</label> 
+                                <label for="complaint-text">${translate('complaint.text')}</label> 
                                 <br> 
                                 <textarea id="complaint-text" autofocus maxlength="400" spellcheck="true" wrap="soft"></textarea>
                             </div>
                             <div class="btn-cont" style="display: flex;">
-                                <button class="send-button">Send</button>
-                                <button class="close-button">Close</button>
+                                <button class="send-button">${translate('btns.send')}</button>
+                                <button class="close-button">${translate('btns.close')}</button>
                             </div>
                             `;
 
@@ -1551,10 +1470,10 @@ window.addEventListener('load', async () => {
                                     if(res.ok){
                                         res = await res.json();
 
-                                        if(res.success) showModal('Your complaint has been successfully recorded', 'It will soon be reviewed by the administration');
-                                        else showModal('An error occurred while recording the complaint', 'Try later');
+                                        if(res.success) showModal(translate('complaint.successT'), translate('complaint.successB'));
+                                        else showModal('An error occurred while recording the complaint', translate('ptl'));
                                     }else{
-                                        showModal('An error occurred while recording the complaint', 'Try later');
+                                        showModal('An error occurred while recording the complaint', translate('ptl'));
                                     }
                                 }catch(err){
                                     showModal('An error occurred while sending the complaint', err);
@@ -1596,21 +1515,21 @@ window.addEventListener('load', async () => {
                                     try {
                                         let success = document.execCommand('copy');
                                         if(success){
-                                            showFlash('Copied');
+                                            showFlash(translate('contextmenu.copyMsgs.s'));
                                         }else{
-                                            showModal('Was not possible to copy the link');
+                                            showModal(translate('contextmenu.copyMsgs.uns'));
                                         }
                                     } catch (err) {
-                                        showModal('Was not possible to copy the link', err);
+                                        showModal(translate('contextmenu.copyMsgs.uns'), err);
                                     }
                                 
                                     document.body.removeChild(textArea); 
                                 }, 10)           
                             }else{
                                 window.navigator.clipboard.writeText(link)
-                                .then(() => showFlash('Copied'))
+                                .then(() => showFlash(translate('contextmenu.copyMsgs.s')))
                                 .catch(err => {
-                                    showModal('Something went wrong', err);
+                                    showModal(translate('contextmenu.copyMsgs.uns'), err);
                                 });
                             }
                         },
@@ -1622,8 +1541,11 @@ window.addEventListener('load', async () => {
                     } 
 
                     for(let action in actions){
-                        if(contextmenu.querySelector(`.${action}-btn`)) 
-                            contextmenu.querySelector(`.${action}-btn`).addEventListener('click', actions[action], {passive: false})
+                        const actionBtn = contextmenu.querySelector(`.${action}-btn`); 
+                        if(actionBtn){
+                            actionBtn.innerText = translate(`contextmenu.${action}`)
+                            actionBtn.addEventListener('click', actions[action], {passive: false})
+                        } 
                     }
                 }
                 contextmenu.style.top = evt.clientY + 'px';
@@ -1700,7 +1622,7 @@ window.addEventListener('load', async () => {
 
             try{
                 let res = await fetch('/chains/' + document.title);
-                if(!res.ok) return showModal('An error occurred when loading hexagons', 'Please try later. Status: ' + res.status);
+                if(!res.ok) return showModal('An error occurred when loading hexagons', translate('ptls') + res.status);
                 res = await res.json();
                 
                 sessionStorage.setItem('user', JSON.stringify({
@@ -1726,22 +1648,22 @@ window.addEventListener('load', async () => {
                 settingsCont.classList.add('settings');
 
                 settingsCont.innerHTML = `
-                <h1 class="settings-title">Settings</h1>
+                <h1 class="settings-title">${translate('sets.h1')}</h1>
                 <svg class="settings-close"><line x1="50%" y1="0%" x2="50%" y2="100%"></line><line x1="0%" y1="50%" x2="100%" y2="50%"></line></svg>
                 <div class="settings-cont">
                     <div class="colors">
-                        <h2 class="settings-title">Theme colors</h2>
+                        <h2 class="settings-title">${translate('sets.themeC')}</h2>
                         <div class="settings-grid colors"></div>
                     </div>
                     <div class="hexs-dColors">
-                        <h2 class="settings-title">Hexagon colors</h2>
+                        <h2 class="settings-title">${translate('sets.hexsC')}</h2>
                         <div class="settings-grid dColors"></div>
                     </div>
                     <div class="font">
-                        <h2 class="settings-title">Font</h2>
+                        <h2 class="settings-title">${translate('sets.font')}</h2>
                         <div class="font-cont">
-                            <span class="font-input-cont"><label for="font-family">Family from <a target="_blank" href="https://fonts.google.com/">Google</a></label>:&nbsp<input type="text" id="font-family" value="${font.family}"></span>
-                            <span class="font-input-cont"><label for="font-size">Size</label>:&nbsp<input type="text" id="font-size" value="${font.size.replace('em', '')}"></span>
+                            <span class="font-input-cont"><label for="font-family">${translate('sets.fontF')} <a target="_blank" href="https://fonts.google.com/">Google</a></label>:&nbsp<input type="text" id="font-family" value="${font.family}"></span>
+                            <span class="font-input-cont"><label for="font-size">${translate('sets.fontS')}</label>:&nbsp<input type="text" id="font-size" value="${font.size.replace('em', '')}"></span>
                         </div>
                         <div class="font-preview">
                         <h3 style="font-family: inherit; margin: 10px 0">Font settings example</h3>
@@ -1749,21 +1671,21 @@ window.addEventListener('load', async () => {
                         </div>
                     </div>
                     <div class="other">
-                        <h2 class="settings-title">Other</h2>
+                        <h2 class="settings-title">${translate('sets.other')}</h2>
                         <div class="other-cont">
-                            <div class="rounded-cont check-cont"><label class="check-label" for="rounded">Rounded corners</label><input class="check-input" type="checkbox" id="rounded"><div class="check-custom"></div></div>
-                            <div class="bordered-cont check-cont"><label class="check-label" for="bordered">Borders</label><input class="check-input" type="checkbox" id="bordered"><div class="check-custom"></div></div>
-                            <!-- <div class="turned-cont check-cont"><label class="check-label" for="turned">Turned hexagons (beta)</label><input class="check-input" type="checkbox" id="turned"><div class="check-custom"></div></div> -->
-                            <div class="innerNum-cont check-cont"><label class="check-label" for="innerNum">Inner numeration</label><input class="check-input" type="checkbox" id="innerNum"><div class="check-custom"></div></div>
-                            <div class="ctrlZoom-cont check-cont"><label class="check-label" for="ctrlZoom">Zoom with ctrl button</label><input class="check-input" type="checkbox" id="ctrlZoom"><div class="check-custom"></div></div>
-                            <div class="slideSpeed-cont check-cont short-text-cont"><label class="check-label" for="slideSpeed">Slide speed</label><input class="short-text-input" type="text" value="${otherSettings.slideSpeed}" id="slideSpeed"></div>
+                            <div class="rounded-cont check-cont"><label class="check-label" for="rounded">${translate('sets.check.R')}</label><input class="check-input" type="checkbox" id="rounded"><div class="check-custom"></div></div>
+                            <div class="bordered-cont check-cont"><label class="check-label" for="bordered">${translate('sets.check.B')}</label><input class="check-input" type="checkbox" id="bordered"><div class="check-custom"></div></div>
+                            <!-- <div class="turned-cont check-cont"><label class="check-label" for="turned">${translate('sets.check.B')}</label><input class="check-input" type="checkbox" id="turned"><div class="check-custom"></div></div> -->
+                            <div class="innerNum-cont check-cont"><label class="check-label" for="innerNum">${translate('sets.check.I')}</label><input class="check-input" type="checkbox" id="innerNum"><div class="check-custom"></div></div>
+                            <div class="ctrlZoom-cont check-cont"><label class="check-label" for="ctrlZoom">${translate('sets.check.Z')}</label><input class="check-input" type="checkbox" id="ctrlZoom"><div class="check-custom"></div></div>
+                            <div class="slideSpeed-cont check-cont short-text-cont"><label class="check-label" for="slideSpeed">${translate('sets.check.S')}</label><input class="short-text-input" type="text" value="${otherSettings.slideSpeed}" id="slideSpeed"></div>
                         </div>
                     </div>
                 </div>
                 <div class="btn-cont" style="display: flex;">
-                    <button class="save-button">Save</button>
-                    <button class="close-button">Close</button>
-                    <button class="reset-button">Reset</button>
+                    <button class="save-button">${translate('sets.save')}</button>
+                    <button class="close-button">${translate('btns.close')}</button>
+                    <button class="reset-button">${translate('sets.reset')}</button>
                 </div>
                 `;
 
@@ -1964,7 +1886,7 @@ window.addEventListener('load', async () => {
                                 localStorage.setItem('colors', JSON.stringify(colors));
                             } 
                         }else{
-                            showModal('An error occurred while changing the settings');
+                            showModal('An error occurred while changing the settings', translate('ptls') + res.status);
                         }
                     }catch(err){
                         showModal('An error occurred while changing the settings', err);

@@ -1,7 +1,11 @@
 {% extends "layout.html" %}
 
+{% block head %}
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+{% endblock %}
+
 {% block content %}
-    <h1>Register</h1>
+    <h1>{{ _('Register') }}</h1>
     <form action="" method="POST" novalidate>
         {{ form.hidden_tag() }}
         <p>
@@ -32,7 +36,8 @@
                 <span style="color: inherit;">{{ error }}</span>
             {% endfor %}
         </p>
-        <p>{{ form.submit() }}</p>
+        <div class="g-recaptcha" data-sitekey="6LePNPEaAAAAAHwXDqhhLC6NjQVqWyssBAWgE-JS"></div>
+        <p>{{ form.send() }}</p>
     </form>
     <style>
         label{
@@ -42,12 +47,36 @@
         p{
             margin: 7px 0;
         }
+        input:not([type='submit']){
+            width: var(--recaptcha-w);
+            box-sizing: border-box;
+        }
+        .recaptcha-required{
+            color: var(--red-c);
+        }
     </style>
     <script>
         document.querySelectorAll('#username, #password').forEach(elem => {
             elem.addEventListener('change', evt => {
                 evt.target.value = evt.target.value.replace(/\s+/gi, '')
-            })
+            });
         });
+
+        window.onload = () => {
+            setCSSProps({
+                // 'recaptcha-w': document.querySelector('#rc-anchor-containers').offsetWidth + 'px'
+            }); 
+        }
+
+        document.querySelector('form').onsubmit = evt => {
+            evt.preventDefault();
+
+            if(grecaptcha.getResponse()){
+                evt.target.submit();
+            }else{
+                !document.querySelector('.recaptcha-required') 
+                && document.querySelector('.g-recaptcha').insertAdjacentHTML('afterend', '<div class="recaptcha-required">Recaptcha required</div>')
+            }
+        }
     </script>
 {% endblock %}

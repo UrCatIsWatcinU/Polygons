@@ -1,19 +1,19 @@
 {% extends "layout.html" %}
 
 {% block content %}
-    <h1>Login</h1>
+    <h1>{{ _('Login') }}</h1>
     <form action="" method="POST" novalidate>
         {{ form.hidden_tag() }}
-        <p>
+        <p class="{% if 'username' in errors %} error-input {% endif %}">
             {{ form.username.label }}
             {{ form.username(size=32) }}
         </p>
-        <p>
+        <p class="{% if 'pwd' in errors %} error-input {% endif %}">
             {{ form.password.label }}
             {{ form.password(size=32) }}
         </p>
         <p class="remember">{{ form.remember_me() }} {{ form.remember_me.label }}</p>
-        <p>{{ form.submit() }}</p>
+        <p>{{ form.send() }}</p>
     </form>
     <style>
         label{
@@ -25,6 +25,9 @@
         }
         .remember > label{
             display: inline;
+        }
+        .error-input input{
+            border: 1px var(--red-c) solid;
         }
     </style>
 {% endblock %}

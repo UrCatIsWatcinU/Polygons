@@ -41,23 +41,23 @@
                     </div>
                 </el-chat>
             {% endfor %}
-            <button class="chat-add">Add chat</button>
+            <button class="chat-add">{{ _('Add chat') }}</button>
         </div>
         <div class="messages-cont">
             <h3 class="messages-title">
                 <svg class='back-to-chats' preserveAspectRatio="none" viewBox='0,0,100,100'>
                     <polyline points="100,0 0,50 100,100"/>
                 </svg>
-                <span class="messages-title-text">Select chat</span>
+                <span class="messages-title-text">{{ _('Select chat') }}</span>
             </h3>
 
             <div class="messages">
-                <h3 class="messages-empty">First select one of chats</h3>
+                <h3 class="messages-empty">{{ _('First select one of chats') }}</h3>
             </div>
 
             <div class="message-form">
                 <textarea id="newMsg" class="message-input"></textarea>
-                <button class="message-send">Send</button>
+                <button class="message-send">{{ _('Send') }}</button>
             </div>
         </div>
     </div>

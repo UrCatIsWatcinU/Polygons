@@ -42,15 +42,20 @@
 
 <div class="find">
     <input type="text" class="find-input">
-    <button class="find-button">Search</button>
+    <button class="find-button">{{_('Search')}}</button>
 </div>
 
 <div class="categs">
     <div class="categs-row">
         {% for categ in categs %}
-            <div class="categ" style="--bgc: #{{categ.color.strip()}}; color: #{{categ.text_color}}">
+            <a href="{{ url_for('fields', categ_name=categ.name ) }}" 
+                id="cat{{ categ.id }}" 
+                BG-img="{{ url_for('static', filename='uploadedImgs/'+categ.BG_img) if categ.BG_img else '' }}" 
+                class="categ" 
+                style="--bgc: #{{categ.color.strip()}}; color: #{{categ.text_color}}">
+
                 <div class="hexagon-editedField">{{categ.name}}</div>
-            </div>
+            </a>
         {% endfor %}
     </div>
     
@@ -61,6 +66,7 @@
     {% if user %}
         {% if user.role.name == 'admin' %}
             <button class="new-categ-btn">New categ</button>
+            <button class="new-categ-btn" onclick="window.location.href = `{{ url_for('bans') }}`">Ip bans</button>
             <button class="complaints" onclick="window.location.href = `{{ url_for('get_complaints') }}`">Complaints</button>
         {% endif %}
     {% endif %}

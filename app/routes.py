@@ -6,25 +6,40 @@ import re
 from threading import Timer
 from datetime import datetime
 
-from app import app, socketio, db
+from app import app, socketio, db, babel
 from app.forms import LoginForm, RegistrationForm
-from app.models import Chain, Chat, ChatMember, ChatRole, Comment, Complaint, Hexagon, Image, Message, RatingChange, User, Categ, UserRating
+from app.models import BannedIp, Chain, Chat, ChatMember, ChatRole, Comment, Complaint, Hexagon, Image, Message, RatingChange, User, Categ, UserRating
 from app.lib import create_dir, delete_dir, serialize
+from app.email import send_email
 
-from flask import render_template, redirect, url_for, request
+from flask import render_template, redirect, url_for, request, abort
 from flask_socketio import emit
 from flask_login import current_user, login_user, logout_user, login_required
+from flask_babel import _
 from werkzeug.urls import url_encode, url_parse
 from flask_sqlalchemy import sqlalchemy
 from sqlalchemy import func
 from sqlalchemy.sql.expression import select
+
+
+@babel.localeselector
+def get_locale():
+    return request.accept_languages.best_match(app.config['LANGUAGES'])
+
+@app.before_request
+def block_method():
+    ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr) 
+    ip_ban_list = db.session.execute(select(BannedIp.addr)).scalars().all()
+    print(ip)
+    if ip in ip_ban_list:
+        abort(403)
 
 @app.errorhandler(404)
 def not_found_error(error):
     user = None
     if current_user and current_user.is_authenticated:
         user = current_user
-    return render_template('error-page.html', error_message='404 not found', error_description='If you write URL manually, check if it is correct', user=user, title='404'), 404
+    return render_template('error-page.html', error_message='404 not found', error_description=_('If you write URL manually, check if it is correct'), user=user, title='404'), 404
 
 @app.errorhandler(500)
 def internal_error(error):
@@ -32,8 +47,11 @@ def internal_error(error):
     user = None
     if current_user and current_user.is_authenticated:
         user = current_user
-    return render_template('error-page.html', user=user, title='500', error_title='500 internal error', error_description='Some troubles happend on server. Please send message to admin'), 500
+    return render_template('error-page.html', user=user, title='500', error_title='500 internal error', error_description=_('Some troubles happend on server. Please send message to admin')), 500
 
+@app.route('/favicon.ico')
+def get_favicon():
+    return redirect(url_for('static', filename='favicon.png'))
 
 @app.route('/')
 @app.route('/index')
@@ -125,6 +143,42 @@ def get_categs_names():
         }, Categ.query.all())) 
     })
 
+@app.route('/categs/<int:id>/uploadBG', methods=['POST'])
+@login_required
+def upload_categ_BG(id):
+    if(current_user.role_id != 2):
+        return json.dumps({'success': False})
+    
+    categ = Categ.query.get_or_404(id)
+
+    if 'file' not in request.files:
+        return json.dumps({'success1': False})
+
+    file = request.files['file']
+    
+    img = Image(hex_id=id)
+    img.ext = file.mimetype.replace('image/', '')
+
+    if(not img.ext in ['png', 'jpg', 'jpeg', 'gif']):
+        return json.dumps({'success2': False})
+
+    db.session.add(img)
+    db.session.commit()
+
+    try:
+        file.save(os.getcwd() + f"/app/static/uploadedImgs/{img.id}.{img.ext}" )
+    except BaseException:
+        db.session.delete(img)
+        db.session.commit()
+        return json.dumps({'success3': False})
+
+    categ.BG_img = f'{img.id}.{img.ext}'
+    db.session.add(categ)
+    db.session.commit()
+
+    return json.dumps({'success': True})
+    
+
 @app.route('/categs/<id>')
 @login_required
 def get_categ(id):
@@ -140,14 +194,31 @@ def get_categ(id):
 def registration():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
+
     form = RegistrationForm()
+
     if form.validate_on_submit():
         user = User(username=form.username.data, email=form.email.data)
         user.set_password(form.password.data)
+
         db.session.add(user)
         db.session.commit()
+        try:
+            send_email('Library Hexagon: your confrimation link', 'info', [user.email], 
+                render_template('parts/confirm-email.txt', user=user), 
+                render_template('parts/confirm-email.html', user=user)
+            )
+        except:
+            db.session.rollback()
+            
         return redirect(url_for('login'))
+
     return render_template('registration.html', title='Register', form=form)
+
+@app.route('/confirm_email/<token>')
+def confirm_email(token):
+    User.verify_confirm_token(token)
+    return redirect(url_for('login'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -156,14 +227,26 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
-        if user is None or not user.check_password(form.password.data):
-            return 'Вы ввели неправильный логин/пароль!'
+        if user is None:
+            return render_template('login.html', title='Login', form=form, errors=['username']) 
+        if not user.check_password(form.password.data):
+            return render_template('login.html', title='Login', form=form, errors=['pwd']) 
+        
+        if not user.is_verify:
+            return render_template('error-page.html', title="Verify email", error_message=_('Verification required'), error_description=_('An email with a link to confirm your email address has been sent to your email address. If you have not received the email, please contact the site administrator.'))
+
         login_user(user, remember=form.remember_me.data)
+        
+        user.addr = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
+        db.session.add(user)
+        db.session.commit()
+
         next_page = request.args.get('next')
         if not next_page or url_parse(next_page).netloc != '':
             next_page = url_for('index')
+
         return redirect(next_page)
-    return render_template('login.html', title='Login', form=form)
+    return render_template('login.html', title='Login', form=form, errors=[])
 
 @app.route('/logout')
 def logout():
@@ -257,7 +340,6 @@ def give_current_user():
 @app.route('/users/delete/<id>', methods=['DELETE'])
 @login_required
 def delete_user(id):
-    
     user = None
     if id == 'i':
         user = User.query.get(current_user.id)
@@ -269,6 +351,40 @@ def delete_user(id):
     db.session.delete(user)
     db.session.commit()
     return json.dumps({"success":True})
+
+@app.route('/users/<int:id>/ban')
+@login_required
+def ban_user(id):
+    if current_user.role_id != 2:
+        return json.dumps({"success": False}), 403
+
+    user = User.query.get_or_404(id)
+
+    if not user.addr:
+        return json.dumps({"success": False})
+    ban = BannedIp(addr=user.addr, user_id=user.id)
+
+    db.session.add(ban)
+    db.session.commit()
+
+    return json.dumps({"success":True})
+
+@app.route('/users/bans')
+@login_required
+def bans():
+    if current_user.role_id != 2:
+        return json.dumps({"success": False}), 403
+    
+    return render_template('ip-bans.html', bans=BannedIp.query.all(), title='Bans', user=current_user)
+@app.route('/users/bans/<int:id>/delete')
+@login_required
+def delete_ban(id):
+    if current_user.role_id != 2:
+        return json.dumps({"success": False}), 403
+    
+    db.session.delete(BannedIp.query.get_or_404(id))
+    db.session.commit()
+    return json.dumps({'success': True})
 
 
 admins_chat_roles = ['admin']
@@ -315,7 +431,7 @@ def delete_chat(id):
 
     current_user_membership = ChatMember.query.filter_by(chat_id=chat.id, user_id=current_user.id).first()
     if not current_user_membership or current_user_membership.role.name != 'admin':
-        return  json.dumps({'success': False, 'message': 'Access denied'})
+        return  json.dumps({'success': False, 'message': _('Access denied')})
 
     db.session.delete(chat)
     db.session.commit()
@@ -360,14 +476,14 @@ def add_chat_member(id):
         user = User.query.filter_by(username=raw_member['user']).first()
 
     if not user:
-        return json.dumps({'success': True, 'message': 'No such user'})
+        return json.dumps({'success': True, 'message': _('No such user')})
 
     if ChatMember.query.filter_by(user_id=user.id, chat_id=chat.id).first():
-        return json.dumps({'success': False, 'message': 'This user alredy is a member of this chat'})
+        return json.dumps({'success': False, 'message': _('This user alredy is a member of this chat')})
 
     current_user_membership = ChatMember.query.filter_by(chat_id=chat.id, user_id=current_user.id).first()
     if not current_user_membership or current_user_membership.role.name not in admins_chat_roles:
-        return  json.dumps({'success': False, 'message': 'Access denied'})
+        return  json.dumps({'success': False, 'message': _('Access denied')})
     
     member = ChatMember(user_id=user.id, chat_role_id=raw_member['role'], chat_id=chat.id)
     db.session.add(member)
@@ -418,7 +534,7 @@ def update_chat_member(id):
 
     current_user_membership = ChatMember.query.filter_by(chat_id=member.chat.id, user_id=current_user.id).first()
     if not current_user_membership or current_user_membership.role.name not in admins_chat_roles:
-        return  json.dumps({'success': False, 'message': 'Access denied'})
+        return  json.dumps({'success': False, 'message': _('Access denied')})
 
     member.chat_role_id = updation['newRoleId']
 
@@ -492,7 +608,7 @@ def set_settings():
     current_user.settings = request.get_data(as_text=True)
     db.session.add(current_user)
     db.session.commit()
-    return json.dumps({"success": "true"})
+    return json.dumps({"success": True})
 
 @app.route('/settings/reset')
 @login_required
@@ -500,7 +616,7 @@ def delete_settings():
     current_user.settings = None
     db.session.add(current_user)
     db.session.commit()
-    return json.dumps({"success": "true"})
+    return json.dumps({"success": True})
 
 
 
@@ -918,7 +1034,7 @@ def chain_move(chain_id):
 @login_required
 def get_complaints():
     if current_user.role_id != 2:
-        return "<h1>You don't have access</h1"
+        return '', 403
 
     return render_template('complaints.html', complaints=Complaint.query.all(), title="Complaints", user=current_user)
 
@@ -930,7 +1046,7 @@ def create_complaint():
     hex_id = Hexagon.query.filter(Hexagon.selector == raw_hex['selector'], Hexagon.categ_id == Categ.query.filter_by(name=raw_hex['categ']).first_or_404().id).first().id
 
     if not hex_id:
-        return json.dumps({'success': False, 'message': 'No such hexagon'})
+        return json.dumps({'success': False, 'message': _('No such hexagon')})
 
     complaint = Complaint(
         body=raw_complaint['text'],

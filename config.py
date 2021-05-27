@@ -8,5 +8,9 @@ class Config(object):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SEND_FILE_MAX_AGE_DEFAULT = 0
     MAX_CONTENT_LENGTH = 3 * 1024 * 1024
+    LANGUAGES = ['en', 'ru']
 
+    MAIL_SERVER = 'localhost'
+    MAIL_PORT = 995
+    MAIL_USE_TLS = True
     

@@ -1,0 +1,9 @@
+{{ user.username }},
+
+You have registered on the Library Hexagon portal, to log in, confirm your email using this link
+
+{{ url_for('confirm_email', token=token, _external=True) }}
+
+If you did not register, please ignore this email
+
+Library Hexagon

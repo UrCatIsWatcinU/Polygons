@@ -3,7 +3,7 @@ if(!user){
     fetch('/users/i')
     .then(res => {
         if(res.ok) return res.json();
-        showModal('An erron occured while loading profile', 'Please try later. Status: ' + res.status);
+        showModal('An erron occured while loading profile', translate('ptls') + res.status);
     })
     .then(res => {
         if(!res) return;
@@ -215,7 +215,7 @@ const changeChat = (id = null) => {
     const msgsTitle = document.querySelector('.messages-title-text');
     const msgsCont = document.querySelector('.messages-cont');
     if(!activeChatId){
-        msgsTitle.innerText = urlParams.get('send') ? 'Choose chat to send ' + urlParams.get('send') : 'Select chat';
+        msgsTitle.innerText = urlParams.get('send') ? translate('chats.chooseSend') + urlParams.get('send') : translate('chats.select');
         msgsCont.classList.remove('messages-cont-active');
         document.querySelector('.app').classList.remove('app-messages');
         return;
@@ -257,9 +257,9 @@ const changeChat = (id = null) => {
 
 let chatRoles;
 fetch('/chats/roles')
-.then(res => res.ok? res.json() : showModal('An erron occured while loading chat roles', 'Please try later. Status: ' + res.status))
+.then(res => res.ok? res.json() : showModal('An erron occured while loading chat roles', translate('ptls') + res.status))
 .then(res => {
-    if(!res || !res.length) return showModal('An erron occured while loading chat roles', 'Please try later');
+    if(!res || !res.length) return showModal('An erron occured while loading chat roles', translate('ptl'));
 
     chatRoles = res;
     window.dispatchEvent(new Event('chatRolesLoaded'));
@@ -270,7 +270,7 @@ let userChatWithId = 0;
 let needToCreateChatWith = false;
 
 const urlParams = new URLSearchParams(window.location.search);
-if(urlParams.get('with')){
+if(urlParams.get('with') && urlParams.get('with') != user.id){
     userChatWithId = urlParams.get('with');
     needToCreateChatWith = true;
 }
@@ -287,9 +287,9 @@ const createChatWith = (evt) => {
             }]
         })
     })
-    .then(res => res.ok ? res.json() : showModal('An error occured while opening chat with user', 'Please try later. Status: ' + res.status))
+    .then(res => res.ok ? res.json() : showModal('An error occured while opening chat with user', translate('ptls') + res.status))
     .then(res => {
-        if(!res || !res.success) return showModal('An error occured while opening chat with user', 'Please try later');
+        if(!res || !res.success) return showModal('An error occured while opening chat with user', translate('ptl'));
 
         window.location.reload();
     })
@@ -310,7 +310,7 @@ class ElChat extends HTMLElement{
         fetch(`/chats/${this.uuid}/members/i`)
         .then(res => res.ok && res.json())
         .then(res => {
-            if(!res || !res.role) return showModal('An erron occured while loading your chat role', 'Please try later');
+            if(!res || !res.role) return showModal('An erron occured while loading your chat role', translate('ptl'));
             this.userMembership = res;
 
             setTimeout(() => {
@@ -325,14 +325,14 @@ class ElChat extends HTMLElement{
                 fetch(`/chats/${this.uuid}/members`)
                 .then(res => {
                     if(!res.ok){
-                        showModal('An error occured while loading chat members', 'Please try later. Status: ' + res.status);
+                        showModal('An error occured while loading chat members', translate('ptls') + res.status);
                         return;
                     }
     
                     return res.json()
                 })
                 .then(async members => {
-                    if(!members) return showModal('An error occured while loading chat members', 'Please try later');
+                    if(!members) return showModal('An error occured while loading chat members', translate('ptl'));
                     
                     if(!this.userMembership) return;
     
@@ -378,7 +378,7 @@ class ElChat extends HTMLElement{
                         chatAbout.innerHTML = `<div class="modal-content chatAbout-modal-content">
                             <div>
                                 <div class="chatAbout-header">
-                                    <h2 class="modal-title chatAbout-title">Chat info</h2>
+                                    <h2 class="modal-title chatAbout-title">${translate('chatAbout.h1')}</h2>
                                     <div class="chatAbot-dropMenu-cont">
                                         <div class="drop-menu-bullets-cont">
                                             <svg class="drop-menu-bullets" preserveAspectRatio="none" viewBox="0,0,40,150">
@@ -394,12 +394,12 @@ class ElChat extends HTMLElement{
                                     </div>
                                 </div>
                                 <div class="chatAbout-content">
-                                    <h4 class="chatAbout-members-title">Members</h4>
+                                    <h4 class="chatAbout-members-title">${translate('chatAbout.members')}</h4>
                                     <ol class="chatAbout-members"></ol>
                                 </div>
                             </div>
                             <div class="chatAbout-btns">
-                                <button class="chatAbout-close">Close</button>
+                                <button class="chatAbout-close">${translate('btns.close')}</button>
                             </div>
                         </div>`;
         
@@ -408,9 +408,9 @@ class ElChat extends HTMLElement{
                         const membersElem = chatAbout.querySelector('.chatAbout-members');
                         const deleteMember = (id, memberElem = null, successCallback = null) => {
                             fetch(`/chats/members/${id}/delete`, { method: 'DELETE' })
-                            .then(res => res.ok ? res.json() : showModal('An error occured while deleting chat member', 'Please try later. Status: ' + res.status))
+                            .then(res => res.ok ? res.json() : showModal('An error occured while deleting chat member', translate('ptls') + res.status))
                             .then(res => {
-                                if(!res || !res.success) return showModal('An error occured while deleting chat member', 'Please try later');
+                                if(!res || !res.success) return showModal('An error occured while deleting chat member', translate('ptl'));
         
                                 memberElem && memberElem.remove();
                                 members = members.filter(mToCheck => mToCheck.id != id )
@@ -473,14 +473,14 @@ class ElChat extends HTMLElement{
                                                         newRoleId: +r.id.replace('role', '')
                                                     })
                                                 })
-                                                .then(res => res.ok ? res.json() : showModal('An error occured while updating chat user', 'Please try later. Status: ' + res.status))
+                                                .then(res => res.ok ? res.json() : showModal('An error occured while updating chat user', translate('ptls') + res.status))
                                                 .then(res => {
-                                                    if(!res || !res.success) return showModal('An error occured while updating chat user', 'Please try later');
+                                                    if(!res || !res.success) return showModal('An error occured while updating chat user', translate('ptl'));
         
                                                     memberElem.querySelector('.role').innerText = r.innerText;
                                                 })
                                                 .catch(err => showModal('An error occured while updating chat user', err))
-                                            }, 'Be careful not to give authority to users you can\'t trust', 'Do yor want change member role?');
+                                            }, translate('chatAbout.changeRoleMsg'));
                                         }
                                     });
                                 }
@@ -495,9 +495,9 @@ class ElChat extends HTMLElement{
                             delete: () => {
                                 showAsk(() => {
                                     fetch(`/chats/${this.uuid}/delete`, { method: 'DELETE' }).then((res) => 
-                                        res.ok ? res.json() : showModal('An error occured while deleting chat', 'Please try later. Status: ' + res.status)
+                                        res.ok ? res.json() : showModal('An error occured while deleting chat', translate('ptls') + res.status)
                                     ).then(res => 
-                                        res.success ? window.location.reload() : showModal('An error occured while deleting chat', 'Please try later')
+                                        res.success ? window.location.reload() : showModal('An error occured while deleting chat', translate('ptl'))
                                     ).catch(err => showModal('An error occured while deleting chat', err));
                                 });
                             },
@@ -505,7 +505,7 @@ class ElChat extends HTMLElement{
                                 if(chatAbout.querySelector('.chatAbout-newMember')) return;
                                 const newMember = setClassName(document.createElement('div'), 'chatAbout-newMember');
                                 newMember.innerHTML = `
-                                    <input placeholder="New user username" type="text" class="chatAbout-newMember-input" id="new-member">&nbsp;<button class="chatAbout-newMember">Add</button> 
+                                    <input placeholder="New user username" type="text" class="chatAbout-newMember-input" id="new-member">&nbsp;<button class="chatAbout-newMember">${translate('chatAbout.add')}</button> 
                                 `;
         
                                 chatAbout.querySelector('.chatAbout-content').append(newMember);
@@ -526,10 +526,10 @@ class ElChat extends HTMLElement{
                                             user: newMemberInput.value,
                                             role: 1
                                         })
-                                    }).then(res => res.ok ? res.json() : showModal('An error occured while adding chat member', 'Please try later. Status: ' + res.status))
+                                    }).then(res => res.ok ? res.json() : showModal('An error occured while adding chat member', translate('ptls') + res.status))
                                     .then(res => {
                                         if(!res || ! res.success){
-                                            if(!res.message) showModal('An error occured while adding chat member', 'Please try later')
+                                            if(!res.message) showModal('An error occured while adding chat member', translate('ptl'))
                                             else showModal('An error occured while adding chat member', res.message)
                                             
                                             return
@@ -553,8 +553,11 @@ class ElChat extends HTMLElement{
                         }
         
                         for(let action in actions){
-                            if(chatAbout.querySelector('.chatAbout-' + action)) 
-                                chatAbout.querySelector('.chatAbout-' + action).onclick = actions[action];   
+                            const actionBtn = chatAbout.querySelector('.chatAbout-' + action)
+                            if(actionBtn){
+                                actionBtn.onclick = actions[action];   
+                                actionBtn.innerText = translate('chatAbout.' + action)
+                            }
                         }
                         
                     }, {passive: false})
@@ -583,7 +586,7 @@ class ElChat extends HTMLElement{
     }
     loadMessages(noEvent = false){
         fetch(`/chats/${this.uuid}/messages`)
-        .then(res => res.ok ? res.json() : showModal('An erron occured while loading messages', 'Please try later. Status: ' + res.status))
+        .then(res => res.ok ? res.json() : showModal('An erron occured while loading messages', translate('ptls') + res.status))
         .then(res => {
             if(!res) return;
             this.messages = res;
@@ -662,16 +665,19 @@ tasks.push(() => {
         input.value = '';
         input.focus();
     }
-    input.onkeyup = (evt) => {
+    
+    input.addEventListener('keypress', (evt) => {
         if(evt.key == 'Enter' && !evt.shiftKey){
+            evt.preventDefault();
             sendMsg();
         }
-    }
+    }, {passive: false})
 
     const entitiesNames = ['admin', 'chain'];
     let username;
     let entity;
-    input.oninput = evt => {
+
+    input.addEventListener('input', evt => {
         if(evt.data == null){
             return [username, entity].forEach(needToClean => {
                 if(needToClean && typeof(needToClean) == 'object'){
@@ -742,27 +748,27 @@ tasks.push(() => {
                 .finally(() => {entity = false});
             }
         }   
-    }
+    })
 
     document.querySelector('.chat-add').onclick = () => {
         const newChatModal = showModal('', '', true);
         newChatModal.innerHTML = `<div class="modal-content newChat-content">
             <div>
-                <h2 class="modal-title newChat-title">Create chat</h2>
+                <h2 class="modal-title newChat-title">${translate('newChat.h1')}</h2>
                 <div class="newChat-form">
                     <div class="newChat-name">
-                        <label class="newChat-label" for="nc-name">Name</label>
+                        <label class="newChat-label" for="nc-name">${translate('newChat.name')}</label>
                         <input class="newChat-input" type="text" id="nc-name">
                     </div>
                     <div class="newChat-members">
-                        <label class="newChat-label" for="nc-members">Members separated by commas</label>
+                        <label class="newChat-label" for="nc-members">${translate('newChat.membs')}</label>
                         <input class="newChat-input" type="text" id="nc-members">
                     </div>
                 </div>
             </div>
             <div class="newChat-btns">
-                <button class="newChat-create">Create chat</button>
-                <button class="newChat-close">Close</button>
+                <button class="newChat-create">${translate('newChat.create')}</button>
+                <button class="newChat-close">${translate('btns.close')}</button>
             </div>
         </div>`;
 
@@ -799,5 +805,5 @@ tasks.push(() => {
         }
     }
 
-    if(urlParams.get('send')) document.querySelector('.messages-title-text').innerText = 'Choose chat to send ' + urlParams.get('send');
+    if(urlParams.get('send')) document.querySelector('.messages-title-text').innerText = translate('chats.chooseSend') + urlParams.get('send');
 });

@@ -377,6 +377,7 @@ a{
     font-size: 1.3em;
     cursor: pointer;
     top: unset;
+    background-color: transparent;
 }
 
 
@@ -653,17 +654,15 @@ a{
     margin: 0;
 }
 .user-chains{
-    overflow: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 
 
 .hexPath-sprite{
     display: none;
-  }
-
-
-
+}
 
 @media (max-width: 1150px){
     body{
@@ -735,12 +734,15 @@ a{
 }
 
 .ios *{
-    filter: none !important;
+    /* filter: none !important; */
+    /* transform: none !important; */
+}
+.ios .hexagon .polygon{
     transform: none !important;
 }
-.ios *:focus{
-    filter: none !important;
-    transform: none !important;
+.ios .hexagon *:focus{
+    filter: initial !important;
+    transform: initial !important;
 }
 .ios *:hover{
     filter: none !important;

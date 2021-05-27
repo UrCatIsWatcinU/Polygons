@@ -1,12 +1,13 @@
 from app import db, login
 
 from werkzeug.security import generate_password_hash, check_password_hash
+from app import app
 from flask_login import UserMixin
 from datetime import datetime
 from sqlalchemy import func
 from sqlalchemy.sql.expression import select
 from flask import render_template
-
+import jwt
 
 
 @login.user_loader
@@ -26,7 +27,8 @@ class User(UserMixin, db.Model):
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'), nullable=False, default=1)
     settings = db.Column(db.String(400))
     is_hidden =  db.Column(db.Boolean, default=False)
-    # is_verify = db.Column(db.Boolean, default=False)
+    addr = db.Column(db.String(16))
+    is_verify = db.Column(db.Boolean, default=False)
     
     hexs = db.relationship('Hexagon', backref='author', lazy='dynamic', cascade="all, delete-orphan")
     chains = db.relationship('Chain', backref='author', lazy='dynamic', cascade="all, delete-orphan")
@@ -36,7 +38,25 @@ class User(UserMixin, db.Model):
     ratings = db.relationship('UserRating', foreign_keys=[UserRating.user_id], backref='target', lazy='dynamic', cascade="all, delete-orphan")
     messages = db.relationship('Message', backref='author', lazy='dynamic', cascade="all, delete-orphan")
     chats_memberships = db.relationship('ChatMember', backref='member', lazy='dynamic', cascade="all, delete-orphan")
+    ip_bans = db.relationship('BannedIp', backref='user', lazy='dynamic', cascade="all, delete-orphan")
 
+    def gen_confirm_token(self):
+        token = jwt.encode({'id': self.id}, app.config['SECRET_KEY'], algorithm='HS256')
+        print(token)
+        return token
+    
+    @staticmethod
+    def verify_confirm_token(token):
+        try:
+            id = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])['id']
+        except:
+            return
+        
+        user = User.query.get(id)
+        user.is_verify = True
+
+        db.session.add(user)
+        db.session.commit()
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -45,7 +65,13 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password_hash, password)
 
     def get_rating(self):
-        return db.session.execute(select([func.sum(UserRating.change)]).where(UserRating.user_id == self.id)).first().values()[0] or 0
+        return db.session.execute(select([func.sum(UserRating.change)]).where(UserRating.user_id == self.id)).first()[0] or 0
+
+class BannedIp(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    addr = db.Column(db.String(16), unique=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
+    
 
 class Role(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -77,7 +103,9 @@ class Categ(db.Model):
     name = db.Column(db.String(64), unique=True, index=True)
     color = db.Column(db.String(6), unique=True)
     text_color = db.Column(db.String(6))
+    BG_img = db.Column(db.String(200))
     params = db.Column(db.String(100))
+
     hexs = db.relationship('Hexagon', backref='categ', lazy='dynamic', cascade="all, delete-orphan")
     chains = db.relationship('Chain', backref='categ', lazy='dynamic', cascade="all, delete-orphan")
 
