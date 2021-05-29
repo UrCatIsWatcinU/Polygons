@@ -16,5 +16,5 @@ def send_email(subject, to_addr, from_addr, body_text, body_html):
     message.attach(part2)
 
     server = smtplib.SMTP('localhost')
-    server.sendmail(from_addr, [to_addr], message.as_text())
+    server.sendmail(from_addr, [to_addr], message.as_string())
     server.quit()
