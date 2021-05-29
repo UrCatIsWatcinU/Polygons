@@ -13,5 +13,5 @@ class Config(object):
 
 
     MAIL_SERVER = os.getenv('MAIL_SERVER', 'localhost')
-    MAIL_PORT = int(os.getenv('MAIL_PORT', '995'))
+    # MAIL_PORT = int(os.getenv('MAIL_PORT', '995'))
     MAIL_USE_TLS = int(os.getenv('MAIL_USE_TLS', True))    
