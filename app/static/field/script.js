@@ -229,8 +229,6 @@ window.addEventListener('load', async () => {
                                         [{ 'header': 1 }, { 'header': 2 }],
                                         [{ 'list': 'ordered'}, { 'list': 'bullet' }],
 
-                                        ['link'],
-
                                         ['clean']
                                     ]
                                 }
