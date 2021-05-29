@@ -1,0 +1,120 @@
+.center-align{
+    display: flex;
+    justify-content: center;
+}
+
+h2{
+    margin-top: 0; 
+}
+h3{
+    margin-top: 0;
+    margin-bottom: .6em;
+    font-size: 1.3em;
+}
+h4{
+    margin-top: 0;
+    margin-bottom: .8em;
+}
+p{
+    margin-top: 0;
+}
+p, div{
+    line-height: 1.4em;
+}
+hr{
+    border: none;
+    border-bottom: 1px solid var(--marker-c);
+    margin: 2em 0;
+}
+ol, ul{
+    padding-left: 1em;
+    margin: .8em 0;
+}
+li{
+    margin-bottom: .3em;
+}
+li::marker{
+    color: var(--marker-c);
+}
+a{
+    color: var(--main-c);
+}
+
+.app{
+    position: relative;
+    overflow: hidden;
+}
+
+.nav{
+    position: absolute;
+    left: var(--aside-pad);
+    padding: 0;
+    margin: 0;
+
+    padding-right: 20px;
+    padding-bottom: 20px;
+    border-right: 1px solid var(--main-c);
+    min-height: 200px;
+
+    user-select: none;
+}
+.nav a{
+    text-decoration: none;
+    color: var(--black-c);
+}
+.nav li{
+    margin: .2em 0;
+}
+.nav li::marker{
+    color: transparent;
+}
+.nav > li::marker{
+    color: var(--marker-c);
+}
+.nav-block{
+    padding: 8px 0;
+
+}
+
+.content{
+    box-sizing: border-box;
+    overflow-y: auto;
+}
+.content *{
+    user-select: unset;
+}
+.text{
+    padding-left: 10px;
+    margin-bottom: 3em;
+}
+.text .text{
+    margin-bottom: 2em;
+}
+.btn{
+    border: 1px var(--main-c) solid;
+    padding: 2px;
+    border-radius: 2px;
+    font-size: .86em;
+}
+.red{
+    color: var(--red-c);
+}
+.mark{
+    border: 1px var(--black-c) solid;
+    padding: 3px;
+    border-radius: 2px;
+    font-size: .7em;
+    opacity: .7;
+}
+.role{
+    margin: 0;
+}
+.note{
+    padding: 15px;
+    background-color: var(--note-bgc);
+    border: 1px var(--main-c) solid;
+    border-radius: 5px;
+}
+.active-linkedElem{
+    text-decoration: underline;
+}

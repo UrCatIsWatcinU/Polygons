@@ -1,22 +1,19 @@
+
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2021-05-28 19:37+0300\n"
-"PO-Revision-Date: 2021-05-28 16:39+0000\n"
+"PO-Revision-Date: 2021-05-28 16:13+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: Russian\n"
 "Language: ru\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10 >= 2 && "
-"n%10<=4 &&(n%100<10||n%100 >= 20)? 1 : 2);\n"
+"Language-Team: Russian\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10 >= 2 &&"
+" n%10<=4 &&(n%100<10||n%100 >= 20)? 1 : 2)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Loco-Source-Locale: ru_RU\n"
 "Generated-By: Babel 2.9.1\n"
-"\n"
-"X-Loco-Parser: loco_parse_po\n"
-"X-Generator: Loco https://localise.biz/"
 
 #: app/forms.py:9 app/forms.py:15 app/templates/users.html:14
 msgid "Username"
@@ -42,8 +39,8 @@ msgstr "E-mail"
 msgid "Repeat password"
 msgstr "Повторите пароль"
 
-#: app/forms.py:19 app/templates/help.html:50 app/templates/help.html:56 
-#: app/templates/layout.html:224 app/templates/noedite-field.html:27 
+#: app/forms.py:19 app/templates/help.html:50 app/templates/help.html:56
+#: app/templates/layout.html:224 app/templates/noedite-field.html:27
 #: app/templates/registration.html:8
 msgid "Register"
 msgstr "Регистрация"
@@ -71,12 +68,13 @@ msgstr "Требуется подтверждение e-mail адреса"
 #: app/routes.py:233
 msgid ""
 "An email with a link to confirm your email address has been sent to your "
-"email address. If you have not received the email, please contact the site "
-"administrator."
+"email address. If you have not received the email, please contact the "
+"site administrator."
 msgstr ""
-"На Ваш адрес электронной почты было отправлено электронное письмо со ссылкой "
-"для подтверждения Вашего адреса электронной почты. Если Вы не получили "
-"электронное письмо, пожалуйста, свяжитесь с администратором сайта."
+"На Ваш адрес электронной почты было отправлено электронное письмо со "
+"ссылкой для подтверждения Вашего адреса электронной почты. Если Вы не "
+"получили электронное письмо, пожалуйста, свяжитесь с администратором "
+"сайта."
 
 #: app/routes.py:431 app/routes.py:483 app/routes.py:534
 msgid "Access denied"
@@ -102,12 +100,12 @@ msgstr "Назад"
 msgid "Open chat with admin"
 msgstr "Открыть чат с админом"
 
-#: app/templates/field.html:27 app/templates/index.html:45 
+#: app/templates/field.html:27 app/templates/index.html:45
 #: app/templates/noedite-field.html:23
 msgid "Search"
 msgstr "Поиск"
 
-#: app/templates/field.html:29 app/templates/help.html:188 
+#: app/templates/field.html:29 app/templates/help.html:188
 #: app/templates/help.html:232
 msgid "Settings"
 msgstr "Настройки"
@@ -126,26 +124,27 @@ msgstr "Создание"
 
 #: app/templates/help.html:21
 msgid ""
-"To create *hexagon* use [contextmenu] > [create] (in desktop you can open it "
-"with right mouse button, on touch devices with long tap).Only registered "
-"users can create hexagons and make other changes to the system, which are "
-"described below"
+"To create *hexagon* use [contextmenu] > [create] (in desktop you can open"
+" it with right mouse button, on touch devices with long tap).Only "
+"registered users can create hexagons and make other changes to the "
+"system, which are described below"
 msgstr ""
-"Для создания *шестиугольника* используйте [контекстное меню] > [создать] (на "
-"ПК Вы можете открыть его правой кнопкой мыши, на сенсорных устройствах - "
-"долгим нажатием). Только зарегистрированные пользователи могут создавать "
-"шестиугольники и вносить другие изменения в систему"
+"Для создания *шестиугольника* используйте [контекстное меню] > [создать] "
+"(на ПК Вы можете открыть его правой кнопкой мыши, на сенсорных "
+"устройствах - долгим нажатием). Только зарегистрированные пользователи "
+"могут создавать шестиугольники и вносить другие изменения в систему"
 
 #: app/templates/help.html:24
 msgid ""
-"*Chains* are built from hexagons, and when you create a hexagon separately "
-"from any chain, it creates a new chain. You can create an unlimited number "
-"of chains and an unlimited number of hexagons in each of your chains"
+"*Chains* are built from hexagons, and when you create a hexagon "
+"separately from any chain, it creates a new chain. You can create an "
+"unlimited number of chains and an unlimited number of hexagons in each of"
+" your chains"
 msgstr ""
 "*Цепочки* строятся из шестиугольников, и когда Вы создаете шестиугольник "
-"отдельно от любой цепочки, создается новая. Вы можете создать неограниченное "
-"количество цепочек и неограниченное количество шестиугольников в каждой из "
-"Ваших цепочек"
+"отдельно от любой цепочки, создается новая. Вы можете создать "
+"неограниченное количество цепочек и неограниченное количество "
+"шестиугольников в каждой из Ваших цепочек"
 
 #: app/templates/help.html:26
 msgid "But there are a few limitations"
@@ -165,8 +164,8 @@ msgstr "размер категории ограничен по соображе
 
 #: app/templates/help.html:32
 msgid ""
-"So if you see {red:[not here]} in context menu, you need to choose another "
-"place to create hex"
+"So if you see {red:[not here]} in context menu, you need to choose "
+"another place to create hex"
 msgstr ""
 "Поэтому, если Вы видите {red:[не здесь]} в контекстном меню, вам нужно "
 "выбрать другое место для создания шестиугольника"
@@ -186,13 +185,13 @@ msgstr "Удаление и другие действия"
 
 #: app/templates/help.html:41
 msgid ""
-"All actions with hexagon you can do using [contextmenu], when right click or "
-"open it with a long press on the *hexagon*. There are short description for "
-"each action you can do"
+"All actions with hexagon you can do using [contextmenu], when right click"
+" or open it with a long press on the *hexagon*. There are short "
+"description for each action you can do"
 msgstr ""
-"Все действия с шестиугольником Вы можете выполнить с помощью [меню], щелкнув "
-"правой кнопкой мыши или открыв его долгим нажатием на *шестиугольник*. "
-"Краткое описание для каждого действия:"
+"Все действия с шестиугольником Вы можете выполнить с помощью [меню], "
+"щелкнув правой кнопкой мыши или открыв его долгим нажатием на "
+"*шестиугольник*. Краткое описание для каждого действия:"
 
 #: app/templates/help.html:44
 msgid "The information below"
@@ -212,11 +211,11 @@ msgstr "Редактирование"
 
 #: app/templates/help.html:49
 msgid ""
-"When you click this button, a page opens with your chats and you can send "
-"the hexagon as an attachment."
+"When you click this button, a page opens with your chats and you can send"
+" the hexagon as an attachment."
 msgstr ""
-"Когда Вы нажимаете эту кнопку, открывается страница с Вашими чатами, и Вы "
-"можете отправить шестиугольник в качестве вложения."
+"Когда Вы нажимаете эту кнопку, открывается страница с Вашими чатами, и Вы"
+" можете отправить шестиугольник в качестве вложения."
 
 #: app/templates/help.html:50
 msgid "More here"
@@ -227,35 +226,36 @@ msgid ""
 "All hexs in the system have unique link and you can share some materials "
 "from Library Hexagon using this option"
 msgstr ""
-"Все шестиугольники в системе имеют уникальную ссылку, и Вы можете поделиться "
-"некоторыми материалами из Library Hexagon, скопировав её"
+"Все шестиугольники в системе имеют уникальную ссылку, и Вы можете "
+"поделиться некоторыми материалами из Library Hexagon, скопировав её"
 
 #: app/templates/help.html:55
 msgid ""
-"The administration monitors the content in the system, and if you think that "
-"some hexagon is violating anything, please let us know using this button"
+"The administration monitors the content in the system, and if you think "
+"that some hexagon is violating anything, please let us know using this "
+"button"
 msgstr ""
-"Администрация следит за контентом в системе, и если Вы считаете, что какой-"
-"то шестиугольник что-либо нарушает, пожалуйста, сообщите нам об этом с "
-"помощью этой кнопки"
+"Администрация следит за контентом в системе, и если Вы считаете, что "
+"какой-то шестиугольник что-либо нарушает, пожалуйста, сообщите нам об "
+"этом с помощью этой кнопки"
 
 #: app/templates/help.html:59
 msgid ""
-"So, about deletions. *When you delete one hexagon, the others in the chain "
-"behind it are also deleted*. This is necessary so that the structure and "
-"logic of the chains are not violated. By analogy with the creation of the "
-"first hexagon when you delete it, the entire chain along with all the "
-"content and comments in it will also be deleted"
+"So, about deletions. *When you delete one hexagon, the others in the "
+"chain behind it are also deleted*. This is necessary so that the "
+"structure and logic of the chains are not violated. By analogy with the "
+"creation of the first hexagon when you delete it, the entire chain along "
+"with all the content and comments in it will also be deleted"
 msgstr ""
 "Итак, об удалении. *Когда Вы удаляете один шестиугольник, остальные в "
 "цепочке за ним также удаляются*. Это необходимо для того, чтобы не "
 "нарушалась структура и логика цепочек. По аналогии с созданием "
-"первогошестиугольника, когда вы удаляете первый шестиугольник удаляется вся "
-"цепочка вместе со всем контентом и комментариями в ней"
+"первогошестиугольника, когда вы удаляете первый шестиугольник удаляется "
+"вся цепочка вместе со всем контентом и комментариями в ней"
 
 #: app/templates/help.html:62
 msgid "Updations and images"
-msgstr "Редактирование и изображения"
+msgstr ""
 
 #: app/templates/help.html:63
 msgid ""
@@ -263,8 +263,8 @@ msgid ""
 "image* into it, otherwise, it will be deleted after 30 minutes"
 msgstr ""
 "Когда Вы создаете шестиугольник, Вам нужно вставить в него какое-нибудь "
-"ключевое слово или изображение, в противном случае он будет удален через 30 "
-"минут"
+"ключевое слово или изображение, в противном случае он будет удален через "
+"30 минут"
 
 #: app/templates/help.html:64
 msgid "Paste text"
@@ -272,19 +272,20 @@ msgstr "Вставка текста"
 
 #: app/templates/help.html:65
 msgid ""
-"To insert text, quickly click on the hexagon twice, as you would to open a "
-"folder on your computer. You can also use the button"
+"To insert text, quickly click on the hexagon twice, as you would to open "
+"a folder on your computer. You can also use the button"
 msgstr ""
-"Чтобы вставить текст, быстро нажмите на шестиугольник дважды, как если бы Вы "
-"открывали папку на своем компьютере. Вы также можете использовать кнопку"
+"Чтобы вставить текст, быстро нажмите на шестиугольник дважды, как если бы"
+" Вы открывали папку на своем компьютере. Вы также можете использовать "
+"кнопку"
 
 #: app/templates/help.html:67
 msgid ""
-"The maximum number of words in the hexagon is determined by the admin for "
-"each category, usually this is *from 5 to 8 words*"
+"The maximum number of words in the hexagon is determined by the admin for"
+" each category, usually this is *from 5 to 8 words*"
 msgstr ""
-"Максимальное количество слов в шестиугольнике определяется администратором "
-"для каждой категории, обычно это *от 5 до 8 слов*"
+"Максимальное количество слов в шестиугольнике определяется "
+"администратором для каждой категории, обычно это *от 5 до 8 слов*"
 
 #: app/templates/help.html:70
 msgid "Drop image"
@@ -292,12 +293,12 @@ msgstr "Вставка изображения"
 
 #: app/templates/help.html:71
 msgid ""
-"Use classical drag-n-drop motions: open folder with file, then drag it into "
-"the hexagon. There are some restrictions for file"
+"Use classical drag-n-drop motions: open folder with file, then drag it "
+"into the hexagon. There are some restrictions for file"
 msgstr ""
-"Используйте классические движения перетаскивания: откройте папку с файлом, "
-"затем перетащите файл из нее в шестиугольник. Существуют некоторые "
-"ограничения для файлов"
+"Используйте классические движения перетаскивания: откройте папку с "
+"файлом, затем перетащите файл из нее в шестиугольник. Существуют "
+"некоторые ограничения для файлов"
 
 #: app/templates/help.html:73
 msgid "You need to drop *only one file*"
@@ -305,8 +306,7 @@ msgstr "Вы должны перетащить только один файл"
 
 #: app/templates/help.html:74
 msgid "We *do not support* big files, so max file size is"
-msgstr ""
-"Мы *не поддерживаем* большие файлы, поэтому максимальный размер файла - "
+msgstr "Мы *не поддерживаем* большие файлы, поэтому максимальный размер файла - "
 
 #: app/templates/help.html:75
 msgid "You can drop only file with extension from this list"
@@ -323,27 +323,28 @@ msgstr "Контент и редактор"
 #: app/templates/help.html:85
 msgid "There is your place to create arcicles or notes."
 msgstr ""
-"На этой вкладке странички Вы можете создавать статьи или заметки, которыми "
-"хотите поделиться с другими пользователями."
+"На этой вкладке странички Вы можете создавать статьи или заметки, "
+"которыми хотите поделиться с другими пользователями."
 
 #: app/templates/help.html:86
 msgid ""
-"For start typing open [About page] by clicking on the text in the hexagon "
-"and select [Content] tab (selected by default) in the opened page. Then "
-"quickly click on this page how to paste text in the hexagon, or [contextmenu]"
-" on page >"
+"For start typing open [About page] by clicking on the text in the hexagon"
+" and select [Content] tab (selected by default) in the opened page. Then "
+"quickly click on this page how to paste text in the hexagon, or "
+"[contextmenu] on page >"
 msgstr ""
 "Для начала редактирования текста откройте [страничку контента], нажав на "
-"текст в шестиугольнике, и выберите вкладку [Контент]. Затем быстро нажмите "
-"на эту страничку два раза, как для вставки текста в шестиугольник, или "
-"используйте [меню правой кнопки] на страничке >"
+"текст в шестиугольнике, и выберите вкладку [Контент]. Затем быстро "
+"нажмите на эту страничку два раза, как для вставки текста в "
+"шестиугольник, или используйте [меню правой кнопки] на страничке >"
 
 #: app/templates/help.html:88
 msgid ""
-"You will see text editor with standart rich text editor functions powered by"
+"You will see text editor with standart rich text editor functions powered"
+" by"
 msgstr ""
-"Вы увидите текстовый редактор со стандартными функциями rich text editor, "
-"основанный на"
+"Вы увидите текстовый редактор со стандартными функциями rich text editor,"
+" основанный на"
 
 #: app/templates/help.html:89
 msgid "You can edit content only in your own chains"
@@ -355,46 +356,48 @@ msgstr "Комментарии и рейтинг "
 
 #: app/templates/help.html:94
 msgid ""
-"To leave a comment, switch to the comments tab, enter your comment in the "
-"text box, and send it. Comments are shared across the entire chain, as is "
-"the rating, which can be seen in the upper-right corner"
+"To leave a comment, switch to the comments tab, enter your comment in the"
+" text box, and send it. Comments are shared across the entire chain, as "
+"is the rating, which can be seen in the upper-right corner"
 msgstr ""
-"Чтобы оставить комментарий, перейдите на вкладку [комментарии], введите свой "
-"комментарий в текстовое поле и отправьте его. Комментарии относятся ко всей "
-"цепочке, как и рейтинг, который можно увидеть в правом верхнем углу"
+"Чтобы оставить комментарий, перейдите на вкладку [комментарии], введите "
+"свой комментарий в текстовое поле и отправьте его. Комментарии относятся "
+"ко всей цепочке, как и рейтинг, который можно увидеть в правом верхнем "
+"углу"
 
 #: app/templates/help.html:95
 msgid ""
-"You can reply to any comment by clicking on the [three dots] in the upper-"
-"right corner of the comment > [reply] or write \"[reply /some_username/]\" - "
-"and your comment will be send to the latest comment by user with "
-"/some_username/"
+"You can reply to any comment by clicking on the [three dots] in the "
+"upper-right corner of the comment > [reply] or write \"[reply "
+"/some_username/]\" - and your comment will be send to the latest comment "
+"by user with /some_username/"
 msgstr ""
 "Вы можете ответить на любой комментарий, нажав на [три точки] в правом "
-"верхнем углу комментария > [ответить] или написать \"[reply /some_username/]"
-"\", тогда Ваш комментарий будет отправлен ответом на последний комментарий "
-"пользователя с именем /some_username/"
+"верхнем углу комментария > [ответить] или написать \"[reply "
+"/some_username/]\", тогда Ваш комментарий будет отправлен ответом на "
+"последний комментарий пользователя с именем /some_username/"
 
 #: app/templates/help.html:98
 msgid ""
 "*The chain rating* is a number determined by users, indicating the "
-"usefulness and literacy of information in the chain. Each user can either "
-"add one to the overall rating, or take it away using the [&nbsp+&nbsp] and "
-"[&nbsp-&nbsp] buttons"
+"usefulness and literacy of information in the chain. Each user can either"
+" add one to the overall rating, or take it away using the [&nbsp+&nbsp] "
+"and [&nbsp-&nbsp] buttons"
 msgstr ""
-"*Рейтинг цепочки* - это число, определяемое пользователями, указывающее на "
-"полезность и грамотность информации в цепочке. Каждый пользователь может "
-"либо прибавить единицу в общий рейтинг, либо отнять с помощью кнопок "
-"[&nbsp+&nbsp] и [&nbsp-&nbsp]"
+"*Рейтинг цепочки* - это число, определяемое пользователями, указывающее "
+"на полезность и грамотность информации в цепочке. Каждый пользователь "
+"может либо прибавить единицу в общий рейтинг, либо отнять с помощью "
+"кнопок [&nbsp+&nbsp] и [&nbsp-&nbsp]"
 
 #: app/templates/help.html:99
 msgid ""
-"In addition to the chains, users also have a rating, and using [dropmenu] "
-"(opens if you click to your name in the header) > [User list] you can see "
-"top users by rating"
+"In addition to the chains, users also have a rating, and using [dropmenu]"
+" (opens if you click to your name in the header) > [User list] you can "
+"see top users by rating"
 msgstr ""
-"У пользователей также как и у цепочек есть рейтинг, и Вы можете посмотреть "
-"топ пользователей по рейтингу используя [навигационное меню] > [Пользователи]"
+"У пользователей также как и у цепочек есть рейтинг, и Вы можете "
+"посмотреть топ пользователей по рейтингу используя [навигационное меню] >"
+" [Пользователи]"
 
 #: app/templates/help.html:102
 msgid "Community rules"
@@ -409,13 +412,13 @@ msgid ""
 "Administration can delete your account or ban your IP-adress, so we "
 "recomended to follow our rules"
 msgstr ""
-"Администрация может удалить Ваш аккаунт или заблокировать IP-адрес, поэтому "
-"мы рекомендуем следовать нашим правилам"
+"Администрация может удалить Ваш аккаунт или заблокировать IP-адрес, "
+"поэтому мы рекомендуем следовать нашим правилам"
 
 #: app/templates/help.html:107
 msgid ""
-"If you think that any hexagon, chain or comment break the rules, report it "
-"to one of the admins in the chat or via"
+"If you think that any hexagon, chain or comment break the rules, report "
+"it to one of the admins in the chat or via"
 msgstr ""
 "Если Вы считаете, что какой-либо шестиугольник, цепочка или комментарий "
 "нарушают правила, сообщите об этом одному из администраторов в чате или "
@@ -423,19 +426,20 @@ msgstr ""
 
 #: app/templates/help.html:111
 msgid ""
-"Do not use profanity or offensive words in relation to other users. *Stay "
-"cultured people*"
+"Do not use profanity or offensive words in relation to other users. *Stay"
+" cultured people*"
 msgstr ""
-"Не используйте ненормативную лексику и не оскорбляйте других пользователяей. "
-"*Оставайтесь культурными людьми*"
+"Не используйте ненормативную лексику и не оскорбляйте других "
+"пользователяей. *Оставайтесь культурными людьми*"
 
 #: app/templates/help.html:112
 msgid ""
 "Make sure that the content you post in Library Hexagon belongs to you or "
 "does not infringe on other people's *intellectual property rights*"
 msgstr ""
-"Убедитесь, что контент, который Вы размещаете в Library Hexagon, принадлежит "
-"вам или не нарушает права других людей на *интеллектуальную собственность*"
+"Убедитесь, что контент, который Вы размещаете в Library Hexagon, "
+"принадлежит вам или не нарушает права других людей на *интеллектуальную "
+"собственность*"
 
 #: app/templates/help.html:113
 msgid "The Library Hexagon prohibits the publication of materials containing"
@@ -447,7 +451,7 @@ msgstr "Деликатный 18+ контент"
 
 #: app/templates/help.html:116
 msgid "Violent or dangerous content"
-msgstr "Контент, содержащий сцены или описание насилия"
+msgstr ""
 
 #: app/templates/help.html:117
 msgid "Promotion of smoking or alcohol"
@@ -465,7 +469,7 @@ msgstr ""
 "*Не спамьте* другим пользователям в чатах. Если Вам кто-то спамит, "
 "пожалуйста, сообщите нам об этом"
 
-#: app/templates/help.html:127 app/templates/help.html:215 
+#: app/templates/help.html:127 app/templates/help.html:215
 #: app/templates/layout.html:16
 msgid "Messages"
 msgstr "Сообщения"
@@ -475,8 +479,7 @@ msgid "Chats"
 msgstr "Чаты"
 
 #: app/templates/help.html:130
-msgid ""
-"In the Library Hexagon you can communicate internally using inbox messages"
+msgid "In the Library Hexagon you can communicate internally using inbox messages"
 msgstr ""
 "В Library Hexagon существует встроенная система сообщений, которая "
 "предназначена для обсуждения контента системы"
@@ -491,14 +494,15 @@ msgstr "создать чат с несколькими пользователя
 
 #: app/templates/help.html:135
 msgid ""
-"In the [dropmenu], click messages and when you see the chat panel in front "
-"of you, click [add chat]. In the modal window that appears, enter the name "
-"of the chat and the members separated by commas (you can add them later)"
+"In the [dropmenu], click messages and when you see the chat panel in "
+"front of you, click [add chat]. In the modal window that appears, enter "
+"the name of the chat and the members separated by commas (you can add "
+"them later)"
 msgstr ""
-"В [навигационном меню] выберите пункт [Сообщения], и когда Вы увидите панель "
-"чатов, нажмите кнопку [Добавить&nbdp;чат]. В появившемся модальном окне "
-"введите имя чата и список участников через запятую (Вы сможете изменить его "
-"позже)"
+"В [навигационном меню] выберите пункт [Сообщения], и когда Вы увидите "
+"панель чатов, нажмите кнопку [Добавить&nbdp;чат]. В появившемся модальном"
+" окне введите имя чата и список участников через запятую (Вы сможете "
+"изменить его позже)"
 
 #: app/templates/help.html:138
 msgid "Or write to one user directly and start a *private chat*"
@@ -507,38 +511,40 @@ msgstr "Или напишите пользователю напрямую и н�
 #: app/templates/help.html:139
 msgid ""
 "On the page of any user (you can get through [dropmenu] > [User list]), "
-"click open chat, your messages will open, and if you do not have a chat with "
-"this user yet, it will be automatically created"
+"click open chat, your messages will open, and if you do not have a chat "
+"with this user yet, it will be automatically created"
 msgstr ""
-"на странице любого пользователя (Вы можете перейти через [навигационное меню]"
-" > [Пользователи]) нажмите [открыть чат], откроется страница с Вашими "
-"сообщениями, и если у Вас еще нет чата с этим пользователем, он будет создан "
-"автоматически"
+"на странице любого пользователя (Вы можете перейти через [навигационное "
+"меню] > [Пользователи]) нажмите [открыть чат], откроется страница с "
+"Вашими сообщениями, и если у Вас еще нет чата с этим пользователем, он "
+"будет создан автоматически"
 
 #: app/templates/help.html:143
 msgid ""
-"Chats are not designed to transmit important or secret information, so be "
-"careful and choose other messengers for confidential communication"
+"Chats are not designed to transmit important or secret information, so be"
+" careful and choose other messengers for confidential communication"
 msgstr ""
-"Чаты не предназначены для передачи важной или секретной информации, поэтому "
-"будьте осторожны и выбирайте другие мессенджеры для конфиденциального общения"
+"Чаты не предназначены для передачи важной или секретной информации, "
+"поэтому будьте осторожны и выбирайте другие мессенджеры для "
+"конфиденциального общения"
 
 #: app/templates/help.html:146
 msgid ""
-"You can *delete* any chat that you have created at any time, but you must "
-"remember that all messages in this case will be permanently lost"
+"You can *delete* any chat that you have created at any time, but you must"
+" remember that all messages in this case will be permanently lost"
 msgstr ""
 "Вы можете *удалить* любой чат, который Вы создали в любое время, но Вы "
-"должны помнить, что все сообщения в этом случае будут безвозвратно потеряны"
+"должны помнить, что все сообщения в этом случае будут безвозвратно "
+"потеряны"
 
 #: app/templates/help.html:150
 msgid "Members and chat control"
-msgstr "Управление участниками чата"
+msgstr ""
 
 #: app/templates/help.html:151
 msgid ""
-"If you are a chat creator, you can manage its members and settings. You can "
-"also always quit from any chat."
+"If you are a chat creator, you can manage its members and settings. You "
+"can also always quit from any chat."
 msgstr ""
 "Если Вы являетесь создателем чата, Вы можете управлять его участниками и "
 "настройками. Вы также всегда можете выйти из любого чата."
@@ -550,8 +556,8 @@ msgstr "{red:Запомните!} Если Вы покинете чат, Вы н
 #: app/templates/help.html:155
 msgid ""
 "To *add or delete* members in chat you need to open caht info panel by "
-"clicking the [&nbspi&nbsp] button in right corner of the chat. In this panel,"
-" you will see a list of participants, and if you are the chat admin"
+"clicking the [&nbspi&nbsp] button in right corner of the chat. In this "
+"panel, you will see a list of participants, and if you are the chat admin"
 msgstr ""
 "Чтобы *добавить или удалить* участника в чата, Вам нужно открыть "
 "информационную панель, нажав кнопку [&nbspi&nbsp] в правом углу чата. На "
@@ -561,21 +567,22 @@ msgstr ""
 #: app/templates/help.html:157
 msgid "you can *remove* any member by using the [cross] next to the name"
 msgstr ""
-"Вы можете *удалить* любого участника, используя [крестик] рядом с его именем"
+"Вы можете *удалить* любого участника, используя [крестик] рядом с его "
+"именем"
 
 #: app/templates/help.html:158
 msgid ""
-"*add* a member by clicking on the [three dots] in the upper left corner of "
-"the panel"
-msgstr ""
-"*добавить* участника, нажав на [три точки] в правом верхнем углу панели"
+"*add* a member by clicking on the [three dots] in the upper left corner "
+"of the panel"
+msgstr "*добавить* участника, нажав на [три точки] в правом верхнем углу панели"
 
 #: app/templates/help.html:159
 msgid ""
-"and *change* the role of the member by clicking on the {role:role indicator} "
-"to the left of the username"
+"and *change* the role of the member by clicking on the {role:role "
+"indicator} to the left of the username"
 msgstr ""
-"и *изменить* роль участника, нажав на {role:роль} слева от имени пользователя"
+"и *изменить* роль участника, нажав на {role:роль} слева от имени "
+"пользователя"
 
 #: app/templates/help.html:164
 msgid "Messages and entities"
@@ -583,12 +590,12 @@ msgstr "Сообщения и отправка сущностей  "
 
 #: app/templates/help.html:165
 msgid ""
-"In addition to the plain text, chat messages can display various entities or "
-"mentions of users using a special syntax or"
+"In addition to the plain text, chat messages can display various entities"
+" or mentions of users using a special syntax or"
 msgstr ""
-"В дополнение к обычному тексту, сообщения чата могут отображать различные "
-"сущности или упоминания пользователей. Вы можете вставить упоминание или "
-"сущность в сообщение, используя специальный синтаксис или кнопку"
+"В дополнение к обычному тексту, сообщения чата могут отображать различные"
+" сущности или упоминания пользователей. Вы можете вставить упоминание или"
+" сущность в сообщение, используя специальный синтаксис или кнопку"
 
 #: app/templates/help.html:166
 msgid "button"
@@ -597,11 +604,11 @@ msgstr " "
 #: app/templates/help.html:167
 msgid ""
 "About *deleting* messages: You can delete a message by clicking on the "
-"[cross] in the upper-right corner of the message. If you are a member, you "
-"can only delete your messages, the admin can delete any"
+"[cross] in the upper-right corner of the message. If you are a member, "
+"you can only delete your messages, the admin can delete any"
 msgstr ""
-"Об *удалении* сообщений: Вы можете удалить сообщение, нажав на [крестик] в "
-"правом верхнем углу сообщения. Если Вы являетесь участником, Вы можете "
+"Об *удалении* сообщений: Вы можете удалить сообщение, нажав на [крестик] "
+"в правом верхнем углу сообщения. Если Вы являетесь участником, Вы можете "
 "удалять только свои сообщения, администратор чата может удалять любые"
 
 #: app/templates/help.html:169
@@ -610,7 +617,8 @@ msgstr "Упоминания пользователей"
 
 #: app/templates/help.html:170
 msgid ""
-"You can mention any Library Hexagon user using the standard mentions syntax"
+"You can mention any Library Hexagon user using the standard mentions "
+"syntax"
 msgstr ""
 "Вы можете упомянуть любого пользователя Library Hexagon, используя "
 "стандартный синтаксис упоминаний"
@@ -621,9 +629,9 @@ msgstr "Шестиугольники или цепочки"
 
 #: app/templates/help.html:175
 msgid ""
-"When you need to discus any hex or chain from Library Hexagon, you can use "
-"such syntax (/some_id/ must be number, /attachment_number/ is serial number "
-"of the attachment), or use "
+"When you need to discus any hex or chain from Library Hexagon, you can "
+"use such syntax (/some_id/ must be number, /attachment_number/ is serial "
+"number of the attachment), or use "
 msgstr ""
 "Когда Вам нужно обсудить какой-либо шестиугольник или цепочку из Library "
 "Hexagon, Вы можете использовать такой синтаксис в сообщении (/some_id/ "
@@ -686,7 +694,7 @@ msgstr "Профиль"
 msgid "Logout"
 msgstr "Выйти"
 
-#: app/templates/layout.html:221 app/templates/login.html:4 
+#: app/templates/layout.html:221 app/templates/login.html:4
 #: app/templates/noedite-field.html:26
 msgid "Login"
 msgstr "Вход в систему"
@@ -746,3 +754,4 @@ msgstr "Скрыть"
 #: app/templates/users.html:51
 msgid "me in list"
 msgstr "меня в этом списке"
+

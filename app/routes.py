@@ -258,7 +258,7 @@ def users_all():
 
 @app.route('/users/<id>')
 def user(id):
-    owner = User.query.get(id)
+    owner = User.query.get_or_404(id)
     allowed_change = 0
 
     user = None
@@ -669,9 +669,6 @@ def get_hexs(categ_name):
 
     return json.dumps({"body": hexs_to_send, "userId": userId, "userRole": userRole})
 
-@app.route('/hexs/<id>/about')
-def get_hex_about(id): 
-    return Hexagon.query.get_or_404(id).about if Hexagon.query.get_or_404(id).about else ''
 
 @app.route('/hexs/<int:id>')
 def get_hex(id):
@@ -684,6 +681,9 @@ def get_hex_json(id):
     
     return json.dumps(prepare_hex_to_send(hex))
 
+@app.route('/hexs/<id>/about')
+def get_hex_about(id): 
+    return Hexagon.query.get_or_404(id).about if Hexagon.query.get_or_404(id).about else ''
 @app.route('/hexs/<id>/about/change', methods=['POST'])
 @login_required
 def change_hex_about(id):
@@ -945,7 +945,7 @@ def delete_comment(id):
     return json.dumps({'success': True})
 @app.route('/chains/<id>/rating')
 def get_rating(id):
-    rating = db.session.execute(select([func.sum(RatingChange.change)]).where(RatingChange.chain_id == id)).first().values()[0]
+    rating = db.session.execute(select([func.sum(RatingChange.change)]).where(RatingChange.chain_id == id)).scalar()
     allowed_change = 0
 
     if current_user.is_authenticated and current_user.id:
@@ -973,7 +973,7 @@ def change_rating(id):
     
     db.session.commit()
     
-    rating = db.session.execute(select([func.sum(RatingChange.change)]).where(RatingChange.chain_id == id)).first().values()[0]
+    rating = db.session.execute(select([func.sum(RatingChange.change)]).where(RatingChange.chain_id == id)).scalar()
 
     return json.dumps({'success': True, 'num': rating, 'change': change_num})
 
@@ -1079,3 +1079,12 @@ def delete_all_complaints():
     db.session.commit()
 
     return redirect(url_for('get_complaints'))
+
+
+
+@app.route('/help')
+def help():
+    user = None
+    if current_user and current_user.is_authenticated:
+        user = current_user
+    return render_template('help.html', user=user, title='Help')

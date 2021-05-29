@@ -137,11 +137,26 @@ window.addEventListener('load', async () => {
             
                     if(hexagon.classList.contains('hexagon-active')) return;
                     hexagon.classList.add('hexagon-active');
+
+                    const saveChanges = hexAboutElem => {
+                        if(!hexAboutElem || !hexAboutElem.editor) return;
+
+                        const editor = hexagonAbout.editor;
+
+                        hexagon.about = editor.getContents();
+
+                        fetch(`/hexs/${hexagon.uuid}/about/change`, {
+                            method: 'POST',
+                            body: JSON.stringify(hexagon.about)
+                        })
+                        .then(res => res.ok && res)
+                        .then(res => res || showModal('An error occured while uploading your changes', translate('ptl')))
+                    }
             
-                    const clearAbouts = evt => {
-                        if(hexagon.isContextmenu) return;
+                    const clearAbouts = () => {
+                        if(hexagon.isContextmenu || document.querySelectorAll('.ask').length) return;
                         document.querySelectorAll('.hexagon-about').forEach(elem => {
-                            elem.parentElement.about = elem.querySelector('.hexagon-about-content').innerHTML;
+                            saveChanges(elem);
                             elem.remove();
                         });
                         document.removeEventListener('mousedown', clearAbouts);
@@ -169,6 +184,9 @@ window.addEventListener('load', async () => {
                             </svg>
                         </div>
                     </div>
+                    <div class="hexagon-about-content">
+                        <div class="hexagon-about-editor"></div>
+                    </div>
                     <div class="hexagon-about-images" style="display: none"></div>
                     <div class="hexagon-about-comments" style="display: none">
                         <div class="hexagon-about-comments-cont"></div>
@@ -187,10 +205,64 @@ window.addEventListener('load', async () => {
                             hexagonAbout.querySelector(`.hexagon-about-${activeAboutTab}`).style.display = '';
                         }
                     }
-                    
-                    const content = document.createElement('div');
-                    content.className = 'hexagon-about-content';
-                    content.style.display = 'none';
+
+                    const content = () => hexagonAbout.querySelector('.hexagon-about-content');
+
+                    const setUpEditor = () => {
+                        let editorOptions = {
+                            theme: 'snow',
+                            debug: false, 
+                            modules: {
+                                toolbar: false
+                            },
+                            readOnly: true,
+                        };
+                        if(hexagon.userId == user.userId || user.userRole == 2){
+                            editorOptions = {
+                                readOnly: false,
+                                debug: 'warn',
+                                theme: 'snow',
+                                modules: {
+                                    toolbar: [
+                                        ['bold', 'italic', 'underline'],
+                                        
+                                        [{ 'header': 1 }, { 'header': 2 }],
+                                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+
+                                        ['link'],
+
+                                        ['clean']
+                                    ]
+                                }
+                            }
+                        }
+                        
+                        const editor = new Quill('.hexagon-about-editor', editorOptions);
+                        
+                        if(typeof(hexagon.about) == 'string'){
+                            if(hexagon.about[0] == '{' || hexagon.about[0] == '['){
+
+                                hexagon.about = JSON.parse(hexagon.about || '{}');
+                            } 
+                            else{
+
+                            }
+                        }
+                        
+                        editor.setContents(hexagon.about);
+                        editor.disable();
+                        
+                        editor.on('selection-change', (range, oldRange) => {
+                            if(range === null && oldRange !== null) {
+                                // hexagonAbout.dispatchEvent(new Event('editorBlur'));
+                                saveChanges(hexagonAbout);
+                                editor.disable();
+                            }
+                        });
+
+                        hexagonAbout.editor = editor;
+                    }
+
                     
                     const createImageCont = (imgObj) => {
                         if(!imgObj || !imgObj.url) return;
@@ -429,6 +501,7 @@ window.addEventListener('load', async () => {
                                 console.log(err);
                             }
                         });
+                        
                         socket.on('deleteComment' + hexagon.chainId, (id) => {
                             try{
                                 hexagonAbout.querySelector('#comment' + id).remove();
@@ -438,7 +511,7 @@ window.addEventListener('load', async () => {
                         });
                     }
             
-                    if(!hexagon.about){
+                    if(!hexagon.about && typeof(hexagon.about) != 'string'){
                         const loadAbout = () => {
                             hexagonAbout.innerHTML += `<div class="loading about-loading">
                             <svg class='loading-svg about-loading-svg' version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
@@ -469,25 +542,25 @@ window.addEventListener('load', async () => {
                               </circle>
                             </svg>
                             </div>`;
-                            fetch(`/hexs/${hexagon.uuid}/about`).then(aboutRes => {
-                                if(aboutRes.ok){
-                                    aboutRes.text().then(async aboutContent => {
-                                        hexagonAbout.querySelectorAll('.hexagon-about-content').forEach(elem => elem.remove());
-                                        content.innerHTML = hexagon.about = aboutContent;
-                                        hexagonAbout.append(content);
-                                        
-                                        selectActiveTab();
-            
-                                        const loading = hexagonAbout.querySelector('.loading');
-                                        loading.style.opacity = 0;
-                                        
-                                        loading.ontransitionend = () => {
-                                            loading.remove();
-                                            loading.isDeleted = true;
-                                        }
-                                        setTimeout(() => {if(!loading.isDeleted) loading.remove()}, 1000)
-                                    });
+                            fetch(`/hexs/${hexagon.uuid}/about`)
+                            .then(res => res.ok && res.text())
+                            .then(aboutContent => {
+                                if(aboutContent === false) return;
+
+                                hexagon.about = aboutContent;
+
+                                setUpEditor();
+
+                                selectActiveTab();
+    
+                                const loading = hexagonAbout.querySelector('.loading');
+                                loading.style.opacity = 0;
+                                
+                                loading.ontransitionend = () => {
+                                    loading.remove();
+                                    loading.isDeleted = true;
                                 }
+                                setTimeout(() => {if(!loading.isDeleted) loading.remove()}, 1000)
                             });
                         }
                         loadAbout();
@@ -497,9 +570,11 @@ window.addEventListener('load', async () => {
                             loadAbout();
                         });
                     }else{
-                        content.innerHTML = hexagon.about;
-                        hexagonAbout.append(content);
                         selectActiveTab();
+                        
+                        setTimeout(() => {
+                            setUpEditor();
+                        },)
                     }
                     
                     fetch(`/chains/${hexagon.chainId}/rating`).then(async rating =>{
@@ -548,70 +623,23 @@ window.addEventListener('load', async () => {
                         hexagonAbout.ondragleave = () => {
                             hexagonAbout.classList.remove('hexagon-about-drag');
                         }
-            
-                        
-                        const clearStyles = node => {
-                            if(node.style){
-                                node.style.cssText = '';
-            
-                                if(node.hasChildNodes()){
-                                    Array.from(node.childNodes).forEach(clearStyles);
-                                }
-                            }
-                        }
-                        const insertObserver = new MutationObserver((mList) => {
-                            mList.forEach(mutation => {
-                                mutation.addedNodes.forEach(node => {
-                                    clearStyles(node);
-            
-                                    if(node.nodeName == 'IMG') node.remove();
-                                });
-                            });
-                        });
-                        insertObserver.observe(content, {
-                            childList: true,
-                            subtree: true
-                        });
-                        content.onfocus = () => {
-                            document.execCommand("defaultParagraphSeparator", false, "div");
-                            content.onblur = () => {
-                                content.setAttribute('contenteditable','false');
-                                hexagon.about = content.innerHTML;
-            
-                                fetch(`/hexs/${hexagon.uuid}/about/change`, {
-                                    method: 'POST',
-                                    body: hexagon.about
-                                });
-                            }
-                        }
-                        
-                        content.addEventListener('dblclick', evt => {
+
+                        content().addEventListener('dblclick', evt => {
                             evt.preventDefault();
                             evt.stopPropagation();
             
-                            const range = document.createRange();
-                            range.selectNodeContents(content);
-                            range.collapse(true);
-                            const sel = window.getSelection();
-                            sel.removeAllRanges();
-                            sel.addRange(range);
-            
-                            content.setAttribute('contenteditable','true');
-                            
-                            content.focus();
+                            if(hexagonAbout.editor){
+                                hexagonAbout.editor.enable();
+                                hexagonAbout.editor.focus();
+                            } 
                         }, {passive: false});
-            
-                        content.onkeypress = evt => {
-                            if(evt.key == 'enter' && evt.metaKey || evt.ctrlKey){
-                                content.blur();
-                            }
-                        } 
                     }
             
                     const deleteObserver = new MutationObserver((mList) => {
                         mList.forEach(mutation => {
                             if(Array.from(mutation.removedNodes).includes(hexagonAbout)){
                                 hexagon.classList.remove('hexagon-active');
+                                saveChanges(hexagonAbout);
                             }
                         });
                     });
@@ -847,7 +875,7 @@ window.addEventListener('load', async () => {
                     }
                 }
             
-                hexagon.about = '';
+                hexagon.about = null;
                 hexagon.imgs = [];
             }
             
@@ -1059,7 +1087,7 @@ window.addEventListener('load', async () => {
             const clearContextMenus = () => {
                 document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});
             }
-            
+
             if(!isTouchDevice()){
                 const SLIDE_SPEED = 1;
                 const MIN_CHANGE = 20;

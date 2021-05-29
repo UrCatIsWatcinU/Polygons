@@ -8,6 +8,7 @@ translate.add({
         edit: 'Edit',
         send: 'Send to chat',
         copy: 'Copy link',
+        move: 'Move',
         copyMsgs: {
             s: 'Copied',
             uns: 'Was not possible to copy the link'
@@ -93,12 +94,14 @@ translate.add({
         delete: 'Удалить',
         edit: 'Изменить',
         send: 'Отправить',
+        move: 'Переместить',
         copy: 'Ссылка',
         complain: 'Пожаловаться',
         user: 'Автор',
         chain: 'Цепочка',
         uid: 'Uid',
-        date: 'Дата'
+        date: 'Дата',
+        not: 'Не здесь',
     },
     defaults: {
         askTitle: 'Вы уверены?',
@@ -382,13 +385,13 @@ function createDropMenu(dropMenu = null, userCont = null, attachElem = null){
     }
 }
 
+const MAX_SIZE = 3000000;
+const EXTENTIONS = ['png', 'jpg', 'jpeg', 'gif'];
 const uploadFile = (files, url, successCB, evt=null) => {
     if(!window.FileReader){
         showModal('Cannot upload file', 'Your browser don\'t support files uploads');
         return;
     }
-    const MAX_SIZE = 3000000;
-    const EXTENTIONS = ['png', 'jpg', 'jpeg', 'gif'];
     
     if(evt){    
         evt.preventDefault();

@@ -69,6 +69,8 @@
             <button class="new-categ-btn" onclick="window.location.href = `{{ url_for('bans') }}`">Ip bans</button>
             <button class="complaints" onclick="window.location.href = `{{ url_for('get_complaints') }}`">Complaints</button>
         {% endif %}
+    {% else %}
+        <button class="help" onclick="window.location.href = `{{ url_for('help') }}`">{{ _('Help') }}</button>
     {% endif %}
 {% endblock %}
 

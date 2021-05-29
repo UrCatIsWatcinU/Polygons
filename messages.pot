@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-05-27 16:31+0300\n"
+"POT-Creation-Date: 2021-05-28 19:37+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -41,8 +41,9 @@ msgstr ""
 msgid "Repeat password"
 msgstr ""
 
-#: app/forms.py:19 app/templates/layout.html:220
-#: app/templates/noedite-field.html:27 app/templates/registration.html:8
+#: app/forms.py:19 app/templates/help.html:50 app/templates/help.html:56
+#: app/templates/layout.html:224 app/templates/noedite-field.html:27
+#: app/templates/registration.html:8
 msgid "Register"
 msgstr ""
 
@@ -54,49 +55,517 @@ msgstr ""
 msgid "Email is used"
 msgstr ""
 
-#: app/routes.py:33
+#: app/routes.py:41
 msgid "If you write URL manually, check if it is correct"
 msgstr ""
 
-#: app/routes.py:41
+#: app/routes.py:49
 msgid "Some troubles happend on server. Please send message to admin"
 msgstr ""
 
-#: app/routes.py:363 app/routes.py:415 app/routes.py:466
+#: app/routes.py:233
+msgid "Verification required"
+msgstr ""
+
+#: app/routes.py:233
+msgid ""
+"An email with a link to confirm your email address has been sent to your "
+"email address. If you have not received the email, please contact the "
+"site administrator."
+msgstr ""
+
+#: app/routes.py:431 app/routes.py:483 app/routes.py:534
 msgid "Access denied"
 msgstr ""
 
-#: app/routes.py:408
+#: app/routes.py:476
 msgid "No such user"
 msgstr ""
 
-#: app/routes.py:411
+#: app/routes.py:479
 msgid "This user alredy is a member of this chat"
 msgstr ""
 
-#: app/routes.py:978
+#: app/routes.py:1046
 msgid "No such hexagon"
 msgstr ""
 
-#: app/templates/error-page.html:19 app/templates/noedite-field.html:25
+#: app/templates/error-page.html:20 app/templates/noedite-field.html:25
 msgid "Back"
 msgstr ""
 
-#: app/templates/error-page.html:21
+#: app/templates/error-page.html:22
 msgid "Open chat with admin"
 msgstr ""
 
-#: app/templates/field.html:25 app/templates/index.html:45
+#: app/templates/field.html:27 app/templates/index.html:45
 #: app/templates/noedite-field.html:23
 msgid "Search"
 msgstr ""
 
-#: app/templates/field.html:27
+#: app/templates/field.html:29 app/templates/help.html:188
+#: app/templates/help.html:232
 msgid "Settings"
 msgstr ""
 
-#: app/templates/layout.html:3
+#: app/templates/help.html:10 app/templates/layout.html:3
 msgid "Main"
+msgstr ""
+
+#: app/templates/help.html:18 app/templates/help.html:195
+msgid "Hexagons"
+msgstr ""
+
+#: app/templates/help.html:20
+msgid "Creation"
+msgstr ""
+
+#: app/templates/help.html:21
+msgid ""
+"To create *hexagon* use [contextmenu] > [create] (in desktop you can open"
+" it with right mouse button, on touch devices with long tap).Only "
+"registered users can create hexagons and make other changes to the "
+"system, which are described below"
+msgstr ""
+
+#: app/templates/help.html:24
+msgid ""
+"*Chains* are built from hexagons, and when you create a hexagon "
+"separately from any chain, it creates a new chain. You can create an "
+"unlimited number of chains and an unlimited number of hexagons in each of"
+" your chains"
+msgstr ""
+
+#: app/templates/help.html:26
+msgid "But there are a few limitations"
+msgstr ""
+
+#: app/templates/help.html:28
+msgid "you can't continue other people's chains"
+msgstr ""
+
+#: app/templates/help.html:29
+msgid "the chains must not intersect"
+msgstr ""
+
+#: app/templates/help.html:30
+msgid "the category size is limited for performance reasons"
+msgstr ""
+
+#: app/templates/help.html:32
+msgid ""
+"So if you see {red:[not here]} in context menu, you need to choose "
+"another place to create hex"
+msgstr ""
+
+#: app/templates/help.html:35
+msgid ""
+"Admins can continue other people's chains and do other actions with "
+"artefacts in the system like owners on this artefacts"
+msgstr ""
+
+#: app/templates/help.html:39
+msgid "Deletion and other actions"
+msgstr ""
+
+#: app/templates/help.html:41
+msgid ""
+"All actions with hexagon you can do using [contextmenu], when right click"
+" or open it with a long press on the *hexagon*. There are short "
+"description for each action you can do"
+msgstr ""
+
+#: app/templates/help.html:44
+msgid "The information below"
+msgstr ""
+
+#: app/templates/help.html:44 app/templates/help.html:47
+msgid "Only creator"
+msgstr ""
+
+#: app/templates/help.html:46
+msgid "You can find help in"
+msgstr ""
+
+#: app/templates/help.html:47 app/templates/help.html:199
+msgid "Updations"
+msgstr ""
+
+#: app/templates/help.html:49
+msgid ""
+"When you click this button, a page opens with your chats and you can send"
+" the hexagon as an attachment."
+msgstr ""
+
+#: app/templates/help.html:50
+msgid "More here"
+msgstr ""
+
+#: app/templates/help.html:52
+msgid ""
+"All hexs in the system have unique link and you can share some materials "
+"from Library Hexagon using this option"
+msgstr ""
+
+#: app/templates/help.html:55
+msgid ""
+"The administration monitors the content in the system, and if you think "
+"that some hexagon is violating anything, please let us know using this "
+"button"
+msgstr ""
+
+#: app/templates/help.html:59
+msgid ""
+"So, about deletions. *When you delete one hexagon, the others in the "
+"chain behind it are also deleted*. This is necessary so that the "
+"structure and logic of the chains are not violated. By analogy with the "
+"creation of the first hexagon when you delete it, the entire chain along "
+"with all the content and comments in it will also be deleted"
+msgstr ""
+
+#: app/templates/help.html:62
+msgid "Updations and images"
+msgstr ""
+
+#: app/templates/help.html:63
+msgid ""
+"When you create the hexagon, you need to paste some *key word* or *drop "
+"image* into it, otherwise, it will be deleted after 30 minutes"
+msgstr ""
+
+#: app/templates/help.html:64
+msgid "Paste text"
+msgstr ""
+
+#: app/templates/help.html:65
+msgid ""
+"To insert text, quickly click on the hexagon twice, as you would to open "
+"a folder on your computer. You can also use the button"
+msgstr ""
+
+#: app/templates/help.html:67
+msgid ""
+"The maximum number of words in the hexagon is determined by the admin for"
+" each category, usually this is *from 5 to 8 words*"
+msgstr ""
+
+#: app/templates/help.html:70
+msgid "Drop image"
+msgstr ""
+
+#: app/templates/help.html:71
+msgid ""
+"Use classical drag-n-drop motions: open folder with file, then drag it "
+"into the hexagon. There are some restrictions for file"
+msgstr ""
+
+#: app/templates/help.html:73
+msgid "You need to drop *only one file*"
+msgstr ""
+
+#: app/templates/help.html:74
+msgid "We *do not support* big files, so max file size is"
+msgstr ""
+
+#: app/templates/help.html:75
+msgid "You can drop only file with extension from this list"
+msgstr ""
+
+#: app/templates/help.html:81
+msgid "About pages"
+msgstr ""
+
+#: app/templates/help.html:83
+msgid "Content and editor"
+msgstr ""
+
+#: app/templates/help.html:85
+msgid "There is your place to create arcicles or notes."
+msgstr ""
+
+#: app/templates/help.html:86
+msgid ""
+"For start typing open [About page] by clicking on the text in the hexagon"
+" and select [Content] tab (selected by default) in the opened page. Then "
+"quickly click on this page how to paste text in the hexagon, or "
+"[contextmenu] on page >"
+msgstr ""
+
+#: app/templates/help.html:88
+msgid ""
+"You will see text editor with standart rich text editor functions powered"
+" by"
+msgstr ""
+
+#: app/templates/help.html:89
+msgid "You can edit content only in your own chains"
+msgstr ""
+
+#: app/templates/help.html:93
+msgid "Comments and rating"
+msgstr ""
+
+#: app/templates/help.html:94
+msgid ""
+"To leave a comment, switch to the comments tab, enter your comment in the"
+" text box, and send it. Comments are shared across the entire chain, as "
+"is the rating, which can be seen in the upper-right corner"
+msgstr ""
+
+#: app/templates/help.html:95
+msgid ""
+"You can reply to any comment by clicking on the [three dots] in the "
+"upper-right corner of the comment > [reply] or write \"[reply "
+"/some_username/]\" - and your comment will be send to the latest comment "
+"by user with /some_username/"
+msgstr ""
+
+#: app/templates/help.html:98
+msgid ""
+"*The chain rating* is a number determined by users, indicating the "
+"usefulness and literacy of information in the chain. Each user can either"
+" add one to the overall rating, or take it away using the [&nbsp+&nbsp] "
+"and [&nbsp-&nbsp] buttons"
+msgstr ""
+
+#: app/templates/help.html:99
+msgid ""
+"In addition to the chains, users also have a rating, and using [dropmenu]"
+" (opens if you click to your name in the header) > [User list] you can "
+"see top users by rating"
+msgstr ""
+
+#: app/templates/help.html:102
+msgid "Community rules"
+msgstr ""
+
+#: app/templates/help.html:104
+msgid "If you do not comply with our rules, you may be banned"
+msgstr ""
+
+#: app/templates/help.html:105
+msgid ""
+"Administration can delete your account or ban your IP-adress, so we "
+"recomended to follow our rules"
+msgstr ""
+
+#: app/templates/help.html:107
+msgid ""
+"If you think that any hexagon, chain or comment break the rules, report "
+"it to one of the admins in the chat or via"
+msgstr ""
+
+#: app/templates/help.html:111
+msgid ""
+"Do not use profanity or offensive words in relation to other users. *Stay"
+" cultured people*"
+msgstr ""
+
+#: app/templates/help.html:112
+msgid ""
+"Make sure that the content you post in Library Hexagon belongs to you or "
+"does not infringe on other people's *intellectual property rights*"
+msgstr ""
+
+#: app/templates/help.html:113
+msgid "The Library Hexagon prohibits the publication of materials containing"
+msgstr ""
+
+#: app/templates/help.html:115
+msgid "Sensitive content 18+"
+msgstr ""
+
+#: app/templates/help.html:116
+msgid "Violent or dangerous content"
+msgstr ""
+
+#: app/templates/help.html:117
+msgid "Promotion of smoking or alcohol"
+msgstr ""
+
+#: app/templates/help.html:118
+msgid "Discussion of prohibited goods"
+msgstr ""
+
+#: app/templates/help.html:121
+msgid ""
+"*Do not spam* other users in chats. If you are being spammed by anyone, "
+"please let us know"
+msgstr ""
+
+#: app/templates/help.html:127 app/templates/help.html:215
+#: app/templates/layout.html:16
+msgid "Messages"
+msgstr ""
+
+#: app/templates/help.html:129 app/templates/help.html:217
+msgid "Chats"
+msgstr ""
+
+#: app/templates/help.html:130
+msgid "In the Library Hexagon you can communicate internally using inbox messages"
+msgstr ""
+
+#: app/templates/help.html:131
+msgid "At the moment, there is an opportunity"
+msgstr ""
+
+#: app/templates/help.html:134
+msgid "to create a chat with several users for *group correspondence*"
+msgstr ""
+
+#: app/templates/help.html:135
+msgid ""
+"In the [dropmenu], click messages and when you see the chat panel in "
+"front of you, click [add chat]. In the modal window that appears, enter "
+"the name of the chat and the members separated by commas (you can add "
+"them later)"
+msgstr ""
+
+#: app/templates/help.html:138
+msgid "Or write to one user directly and start a *private chat*"
+msgstr ""
+
+#: app/templates/help.html:139
+msgid ""
+"On the page of any user (you can get through [dropmenu] > [User list]), "
+"click open chat, your messages will open, and if you do not have a chat "
+"with this user yet, it will be automatically created"
+msgstr ""
+
+#: app/templates/help.html:143
+msgid ""
+"Chats are not designed to transmit important or secret information, so be"
+" careful and choose other messengers for confidential communication"
+msgstr ""
+
+#: app/templates/help.html:146
+msgid ""
+"You can *delete* any chat that you have created at any time, but you must"
+" remember that all messages in this case will be permanently lost"
+msgstr ""
+
+#: app/templates/help.html:150
+msgid "Members and chat control"
+msgstr ""
+
+#: app/templates/help.html:151
+msgid ""
+"If you are a chat creator, you can manage its members and settings. You "
+"can also always quit from any chat."
+msgstr ""
+
+#: app/templates/help.html:153
+msgid "{red:Remember!} If you leave the chat you will not be able to return"
+msgstr ""
+
+#: app/templates/help.html:155
+msgid ""
+"To *add or delete* members in chat you need to open caht info panel by "
+"clicking the [&nbspi&nbsp] button in right corner of the chat. In this "
+"panel, you will see a list of participants, and if you are the chat admin"
+msgstr ""
+
+#: app/templates/help.html:157
+msgid "you can *remove* any member by using the [cross] next to the name"
+msgstr ""
+
+#: app/templates/help.html:158
+msgid ""
+"*add* a member by clicking on the [three dots] in the upper left corner "
+"of the panel"
+msgstr ""
+
+#: app/templates/help.html:159
+msgid ""
+"and *change* the role of the member by clicking on the {role:role "
+"indicator} to the left of the username"
+msgstr ""
+
+#: app/templates/help.html:164
+msgid "Messages and entities"
+msgstr ""
+
+#: app/templates/help.html:165
+msgid ""
+"In addition to the plain text, chat messages can display various entities"
+" or mentions of users using a special syntax or"
+msgstr ""
+
+#: app/templates/help.html:166
+msgid "button"
+msgstr ""
+
+#: app/templates/help.html:167
+msgid ""
+"About *deleting* messages: You can delete a message by clicking on the "
+"[cross] in the upper-right corner of the message. If you are a member, "
+"you can only delete your messages, the admin can delete any"
+msgstr ""
+
+#: app/templates/help.html:169
+msgid "Users mentions"
+msgstr ""
+
+#: app/templates/help.html:170
+msgid ""
+"You can mention any Library Hexagon user using the standard mentions "
+"syntax"
+msgstr ""
+
+#: app/templates/help.html:174
+msgid "Hexs or chains"
+msgstr ""
+
+#: app/templates/help.html:175
+msgid ""
+"When you need to discus any hex or chain from Library Hexagon, you can "
+"use such syntax (/some_id/ must be number, /attachment_number/ is serial "
+"number of the attachment), or use "
+msgstr ""
+
+#: app/templates/help.html:181
+msgid "Links"
+msgstr ""
+
+#: app/templates/help.html:182
+msgid "If you want to paste link, use this syntax"
+msgstr ""
+
+#: app/templates/help.html:197
+msgid "Creations"
+msgstr ""
+
+#: app/templates/help.html:198
+msgid "Deletions"
+msgstr ""
+
+#: app/templates/help.html:205
+msgid "About page"
+msgstr ""
+
+#: app/templates/help.html:207
+msgid "Content"
+msgstr ""
+
+#: app/templates/help.html:208
+msgid "Comments"
+msgstr ""
+
+#: app/templates/help.html:209
+msgid "Rules"
+msgstr ""
+
+#: app/templates/help.html:218
+msgid "Members"
+msgstr ""
+
+#: app/templates/help.html:220
+msgid "Entities"
+msgstr ""
+
+#: app/templates/index.html:73 app/templates/layout.html:20
+msgid "Help"
 msgstr ""
 
 #: app/templates/layout.html:8
@@ -107,15 +576,11 @@ msgstr ""
 msgid "Profile"
 msgstr ""
 
-#: app/templates/layout.html:16
-msgid "Messages"
-msgstr ""
-
-#: app/templates/layout.html:31
+#: app/templates/layout.html:35
 msgid "Logout"
 msgstr ""
 
-#: app/templates/layout.html:217 app/templates/login.html:4
+#: app/templates/layout.html:221 app/templates/login.html:4
 #: app/templates/noedite-field.html:26
 msgid "Login"
 msgstr ""
@@ -164,23 +629,15 @@ msgstr ""
 msgid "Role"
 msgstr ""
 
-#: app/templates/users.html:31
-msgid "Delete"
-msgstr ""
-
-#: app/templates/users.html:32
-msgid "Change visibility"
-msgstr ""
-
-#: app/templates/users.html:50
+#: app/templates/users.html:51
 msgid "Show"
 msgstr ""
 
-#: app/templates/users.html:50
+#: app/templates/users.html:51
 msgid "Hide"
 msgstr ""
 
-#: app/templates/users.html:50
+#: app/templates/users.html:51
 msgid "me in list"
 msgstr ""
 
