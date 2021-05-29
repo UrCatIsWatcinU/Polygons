@@ -203,7 +203,8 @@ def registration():
         db.session.add(user)
         db.session.commit()
         
-        send_email('Library Hexagon: your confrimation link', user.email, 'info@libhex.com',  
+        send_email('Library Hexagon: your confrimation link', user.email, 'info@libhex.com',
+            render_template('parts/confirm-email.txt', user=user),
             render_template('parts/confirm-email.html', user=user)
         )
             
