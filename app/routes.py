@@ -203,10 +203,15 @@ def registration():
         db.session.add(user)
         db.session.commit()
         
-        send_email('Library Hexagon: your confrimation link', user.email, 'info@libhex.com',
-            render_template('parts/confirm-email.txt', user=user),
-            render_template('parts/confirm-email.html', user=user)
-        )
+        try:
+            send_email('Library Hexagon: your confrimation link', user.email, 'info@libhex.com',
+                render_template('parts/confirm-email.txt', user=user),
+                render_template('parts/confirm-email.html', user=user)
+            )
+        except:
+            db.session.delete(user)
+            db.session.commit()
+            return render_template('error_page.html', user=None, title='Reg error', error_message=_('Registration error'), error_description=_('Please try later or contact the site administrator.'))
             
         return redirect(url_for('login'))
 

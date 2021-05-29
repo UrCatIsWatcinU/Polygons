@@ -1,5 +1,5 @@
 <div style="font-family: Arial, Helvetica, sans-serif;">
-    <h4>{{ user.username }}</h4>,
+    <h4>{{ user.username }},</h4>
     <div>You have registered on the Library Hexagon portal, to log in, confirm your email using this link</div>
     <h3><a href="{{ url_for('confirm_email', token=user.gen_confirm_token(), _external=True) }}">Click here to verify your email</a></h3>
     <div>If you did not register, please ignore this email</div>

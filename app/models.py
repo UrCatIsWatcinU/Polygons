@@ -42,7 +42,6 @@ class User(UserMixin, db.Model):
 
     def gen_confirm_token(self):
         token = jwt.encode({'id': self.id}, app.config['SECRET_KEY'], algorithm='HS256')
-        print(token)
         return token
     
     @staticmethod
