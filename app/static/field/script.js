@@ -239,15 +239,16 @@ window.addEventListener('load', async () => {
                         
                         if(typeof(hexagon.about) == 'string'){
                             if(hexagon.about[0] == '{' || hexagon.about[0] == '['){
-
                                 hexagon.about = JSON.parse(hexagon.about || '{}');
+                                editor.setContents(hexagon.about);
                             } 
                             else{
-
+                                editor.insertText(0, hexagon.about);
                             }
+                        }else if(typeof(hexagon.about) == 'object'){
+                            editor.setContents(hexagon.about);
                         }
                         
-                        editor.setContents(hexagon.about);
                         editor.disable();
                         
                         editor.on('selection-change', (range, oldRange) => {

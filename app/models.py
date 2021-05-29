@@ -41,7 +41,7 @@ class User(UserMixin, db.Model):
     ip_bans = db.relationship('BannedIp', backref='user', lazy='dynamic', cascade="all, delete-orphan")
 
     def gen_confirm_token(self):
-        token = jwt.encode({'id': self.id}, app.config['SECRET_KEY'], algorithm='HS256')
+        token = jwt.encode({'id': self.id}, app.config['SECRET_KEY'], algorithm='HS256')    
         return token
     
     @staticmethod
