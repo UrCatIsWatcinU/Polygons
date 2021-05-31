@@ -52,10 +52,12 @@
             {% for chain in owner.chains %}
                 <div class="row">
                     {% for hex in hexs_sort_fn(chain.hexs) %}
-                        <div class="hexagon" id="h{{ hex.num }}">
-                            <div class="hexagon-editedField"><a href="/fields/{{ hex.categ.name }}?{{ {'hexId': hex.id} | urlencode }}" target="_blank" rel="noopener noreferrer">{{ hex.inner_text }}</a></div>
-                            <div class="hexagon-num">{{ hex.num }}</div>
-                        </div>
+                        {% if hex %}
+                            <div class="hexagon" id="h{{ hex.num }}">
+                                <div class="hexagon-editedField"><a href="/fields/{{ hex.categ.name }}?{{ {'hexId': hex.id} | urlencode }}" target="_blank" rel="noopener noreferrer">{{ hex.inner_text }}</a></div>
+                                <div class="hexagon-num">{{ hex.num }}</div>
+                            </div>  
+                        {% endif %}
                     {% endfor %}  
                 </div>
             {% endfor %}  

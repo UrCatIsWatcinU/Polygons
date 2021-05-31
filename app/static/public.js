@@ -33,7 +33,8 @@ translate.add({
         images: 'Images',
         content: 'Content',
         comments: 'Comments',
-        yourComment: 'Your comment'
+        yourComment: 'Your comment',
+        inReply: 'in reply to'
     },
     complaint: {
         text: 'Text',
@@ -117,7 +118,8 @@ translate.add({
         images: 'Картинки',
         content: 'Контент',
         comments: 'Комментарии',
-        yourComment: 'Ваш комментарий'
+        yourComment: 'Ваш комментарий',
+        inReply: 'в ответ'
     },
     complaint: {
         text: 'Текст жалобы',

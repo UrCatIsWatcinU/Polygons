@@ -261,7 +261,6 @@ window.addEventListener('load', async () => {
 
                         hexagonAbout.editor = editor;
                     }
-
                     
                     const createImageCont = (imgObj) => {
                         if(!imgObj || !imgObj.url) return;
@@ -450,26 +449,51 @@ window.addEventListener('load', async () => {
                             evt.preventDefault();
                         });
                     }
+
                     const createComments = async () => {
                         const commentsElem = hexagonAbout.querySelector('.hexagon-about-comments-cont');
-            
-                        const commentsRes = await fetch(`/chains/${hexagon.chainId}/comments`);
-                        if(!commentsRes.ok) return;
-            
-                        const comments = await commentsRes.json();
-                        
-                        const createComment = comment => {
+                        const createComment = (comment) => {
                             let commentElem = setClassName(document.createElement('div'), 'hexagon-about-comment');
                             commentElem.id = 'comment' + comment.id;
+                            commentElem.userId = comment.userId
             
-                            commentElem.innerHTML = `<a href="/users/${comment.userId}" class="hexagon-about-comment-user">${comment.username}:</a>&nbsp<br>
-                            <div class="hexagon-about-comment-body"></div>`;
-                            commentElem.querySelector('.hexagon-about-comment-body').innerText = comment.body;
+                            commentElem.innerHTML = `<div class="hexagon-about-comment-userCont">
+                                <a href="/users/${comment.userId}" class="hexagon-about-comment-user"></a>
+                            </div>
+                            <div class="hexagon-about-comment-body"></div>
+                            <div class="hexagon-about-comment-btns">
+                            <svg xmlns="http://www.w3.org/2000/svg" title="reply" class='hexagon-about-comment-replyBtn' viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="15 14 20 9 15 4"></polyline>
+                                <path d="M4 20v-7a4 4 0 0 1 4-4h12"></path>
+                            </svg>
+                            </div>`;
+                            const commentUser = commentElem.querySelector('.hexagon-about-comment-user');
+                            commentElem.username = commentUser.innerText = comment.username;
+
+                            const commentBody = commentElem.querySelector('.hexagon-about-comment-body');
+    
+                            commentBody.innerHTML = comment.body.trim().replace(/</g, '&lt;').replace(/\n/g, '<br>');
+                            
+                            const usersLinks = comment.body.match(/@\S+/gi) || [];
+                            usersLinks.forEach(uL => {
+                                fetch(`/users/${uL.replace('@', '')}/json`)
+                                .then(res => res.ok && res.json())
+                                .then(res => {
+                                    if(!res) return;
+                                    
+                                    commentBody.innerHTML = commentBody.innerHTML.replace(uL.replace('@', ''), `<a href="/users/${res.id}">${res.name}</a>`) 
+                                })
+                                .catch(err => showModal('An error occured', err))
+                                .finally(() => {
+                                    // username = null;
+                                });
+                            });
             
+                            // comment btns
                             if(comment.userId == user.userId || user.userRole == 2){
                                 const deleteCommentBtn = setClassName(document.createElementNS('http://www.w3.org/2000/svg', 'svg'), 'hexagon-about-comment-close');
                                 deleteCommentBtn.innerHTML = '<line x1="50%" y1="0%" x2="50%" y2="100%"></line><line x1="0%" y1="50%" x2="100%" y2="50%"></line>';
-                                commentElem.append(deleteCommentBtn);
+                                commentElem.querySelector('.hexagon-about-comment-btns').append(deleteCommentBtn);
                                 deleteCommentBtn.onclick = () => {
                                     showAsk(() => {
                                         fetch('/chains/comments/delete/' + commentElem.id.replace('comment', ''), {
@@ -478,23 +502,51 @@ window.addEventListener('load', async () => {
                                     })
                                 }
                             }
-            
+
+                            const replyBtn = commentElem.querySelector('.hexagon-about-comment-replyBtn') || {};
+
+                            replyBtn.onclick = () => {
+                                const input = hexagonAbout.querySelector('#newComment');
+                                input.value = `[reply ${comment.id}]`
+                            }
+                            
                             if(comment.userId == user.userId){
                                 commentElem.style.setProperty('--underline-color', 'var(--main-c)')
                             }
-            
+
                             if(hexagonAbout.querySelector('.hexagon-about-comments-empty')) hexagonAbout.querySelector('.hexagon-about-comments-empty').remove();
+                            if(comment.replyToId){
+                                const replyTo = hexagonAbout.querySelector(`#comment${comment.replyToId}`);
+                                if(replyTo){
+                                    commentElem.classList.add('hexagon-about-comment-reply');
+                                    replyTo.after(commentElem);
+
+                                    console.log(commentUser);
+                                    commentUser.parentElement.innerHTML += `&nbsp;
+                                    <span class="hexagon-about-comment-userInReply">${translate('hexAbout.inReply')} 
+                                        <a href="/users/${replyTo.userId}">${replyTo.username}</a>
+                                    </span>`;
+
+                                    return;
+                                }
+                            }
                             commentsElem.append(commentElem)
                         }
+
+                        const commentsRes = await fetch(`/chains/${hexagon.chainId}/comments`);
+                        if(!commentsRes.ok) return;
+            
+                        const comments = (await commentsRes.json()).sort((a, b) => a.id - b.id);
+                        
                         if(!comments || !comments.length){
                             commentsElem.innerHTML = '<h3 class="hexagon-about-comments-empty">No comments</h3>';
                         }else{
+                            hexagonAbout.comments = comments;
                             comments.forEach(createComment)
                         }
             
                         socket.on('newComment' + hexagon.chainId, (data) => {
                             try{
-            
                                 createComment(JSON.parse(data))
                             }catch(err){
                                 console.log(err);
@@ -723,13 +775,37 @@ window.addEventListener('load', async () => {
                             // btn.style.pointerEvents = 'none';
                         }else if(evt.target.classList.contains('send-comment')){
                             const input = hexagonAbout.querySelector('#newComment');
-                            if(!input || !input.value) return;
+                            if(!input || !input.value || typeof(input.value) != 'string') return;
+                            const newCommentObj = {
+                                body: input.value.trim(),
+                            }
+
+                            let replyStr = input.value.match(/(?<=\[)[^\[\]]+(?=\])/);
+                            replyStr = replyStr && replyStr[0];
+
+                            if(replyStr && replyStr.split(/\s+/)[0] == 'reply'){
+                                const replyTo = replyStr.split(/\s+/)[1];
+
+                                if(+replyTo){
+                                    newCommentObj.replyTo = replyTo;       
+                                }else{
+                                    const userComments = typeof(hexagonAbout.comments) == 'object' 
+                                    && hexagonAbout.comments.filter(c => c.username == replyTo);
+                                    
+                                    if(userComments && userComments.length){
+                                        newCommentObj.replyTo = userComments.pop().id;       
+                                    }
+                                }
+
+                                const bodyWithoutReplyStr = newCommentObj.body.replace(`[${replyStr}]`, '');
+                                if(!bodyWithoutReplyStr.trim()) return;
+                                
+                                newCommentObj.body = bodyWithoutReplyStr;
+                            }
             
                             fetch(`/chains/${hexagon.chainId}/comments/new`, {
                                 method: 'POST',
-                                body: JSON.stringify({
-                                    body: input.value,
-                                })
+                                body: JSON.stringify(newCommentObj)
                             }).then(() => {
                                 input.value = '';
                             });

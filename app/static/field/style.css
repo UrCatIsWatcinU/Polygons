@@ -27,6 +27,9 @@ html{
   margin: 10px;
   cursor: pointer;
 }
+.touch-device .scroll-btn{
+  --size: 1.5em
+} 
 
 .hexsCont{
   width: max-content;
@@ -301,6 +304,31 @@ html{
   position: relative;
   margin-bottom: 5px;
 }
+.touch-device .hexagon-about-comment{
+  --size: 1.5em;
+}
+
+.hexagon-about-comment-btns{
+  position: absolute;
+  top: 5px;
+  right: 0;
+}
+.hexagon-about-comment-replyBtn{
+  width: var(--size);
+  height: var(--size);
+  fill: transparent;
+  stroke: var(--main-c);
+  stroke-width: 1.5px;
+  cursor: pointer;
+}
+.hexagon-about-comment-reply{
+  padding-left: 10px;
+  border-left: 5px solid var(--grid-c);
+}
+.hexagon-about-comment-userInReply{
+  font-size: .85em;
+  opacity: .6;
+}
 .hexagon-about-comment-user{
   opacity: .7;
   text-decoration: none;
@@ -319,6 +347,11 @@ html{
   margin-top: 2px;
   white-space: pre-wrap;
 }
+.hexagon-about-img-close{
+  position: absolute;
+  top: 5px;
+  right: 0;
+}
 .hexagon-about-img-close,
 .hexagon-about-comment-close{
   transform: rotate(45deg);
@@ -327,9 +360,6 @@ html{
   width: var(--size);
   height: var(--size);
   cursor: pointer;
-  position: absolute;
-  top: 5px;
-  right: 0;
 }
 .hexagon-about-img-close{
   top: var(--arrow-pad);
@@ -373,6 +403,9 @@ html{
   height: var(--size);
   stroke: var(--main-c);
   cursor: pointer;
+}
+.touch-device .hexagon-about-rating-btn{
+  --size: 1.5em;
 }
 .hexagon-about-rating-plus:hover{
   transform: scale(1.05);

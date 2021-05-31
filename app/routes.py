@@ -263,7 +263,10 @@ def users_all():
 
 @app.route('/users/<id>')
 def user(id):
-    owner = User.query.get_or_404(id)
+    owner = User.query.filter_by(username=id).first()
+    if not owner:
+        owner = User.query.get_or_404(id)
+    
     allowed_change = 0
 
     user = None
@@ -910,14 +913,10 @@ def get_chain_json(id):
     
     return json.dumps(prepare_chain_to_send(chain))
 
+prepare_comment_to_send = lambda comment: {**serialize(comment), 'username': comment.author.username}
 @app.route('/chains/<id>/comments')
 def get_comments(id):
-    return json.dumps(list(map(lambda comment: {
-        'id': comment.id,
-        'body': comment.body,
-        'userId': comment.user_id,
-        'username': comment.author.username
-    }, Chain.query.get_or_404(id).comments)))
+    return json.dumps([prepare_comment_to_send(comment) for comment in Chain.query.get_or_404(id).comments])
 
 @app.route('/chains/<id>/comments/new', methods=['POST'])
 @login_required
@@ -928,12 +927,13 @@ def create_comment(id):
     comment = Comment(
         body=raw_comment['body'],
         user_id=current_user.id,
-        chain_id=chain.id
+        chain_id=chain.id,
+        reply_to_id=(raw_comment['replyTo'] if 'replyTo' in raw_comment else None) 
     )
     db.session.add(comment)
     db.session.commit()
 
-    socketio.emit(f'newComment{chain.id}', json.dumps({'id': comment.id, 'body': comment.body, 'userId': current_user.id, 'username': current_user.username}))
+    socketio.emit(f'newComment{chain.id}', json.dumps(prepare_comment_to_send(comment)))
     return json.dumps({'success': True})
 
 @app.route('/chains/comments/delete/<id>', methods=['DELETE'])

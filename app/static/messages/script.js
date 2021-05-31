@@ -75,7 +75,7 @@ const createMessage = (message) => {
             })
             .catch(err => showModal('An error occured', err))
             .finally(() => {
-                username = null;
+                // username = null;
             });
         });
     }
