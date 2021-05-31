@@ -41,7 +41,7 @@ class User(UserMixin, db.Model):
     ip_bans = db.relationship('BannedIp', backref='user', lazy='dynamic', cascade="all, delete-orphan")
 
     def gen_confirm_token(self):
-        token = jwt.encode({'id': self.id}, app.config['SECRET_KEY'], algorithm='HS256')    
+        token = jwt.encode({'id': self.id}, app.config['SECRET_KEY'], algorithm='HS256')
         return token
     
     @staticmethod
@@ -124,6 +124,10 @@ class Comment(db.Model):
     body = db.Column(db.String(500), index=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
     chain_id = db.Column(db.Integer,db.ForeignKey('chain.id'), index=True)
+    reply_to_id = db.Column(db.Integer,db.ForeignKey('comment.id'), index=True)
+    replies = db.relationship('Comment', backref='to', lazy='dynamic', cascade="all, delete-orphan", remote_side=[id], single_parent=True, uselist=True)
+
+    
 
 class RatingChange(db.Model):
     id = db.Column(db.Integer, primary_key=True)
