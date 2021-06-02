@@ -521,7 +521,6 @@ window.addEventListener('load', async () => {
                                     commentElem.classList.add('hexagon-about-comment-reply');
                                     replyTo.after(commentElem);
 
-                                    console.log(commentUser);
                                     commentUser.parentElement.innerHTML += `&nbsp;
                                     <span class="hexagon-about-comment-userInReply">${translate('hexAbout.inReply')} 
                                         <a href="/users/${replyTo.userId}">${replyTo.username}</a>
@@ -616,16 +615,16 @@ window.addEventListener('load', async () => {
                         }
                         loadAbout();
             
-                        socket.on('changeAbout' + hexagon.uuid, (data) => {
-                            if(JSON.parse(data).userId == JSON.parse(sessionStorage.getItem('user') || '{}').userId) return ;
-                            loadAbout();
-                        });
+                        // socket.on('changeAbout' + hexagon.uuid, (data) => {
+                        //     if(JSON.parse(data).userId == JSON.parse(sessionStorage.getItem('user') || '{}').userId) return ;
+                        //     loadAbout();
+                        // });
                     }else{
                         selectActiveTab();
                         
                         setTimeout(() => {
                             setUpEditor();
-                        },)
+                        }, 0)
                     }
                     
                     fetch(`/chains/${hexagon.chainId}/rating`).then(async rating =>{
@@ -780,10 +779,11 @@ window.addEventListener('load', async () => {
                                 body: input.value.trim(),
                             }
 
-                            let replyStr = input.value.match(/(?<=\[)[^\[\]]+(?=\])/);
+                            let replyStr = input.value.match(/\[[^\[\]]+(?=\])/);
                             replyStr = replyStr && replyStr[0];
 
-                            if(replyStr && replyStr.split(/\s+/)[0] == 'reply'){
+                            if(typeof(replyStr) == 'string' && replyStr.replace('[', '').split(/\s+/)[0] == 'reply'){
+                                replyStr = replyStr.replace('[', '');
                                 const replyTo = replyStr.split(/\s+/)[1];
 
                                 if(+replyTo){
@@ -1122,9 +1122,10 @@ window.addEventListener('load', async () => {
             
             // создание сетки
             let rowsStr = '';
-            let hexagonStr = `<el-hexagon draggable="false" class="hexagon">
-            <div class="hexagon-num">0</div>
-            </el-hexagon>`.repeat(GRID_WIDTH);
+            const hexElemTag = customElements ? 'el-hexagon' : 'div';
+            let hexagonStr = `<${hexElemTag} draggable="false" class="hexagon">
+                <div class="hexagon-num">0</div>
+            </${hexElemTag}>`.repeat(GRID_WIDTH);
             for(let i = 1; i <= GRID_HEIGHT; i+=2){
                 rowsStr += `
                 <div id="r${i}" class="row">${hexagonStr}</div>
@@ -1541,8 +1542,6 @@ window.addEventListener('load', async () => {
                             complaint = complaint.firstElementChild;
                             complaint.classList.add('complaint');
 
-                            console.log(complaint);
-
                             complaint.innerHTML = `
                             <h1 class="complaint-title">${translate('contextmenu.complain')}</h1>
                             <svg class="complaint-close"><line x1="50%" y1="0%" x2="50%" y2="100%"></line><line x1="0%" y1="50%" x2="100%" y2="50%"></line></svg>
@@ -1586,12 +1585,10 @@ window.addEventListener('load', async () => {
                             complaint.querySelector('.complaint-close').onclick = hideModal;
                         },
                         edit: () => {
-                            console.log(hexagon);
                             hexagon.dispatchEvent(new Event('stopClearing'));
 
                             if(hexagon.querySelector('.hexagon-about-content')){
                                 evt.stopImmediatePropagation();
-                                console.log('content');
                                 hexagon.querySelector('.hexagon-about-content').dispatchEvent(new Event('dblclick'));
                             }else{
                                 hexagon.dispatchEvent(new Event('dblclick'));

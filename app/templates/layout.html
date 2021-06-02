@@ -159,6 +159,11 @@
       {{ public_scripts() }}
       {{ public_static() }}
     {% endblock %}
+    <script>
+      window.onerror = (err, url, line) => {
+          alert(err + ' ' + line);
+      }
+  </script>
     
     {% block head %}
     {% endblock %}

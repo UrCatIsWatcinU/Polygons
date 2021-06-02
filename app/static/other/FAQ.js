@@ -12,13 +12,15 @@ tasks.push(() => {
     });
 
     document.querySelectorAll('.text').forEach(text => {
-        const btns = text.innerHTML.match(/(?<=\[)[^[\]/:]+(?=\])\s*(?!\[])/g) || [];
+        const btns = text.innerHTML.match(/\[[^[\]/:]+(?=\])\s*(?!\[])/g) || [];
         btns.forEach(btn => {
+            btn = btn.replace('[', '');
             text.innerHTML = text.innerHTML.replace(`[${btn}]`, `<span class="btn">${btn}</span>`);
         });
 
-        const classes =  text.innerHTML.match(/(?<=\{)[^{\}]+(?=\})\s*(?!\{})/g) || [];
+        const classes =  text.innerHTML.match(/\{[^{\}]+(?=\})\s*(?!\{})/g) || [];
         classes.forEach(cls => {
+            cls = cls.replace('{', '');
             const clsName = cls.split(':')[0];
             const clsText = cls.split(':')[1];
             text.innerHTML = text.innerHTML.replace(`{${cls}}`, `<span class="${clsName}">${clsText}</span>`);
@@ -29,8 +31,9 @@ tasks.push(() => {
             text.innerHTML = text.innerHTML.replace(`${bold}`, `<b>${bold.replace(/\*/g, '')}</b>`);
         });
 
-        const italics = text.innerHTML.match(/(?<!(<|:|\/|"))\/[^/\d<>]+\//g) || [];
+        const italics = text.innerHTML.match(/[^<:\/"]\/[^/\d<>]+\//g) || [];
         italics.forEach(italic => {
+            italic = italic.replace(italic[0], '');
             text.innerHTML = text.innerHTML.replace(`${italic}`, `<i>${italic.replace(/\//g, '')}</i>`);
         });
 

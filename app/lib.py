@@ -17,6 +17,9 @@ def delete_dir(name):
     except FileNotFoundError:
         pass 
 
+def date_to_timestamp(date):
+    return time.mktime(date.timetuple())
+
 def serialize(row, not_needed_attrs=[]):
     result = {}
 
@@ -26,5 +29,5 @@ def serialize(row, not_needed_attrs=[]):
             c_name = camelcase(c)
             result[c_name] = getattr(row, c)
             if isinstance(result[c_name], datetime):
-                result[c_name] = time.mktime(result[c_name].timetuple())
+                result[c_name] = date_to_timestamp(result[c_name])
     return result

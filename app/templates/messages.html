@@ -16,7 +16,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {{ layout.loading_head() }}
     {{ layout.public_scripts() }}
-    <script src="{{url_for('static', filename='messages/script.js')}}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='messages/script.js') }}"></script>
     {{ layout.public_static() }}
     <link rel="stylesheet" href="{{url_for('static', filename='messages/style.css')}}">
     <title>Library Hexagon | Messages</title>

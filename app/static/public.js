@@ -580,8 +580,8 @@ const main = async () => {
     
     setCSSProps(Object.assign(cssProps, hexSizes.createCSSProps()));
     
-    window.onerror = (msg) => {
-        showModal('Error', msg);
+    window.onerror = (msg, url, line) => {
+        showModal('Error', `${msg} in ${url.split('/').pop()}:${line}`);
     };
 
     if(document.querySelector('.find-button')){
@@ -698,8 +698,17 @@ const main = async () => {
             }
         }, 100)
     }
-
-    tasks.forEach(task => task());
+    
+    setTimeout(() => {
+        tasks.forEach(task => {
+            try{
+                task();
+            }catch(err){
+                showModal('Critical error', err)
+            }
+            
+        });
+    }, 0)
 }
 window.addEventListener('load', main);
 
@@ -736,4 +745,5 @@ const loading = `<div class="inline-loading loading">
       begin="0.3"/>     
   </circle>
 </svg>
-</div>`
+</div>`;
+

@@ -1,3 +1,5 @@
+'use strict';
+
 let user = sessionStorage.getItem('user');
 if(!user){
     fetch('/users/i')
@@ -20,7 +22,7 @@ if(!user){
     user = JSON.parse(user);
 }
 
-const chatAdminsRoles = ['admin']
+const chatAdminsRoles = ['admin'];
 let activeChatId;
 
 const localTimeZoneOffset = (new Date).getTimezoneOffset() * 60;
@@ -41,6 +43,7 @@ const longDateFormater = Intl.DateTimeFormat(undefined, {
 const createMessage = (message) => {
     if(!message || document.querySelector('#m' + message.id) || message.chatId != activeChatId) return;
     const chat = document.querySelector('#c' + message.chatId);
+    if(!chat) return;
 
     if(message.date && typeof(message.date) != 'object'){
         message.date = new Date((message.date - localTimeZoneOffset) * 1000);
@@ -134,10 +137,11 @@ const createMessage = (message) => {
             `<a class="message-attachment-inText" href="${id}">${name}</id>`);
         }
     }
-    const entities = message.text.match(/(?<=\[)[^[\]]+(?=\])\s*(?!\[])/g);
+    const entities = message.text.match(/\[[^[\]]+\]/g);
     
     if(entities){
         entities.forEach((entity, i) => {
+            entity = entity.replace(/[[\]]/g, '').trim();
             const entityName = entity.split(/\s+/)[0];
             const entityNum = entity.split(/\s+/)[1];
 
@@ -180,10 +184,10 @@ const createMessage = (message) => {
 
 socket.on('new-message', msg => {
     msg = JSON.parse(msg);
-    createMessage(msg)
+    createMessage(msg);
 
     const chat = document.querySelector('#c' + msg.chatId);
-    if(msg.isUnread && msg.user.id != user.userId){
+    if(msg.isUnread && msg.user.id != user.userId && chat){
         chat.unreadMsgsElem.style.opacity = 1;
         chat.unreadMsgsElem.innerText = ++chat.unreadedMsgs
     }
@@ -191,6 +195,7 @@ socket.on('new-message', msg => {
 });
 socket.on('lastMessageUpdate', msg => {
     const chat = document.querySelector('#c'+ msg.chatId);
+    if(!chat) return;   
     chat.querySelector('.last-message').innerHTML = msg.body;
 
     chat.cerateLastMsgDate();
@@ -609,7 +614,7 @@ class ElChat extends HTMLElement{
         const lastMsgDateElem = this.querySelector('.message-date');
         if(!lastMsgDateElem) return;
 
-        const lastMsgDate = new Date((new Date(lastMsgDateElem.getAttribute('date'))).getTime() - localTimeZoneOffset * 1e3);
+        const lastMsgDate = new Date((lastMsgDateElem.getAttribute('date') - localTimeZoneOffset) * 1e3);
     
         lastMsgDateElem.innerText = shortDateFormater.format(lastMsgDate);
     }

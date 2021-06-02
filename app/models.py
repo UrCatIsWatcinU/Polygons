@@ -1,7 +1,9 @@
 from app import db, login
+from app import app
+from app.lib import date_to_timestamp
+
 
 from werkzeug.security import generate_password_hash, check_password_hash
-from app import app
 from flask_login import UserMixin
 from datetime import datetime
 from sqlalchemy import func
@@ -175,4 +177,4 @@ class Message(db.Model):
     date = db.Column(db.DateTime, default=datetime.utcnow, index=True)
     
     def __repr__(self):
-        return render_template('parts/message.html', message=self)
+        return render_template('parts/message.html', message=self, date_parse=date_to_timestamp)

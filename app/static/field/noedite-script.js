@@ -28,6 +28,7 @@ window.addEventListener('load', async () => {
             let size = params.size.split(/[x\sх]/);
             const GRID_HEIGHT = size[0]; // измеряется в шестиугольниках
             const GRID_WIDTH = size[1]; // измеряется в шестиугольниках
+
             const deleteHex = hexagon => {
                 let deletedHexs = [];
                 const deleteHexInner = hexagon => {
@@ -87,37 +88,39 @@ window.addEventListener('load', async () => {
                     hexagon.append(editedField);
                 }
 
+                // плашка подробнее
                 editedField.onclick = evt => {
                     if(!hexagon.classList.contains('hexagon-visible') || !editedField.innerText) return;
-
-                    document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});
-                    
+            
                     evt.stopPropagation();
-
+            
                     if(hexagon.classList.contains('hexagon-active')) return;
                     hexagon.classList.add('hexagon-active');
-
-                    const clearAbouts = evt => {
+            
+                    const clearAbouts = () => {
+                        if(hexagon.isContextmenu || document.querySelectorAll('.ask').length) return;
                         document.querySelectorAll('.hexagon-about').forEach(elem => {
-                            elem.parentElement.about = elem.querySelector('.hexagon-about-content').innerHTML;
                             elem.remove();
                         });
                         document.removeEventListener('mousedown', clearAbouts);
                     }
                     clearAbouts();
-    
+            
                     let hexagonAbout = document.createElement('div');
                     hexagonAbout.className = 'hexagon-about';
                     hexagonAbout.innerHTML = `
                     <div class="hexagon-about-controls">
-                        <div>
-                            <span class="hexagon-about-btn contentBtn">Content</span>
-                            <span class="hexagon-about-btn imagesBtn">Images</span>
-                            <span class="hexagon-about-btn commentsBtn">Comments</span>
+                        <div class="hexagon-about-controls-btns">
+                            <span class="hexagon-about-btn contentBtn">${translate('hexAbout.content')}</span>
+                            <span class="hexagon-about-btn imagesBtn">${translate('hexAbout.images')}</span>
+                            <span class="hexagon-about-btn commentsBtn">${translate('hexAbout.comments')}</span>
                         </div>
                         <div class="hexagon-about-rating"> 
                             <span class="hexagon-about-rating-num">0</span>
                         </div>
+                    </div>
+                    <div class="hexagon-about-content">
+                        <div class="hexagon-about-editor"></div>
                     </div>
                     <div class="hexagon-about-images" style="display: none"></div>
                     <div class="hexagon-about-comments" style="display: none">
@@ -132,10 +135,37 @@ window.addEventListener('load', async () => {
                             hexagonAbout.querySelector(`.hexagon-about-${activeAboutTab}`).style.display = '';
                         }
                     }
-                    
-                    const content = document.createElement('div');
-                    content.className = 'hexagon-about-content';
-                    content.style.display = 'none';
+
+                    const content = () => hexagonAbout.querySelector('.hexagon-about-content');
+
+                    const setUpEditor = () => {
+                        let editorOptions = {
+                            theme: 'snow',
+                            debug: false, 
+                            modules: {
+                                toolbar: false
+                            },
+                            readOnly: true,
+                        };
+                        
+                        const editor = new Quill('.hexagon-about-editor', editorOptions);
+                        
+                        if(typeof(hexagon.about) == 'string'){
+                            if(hexagon.about[0] == '{' || hexagon.about[0] == '['){
+                                hexagon.about = JSON.parse(hexagon.about || '{}');
+                                editor.setContents(hexagon.about);
+                            } 
+                            else{
+                                editor.insertText(0, hexagon.about);
+                            }
+                        }else if(typeof(hexagon.about) == 'object'){
+                            editor.setContents(hexagon.about);
+                        }
+                        
+                        editor.disable();
+
+                        hexagonAbout.editor = editor;
+                    }
                     
                     const createImageCont = (imgObj) => {
                         if(!imgObj || !imgObj.url) return;
@@ -145,23 +175,24 @@ window.addEventListener('load', async () => {
                         img.setAttribute('draggable', 'false')
                         img.src = '/' + imgObj.url;
                         img.uuid = imgObj.uuid;
+                        img.isBG = imgObj.isBG;
+            
+                        imgCont.append(img);
+                        imgCont.img = img;
                         img.onerror = () => {
                             imgCont.remove();
                             hexagon.imgs = hexagon.imgs.filter(i => i.uuid != img.uuid);
                         }
-
-                        imgCont.append(img);
-                        imgCont.img = img;
-
+            
                         return imgCont;
                     }
                     let isSlideAnimationActive = false;
                     const startImgsSlider = () => {
                         const conts = Array.from(hexagonAbout.querySelectorAll('.hexagon-about-images-imgCont'));
                         const images = hexagonAbout.querySelector('.hexagon-about-images');
-
+            
                         if(!conts || !conts.length || conts.length == 1) return;
-
+            
                         const inner = () => {
                             console.log('create slider');
                             images.slideTo = (n) => {
@@ -182,9 +213,9 @@ window.addEventListener('load', async () => {
                                 } else if(neededScroll < 0){
                                     return 0;
                                 } 
-
+            
                                 let step = Math.abs(neededScroll - slider.scrollLeft) * .05;
-
+            
                                 const anim = () => {
                                     isSlideAnimationActive = true;
                                     if(Math.floor(slider.scrollLeft) == Math.floor(neededScroll)){
@@ -203,9 +234,9 @@ window.addEventListener('load', async () => {
                                 
                                 return Math.round((neededScroll - slider.offsetWidth) / slider.offsetWidth) + 1;
                             }
-
+            
                             images.style.height = `calc(${(Math.max(...conts.map(cont => cont.img.height)))}px + (${images.imagesArrowsSize} + ${images.arrowPad * 2}px) * 2)`;
-
+            
                             const bullets = images.querySelector('.hexagon-about-images-bullets');
                             bullets.style.left = `calc(50% - ${bullets.offsetWidth}px / 2)`;
                             bullets.firstElementChild.classList.add('hexagon-about-images-active-bullet');
@@ -234,7 +265,7 @@ window.addEventListener('load', async () => {
                                 notLoadedImgs = notLoadedImgs.filter(uuid => imgCont.img.uuid != uuid);
                                 if(!notLoadedImgs.length){  
                                     areImagesLoaded = true;
-
+            
                                     const bullets = setClassName(document.createElement('div'), 'hexagon-about-images-bullets');
                                     const nextBtn = setClassName(document.createElementNS('http://www.w3.org/2000/svg', 'svg'), 'hexagon-about-images-switch hexagon-about-images-next');
                                     const prevBtn = setClassName(document.createElementNS('http://www.w3.org/2000/svg', 'svg'), 'hexagon-about-images-switch hexagon-about-images-prev');
@@ -248,8 +279,7 @@ window.addEventListener('load', async () => {
                                                 btn.classList.add('hexagon-about-images-active-bullet');
                                                 prevBtn.classList.remove('hexagon-about-images-switch-disabled');
                                                 nextBtn.classList.remove('hexagon-about-images-switch-disabled');
-
-                                                console.log(i);
+            
                                                 if(i === 0){
                                                     prevBtn.classList.add('hexagon-about-images-switch-disabled');
                                                 }else if(i == btns.length - 1){
@@ -262,16 +292,17 @@ window.addEventListener('load', async () => {
                                         const bullet = setClassName(document.createElementNS('http://www.w3.org/2000/svg', 'svg'), 'hexagon-about-images-bullet');
                                         bullet.setAttribute( 'viewBox', '0 0 100 100');
                                         bullet.innerHTML = `<circle cx="50" cy="50" r="40"></circle>`;
-
+            
                                         bullet.onclick = () => {
+                                            if(isSlideAnimationActive) return;
                                             images.slideTo(i + 1);
                                             changeActiveBullet(i);
                                         }
-
+            
                                         bullets.append(bullet);
                                     });
                                     images.append(bullets);
-
+            
                                     
                                     nextBtn.onclick = () => { 
                                         if(isSlideAnimationActive) return;
@@ -285,48 +316,89 @@ window.addEventListener('load', async () => {
                                     [nextBtn, prevBtn].forEach(btn => {
                                         btn.setAttribute( 'viewBox', '0 0 100 100');
                                         btn.innerHTML = `<polygon points="0,0 100,50 0,100"></polygon>`;
-
+            
                                         images.append(btn);
                                     });
-
+            
                                     hexagonAbout.dispatchEvent(new Event('allImagesLoaded'));
                                     if(activeAboutTab == 'images') startImgsSlider();
                                 }
-                            }
+                            } 
                         });
                         
                         if(!hexagonAbout.querySelector('.hexagon-about-images')) hexagonAbout.append(images);
                         images.firstElementChild.append(...imgsConts);
-
+            
                         images.addEventListener('wheel', (evt) => {
                             evt.stopPropagation();
                             evt.preventDefault();
                         });
                     }
+
                     const createComments = async () => {
                         const commentsElem = hexagonAbout.querySelector('.hexagon-about-comments-cont');
+                        const createComment = (comment) => {
+                            let commentElem = setClassName(document.createElement('div'), 'hexagon-about-comment');
+                            commentElem.id = 'comment' + comment.id;
+                            commentElem.userId = comment.userId
+            
+                            commentElem.innerHTML = `
+                            <div class="hexagon-about-comment-userCont">
+                                <a href="/users/${comment.userId}" class="hexagon-about-comment-user"></a>
+                            </div>
+                            <div class="hexagon-about-comment-body"></div>`;
+                            const commentUser = commentElem.querySelector('.hexagon-about-comment-user');
+                            commentElem.username = commentUser.innerText = comment.username;
+
+                            const commentBody = commentElem.querySelector('.hexagon-about-comment-body');
+    
+                            commentBody.innerHTML = comment.body.trim().replace(/</g, '&lt;').replace(/\n/g, '<br>');
+                            
+                            const usersLinks = comment.body.match(/@\S+/gi) || [];
+                            usersLinks.forEach(uL => {
+                                fetch(`/users/${uL.replace('@', '')}/json`)
+                                .then(res => res.ok && res.json())
+                                .then(res => {
+                                    if(!res) return;
+                                    
+                                    commentBody.innerHTML = commentBody.innerHTML.replace(uL.replace('@', ''), `<a href="/users/${res.id}">${res.name}</a>`) 
+                                })
+                                .catch(err => showModal('An error occured', err))
+                                .finally(() => {
+                                    // username = null;
+                                });
+                            });
+
+                            if(hexagonAbout.querySelector('.hexagon-about-comments-empty')) hexagonAbout.querySelector('.hexagon-about-comments-empty').remove();
+                            if(comment.replyToId){
+                                const replyTo = hexagonAbout.querySelector(`#comment${comment.replyToId}`);
+                                if(replyTo){
+                                    commentElem.classList.add('hexagon-about-comment-reply');
+                                    replyTo.after(commentElem);
+
+                                    commentUser.parentElement.innerHTML += `&nbsp;
+                                    <span class="hexagon-about-comment-userInReply">${translate('hexAbout.inReply')} 
+                                        <a href="/users/${replyTo.userId}">${replyTo.username}</a>
+                                    </span>`;
+
+                                    return;
+                                }
+                            }
+                            commentsElem.append(commentElem)
+                        }
 
                         const commentsRes = await fetch(`/chains/${hexagon.chainId}/comments`);
                         if(!commentsRes.ok) return;
-    
-                        const comments = await commentsRes.json();
+            
+                        const comments = (await commentsRes.json()).sort((a, b) => a.id - b.id);
                         
-                        const createComment = comment => {
-                            let commentElem = setClassName(document.createElement('div'), 'hexagon-about-comment');
-                            commentElem.id = 'comment' + comment.id;
-
-                            commentElem.innerHTML = `<a href="/users/${comment.userId}" class="hexagon-about-comment-user">${comment.username}:</a>&nbsp<br>
-                            <div class="hexagon-about-comment-body">${comment.body}</div>`;
-
-                            if(hexagonAbout.querySelector('.hexagon-about-comments-empty')) hexagonAbout.querySelector('.hexagon-about-comments-empty').remove();
-                            commentsElem.append(commentElem)
-                        }
                         if(!comments || !comments.length){
                             commentsElem.innerHTML = '<h3 class="hexagon-about-comments-empty">No comments</h3>';
                         }else{
+                            hexagonAbout.comments = comments;
                             comments.forEach(createComment)
                         }
-
+            
                         socket.on('newComment' + hexagon.chainId, (data) => {
                             try{
                                 createComment(JSON.parse(data))
@@ -334,6 +406,7 @@ window.addEventListener('load', async () => {
                                 console.log(err);
                             }
                         });
+                        
                         socket.on('deleteComment' + hexagon.chainId, (id) => {
                             try{
                                 hexagonAbout.querySelector('#comment' + id).remove();
@@ -342,8 +415,8 @@ window.addEventListener('load', async () => {
                             }
                         });
                     }
-
-                    if(!hexagon.about){
+            
+                    if(!hexagon.about && typeof(hexagon.about) != 'string'){
                         const loadAbout = () => {
                             hexagonAbout.innerHTML += `<div class="loading about-loading">
                             <svg class='loading-svg about-loading-svg' version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
@@ -374,40 +447,37 @@ window.addEventListener('load', async () => {
                               </circle>
                             </svg>
                             </div>`;
-                            fetch(`/hexs/${hexagon.uuid}/about`).then(aboutRes => {
-                                if(aboutRes.ok){
-                                    aboutRes.text().then(async aboutContent => {
-                                        hexagonAbout.querySelectorAll('.hexagon-about-content').forEach(elem => elem.remove());
-                                        content.innerHTML = hexagon.about = aboutContent;
-                                        hexagonAbout.append(content);
-                                        
-                                        selectActiveTab();
+                            fetch(`/hexs/${hexagon.uuid}/about`)
+                            .then(res => res.ok && res.text())
+                            .then(aboutContent => {
+                                if(aboutContent === false) return;
 
-                                        const loading = hexagonAbout.querySelector('.loading');
-                                        loading.style.opacity = 0;
-                                        
-                                        loading.ontransitionend = () => {
-                                            loading.remove();
-                                            loading.isDeleted = true;
-                                        }
-                                        setTimeout(() => {if(!loading.isDeleted) loading.remove()}, 1000)
-                                    });
+                                hexagon.about = aboutContent;
+
+                                setUpEditor();
+
+                                selectActiveTab();
+    
+                                const loading = hexagonAbout.querySelector('.loading');
+                                loading.style.opacity = 0;
+                                
+                                loading.ontransitionend = () => {
+                                    loading.remove();
+                                    loading.isDeleted = true;
                                 }
+                                setTimeout(() => {if(!loading.isDeleted) loading.remove()}, 1000)
                             });
                         }
                         loadAbout();
-
-                        socket.on('changeAbout' + hexagon.uuid, (data) => {
-                            if(JSON.parse(data).userId == JSON.parse(sessionStorage.getItem('user') || '{}').userId) return ;
-                            loadAbout();
-                        });
                     }else{
-                        content.innerHTML = hexagon.about;
-                        hexagonAbout.append(content);
                         selectActiveTab();
+                        
+                        setTimeout(() => {
+                            setUpEditor();
+                        }, 0)
                     }
                     
-                    fetch(`/chains/${hexagon.chainId}/rating`).then(async rating => {
+                    fetch(`/chains/${hexagon.chainId}/rating`).then(async rating =>{
                         if(rating.ok){
                             rating = await rating.json()
                             hexagonAbout.querySelector('.hexagon-about-rating-num').innerText = rating.num ? rating.num : '0';
@@ -415,7 +485,7 @@ window.addEventListener('load', async () => {
                     });
                     createImages();
                     createComments();
-    
+            
                     const deleteObserver = new MutationObserver((mList) => {
                         mList.forEach(mutation => {
                             if(Array.from(mutation.removedNodes).includes(hexagonAbout)){
@@ -426,11 +496,12 @@ window.addEventListener('load', async () => {
                     deleteObserver.observe(hexagon, {
                         childList: true
                     });
+            
                     
                     hexagonAbout.addEventListener('mousedown', evt => {
                         evt.stopPropagation();
                     });
-
+            
                     selectActiveTab();
                     const changeTab = (newTabName) => {
                         if(hexagonAbout.querySelector(`.${activeAboutTab}Btn`)){
@@ -446,19 +517,20 @@ window.addEventListener('load', async () => {
                         if(evt.target.classList.contains('hexagon-about-btn')){
                             const btn = evt.target;
                             changeTab(btn.classList[1].replace('Btn', ''));
-
+            
                             let currentBlock = hexagonAbout.querySelector(`.hexagon-about-${activeAboutTab}`);
                             if(currentBlock.classList.contains('hexagon-about-images')){
                                 startImgsSlider();
                             }
                         }
                     });
-
+            
                     hexagon.append(hexagonAbout);
-    
+            
                     const checkHexVisibility = (r, h) => document.querySelector(`#r${r} #h${h}`) ? document.querySelector(`#r${r} #h${h}`).classList.contains('hexagon-visible') : false;
                     let rId = hexagon.rowId;
                     let hId = +hexagon.id.replace('h', '');
+                    
                     if(!isIOS()){
                         if(checkHexVisibility(rId, hId + 1) && checkHexVisibility(rId, hId - 1)){
                             if(hexagon.parentElement.classList.contains('row-moved')){
@@ -485,7 +557,7 @@ window.addEventListener('load', async () => {
                         }else{
                             if(hexagon.parentElement.classList.contains('row-moved')){
                                 if(checkHexVisibility(rId + 1, hId) && checkHexVisibility(rId + 1, hId+ 1)){
-                                    hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5 - TRIANGLE_HEIGHT) + 'px';
+                                    hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5 - hexSizes.TRIANGLE_HEIGHT) + 'px';
                                     if(checkHexVisibility(rId - 1, hId)){
                                         hexagonAbout.style.bottom = 0
                                         hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
@@ -504,7 +576,7 @@ window.addEventListener('load', async () => {
                                 }
                             }else{
                                 if(checkHexVisibility(rId + 1, hId - 1) && checkHexVisibility(rId + 1, hId)){
-                                    hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5 - TRIANGLE_HEIGHT) + 'px';
+                                    hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5 - hexSizes.TRIANGLE_HEIGHT) + 'px';
                                     if(checkHexVisibility(rId - 1, hId)){
                                         hexagonAbout.style.bottom = 0
                                         hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
@@ -536,6 +608,25 @@ window.addEventListener('load', async () => {
         
                 return editedField;
             }
+
+            const setHexProps = hexagon => {
+                // ид ряда и ид шестиугольника
+                let row = hexagon.parentElement;
+                hexagon.id = 'h' +  ([].indexOf.call(row.children, hexagon) + 1);
+                hexagon.rowId = idToNum(row.id);
+
+                createEditedField(hexagon);
+            }
+            class ElHexagon extends HTMLElement{
+                constructor() {
+                    super();
+                }
+                connectedCallback() { 
+                    setHexProps(this)
+                }
+            }
+            
+            customElements.define('el-hexagon', ElHexagon);
 
             function parseHexsFromJson(savedHexs){    
                 if(!savedHexs.length) return [];
@@ -593,9 +684,9 @@ window.addEventListener('load', async () => {
             
             // создание сетки
             let rowsStr = '';
-            let hexagonStr = `<div class="hexagon">
+            let hexagonStr = `<el-hexagon class="hexagon">
             <div class="hexagon-num">0</div>
-            </div>`.repeat(GRID_WIDTH);
+            </el-hexagon>`.repeat(GRID_WIDTH);
             for(let i = 1; i <= GRID_HEIGHT; i+=2){
                 rowsStr += `
                 <div id="r${i}" class="row">${hexagonStr}</div>
@@ -715,17 +806,6 @@ window.addEventListener('load', async () => {
         
                 return false
             }
-        
-            // определение свойст шестиугольника
-            const setHexProps = hexagon => {
-                // ид ряда и ид шестиугольника
-                let row = hexagon.parentElement;
-                hexagon.id = 'h' +  ([].indexOf.call(row.children, hexagon) + 1);
-                hexagon.rowId = idToNum(row.id);
-
-                createEditedField(hexagon);
-            }
-            document.querySelectorAll('.hexagon').forEach(setHexProps);
             
             const backup = () => {
                 localStorage.setItem('userScroll-' + document.title, JSON.stringify({x: document.body.scrollLeft, y: document.body.scrollTop}));
