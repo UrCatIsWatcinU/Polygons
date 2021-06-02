@@ -296,7 +296,7 @@ a{
     width: calc(var(--hexagon-width));
     height: calc(var(--body-height));
     box-sizing: border-box;
-    background: var(--bgc);
+    background: transparent;
     padding: 4px;
     color: var(--white-c);
     position: absolute;
