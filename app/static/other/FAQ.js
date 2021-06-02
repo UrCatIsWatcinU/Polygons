@@ -3,7 +3,7 @@ tasks.push(() => {
     const nav = document.querySelector('.nav');
 
     content.style.marginLeft = nav.offsetWidth + 40 + 'px';
-    content.style.paddingRight = (nav.offsetWidth - 40) + 'px';
+    if(document.documentElement.clientWidth > 900) content.style.paddingRight = (nav.offsetWidth - 40) + 'px';
 
     setCSSProps({
         'marker-c': tinycolor(colors.MAIN_C).setAlpha(.7),

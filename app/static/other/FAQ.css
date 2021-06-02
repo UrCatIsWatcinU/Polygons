@@ -118,3 +118,10 @@ a{
 .active-linkedElem{
     text-decoration: underline;
 }
+
+
+@media (max-width: 760px){
+    .nav{
+        display: none;
+    }
+}
