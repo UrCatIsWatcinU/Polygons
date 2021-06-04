@@ -80,7 +80,6 @@ window.addEventListener('load', async () => {
                 if(!editedField){
                     editedField = document.createElement('div');
                     editedField.className = 'hexagon-editedField';
-                    if(isTouchDevice()) editedField.style.textDecoration = 'underline';
                     
                     editedField.onfocus = () => {    
                         editedField.innerText = editedField.innerText.trim();
