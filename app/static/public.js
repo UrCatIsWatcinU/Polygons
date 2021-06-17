@@ -518,6 +518,15 @@ let colors = {
 }
 const defaultColors = Object.assign({}, colors);
 
+const constColors = {
+    RED_C: '#f52e2e',
+    GREEN_C: '#1bb123',
+    GREY_C: '#dfdfdf',
+    MAIN_C:'#974E9E',
+    BODU_BGC: '#f0f0f0',
+    DARK_MAIN_C: '#703868',
+}
+
 let hexsColors = [
     '#00A9B6', '#82B034', '#FFCA56', '#FF7626', '#FB91AF'
 ]
@@ -789,21 +798,17 @@ const main = async () => {
 
     const cssProps = {
         'max-about-height': (document.documentElement.clientHeight - 100) + 'px',
-        'grid-c': hexToRgb(colors.MAIN_C, 0.1),
-        'red-c': '#f52e2e',
-        'green-c': '#1bb123',
-        'grey-c': '#dfdfdf',
-        'main-c':'#974E9E',
-        'body-bgc': '#f0f0f0',
-        'dark-main-c': '#703868',
+        'grid-c': hexToRgb(constColors.MAIN_C, 0.1),
         'font': font.family,
         'font-size': font.size,
         'trans-dur': '.2s',
     }
     cssProps.trans = `all ${cssProps['trans-dur']} ease`;
-    for(let color in defaultColors){
-        cssProps[color.toLowerCase().replace(/_/g, '-',)] = colors[color] || defaultColors[color];
+    let allColors = Object.assign(defaultColors, constColors);
+    for(let color in allColors){
+        cssProps[color.toLowerCase().replace(/_/g, '-',)] = allColors[color] || defaultColors[color];
     }
+    
 
     cssProps['scroll-thumb-c'] = tinycolor(colors.BLACK_C).setAlpha(.1);
     

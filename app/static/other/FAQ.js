@@ -6,9 +6,9 @@ tasks.push(() => {
     if(document.documentElement.clientWidth > 900) content.style.paddingRight = (nav.offsetWidth - 40) + 'px';
 
     setCSSProps({
-        'marker-c': tinycolor(colors.MAIN_C).setAlpha(.7),
-        'active-linkedElem-bgc': tinycolor(colors.MAIN_C).setAlpha(.2),
-        'note-bgc': tinycolor(colors.MAIN_C).setAlpha(.1),
+        'marker-c': tinycolor(constColors.MAIN_C).setAlpha(.7),
+        'active-linkedElem-bgc': tinycolor(constColors.MAIN_C).setAlpha(.2),
+        'note-bgc': tinycolor(constColors.MAIN_C).setAlpha(.1),
     });
 
     document.querySelectorAll('.text').forEach(text => {

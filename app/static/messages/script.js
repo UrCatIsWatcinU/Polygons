@@ -622,7 +622,7 @@ tasks.push(() => {
     const headerHeight = document.querySelector('header').offsetHeight;
     document.body.style.paddingTop = headerHeight + 'px';
 
-    const messageBg = tinycolor(colors.MAIN_C).desaturate(20).lighten(38).toString();
+    const messageBg = tinycolor(constColors.MAIN_C).desaturate(20).lighten(38).toString();
     const cssProps = {
         'my-message-bgc': messageBg,
     }

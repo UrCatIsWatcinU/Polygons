@@ -63,7 +63,7 @@ tasks.push(() => {
 
     const usersCssProps = {
         'role-size': maxRoleSize + 'px',
-        'me-bgc': hexToRgb(colors.MAIN_C, .06)
+        'me-bgc': hexToRgb(constColors.MAIN_C, .06)
     }
 
     setCSSProps(usersCssProps);
