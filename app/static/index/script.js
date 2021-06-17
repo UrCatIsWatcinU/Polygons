@@ -150,7 +150,7 @@ window.addEventListener('load', async () => {
         categ.prepend(polygon); 
         
         if(categ.getAttribute('BG-img')){
-            createBgHex(categ, categ.getAttribute('BG-img').replace(/^\//, ''), categPath)
+            createBgHex(categ, categ.getAttribute('BG-img').replace(/^\//, ''), categPath, true)
         }else{
             polygon.innerHTML = `<path class="categ-path" d="${categPath}"></path>`;
         }

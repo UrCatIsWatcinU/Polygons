@@ -25,21 +25,6 @@ if(!user){
 const chatAdminsRoles = ['admin'];
 let activeChatId;
 
-const localTimeZoneOffset = (new Date).getTimezoneOffset() * 60;
-
-const shortDateFormater = Intl.DateTimeFormat(undefined, {
-    hour: 'numeric',
-    minute: 'numeric',
-});
-const longDateFormater = Intl.DateTimeFormat(undefined, {
-    day: 'numeric',
-    month: 'numeric',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric',
-    second: 'numeric'
-});
-
 const createMessage = (message) => {
     if(!message || document.querySelector('#m' + message.id) || message.chatId != activeChatId) return;
     const chat = document.querySelector('#c' + message.chatId);
@@ -99,7 +84,7 @@ const createMessage = (message) => {
                 setHexVisible(attachedHex, res.num);
 
                 if(res.BGImg){
-                    createBgHex(attachedHex, res.BGImg)
+                    createBgHex(attachedHex, res.BGImg, hexPath(), true);
                 }
 
                 if(!msgElem.querySelector('.attacments')) msgElem.firstElementChild.append(setClassName(document.createElement('div'), 'attachments'))
@@ -220,7 +205,7 @@ const changeChat = (id = null) => {
     const msgsTitle = document.querySelector('.messages-title-text');
     const msgsCont = document.querySelector('.messages-cont');
     if(!activeChatId){
-        msgsTitle.innerText = urlParams.get('send') ? translate('chats.chooseSend') + urlParams.get('send') : translate('chats.select');
+        msgsTitle.innerText = urlParams.get('send') ? translate('chats.chooseToSend') + urlParams.get('send') : translate('chats.select');
         msgsCont.classList.remove('messages-cont-active');
         document.querySelector('.app').classList.remove('app-messages');
         return;
@@ -304,7 +289,6 @@ const createChatWith = (evt) => {
 class ElChat extends HTMLElement{
     constructor() {
         super();
-        
     }
     connectedCallback() { 
         this.uuid = this.id.replace('c', '');
@@ -810,5 +794,5 @@ tasks.push(() => {
         }
     }
 
-    if(urlParams.get('send')) document.querySelector('.messages-title-text').innerText = translate('chats.chooseSend') + urlParams.get('send');
+    if(urlParams.get('send')) document.querySelector('.messages-title-text').innerText = translate('chats.chooseToSend') + urlParams.get('send');
 });

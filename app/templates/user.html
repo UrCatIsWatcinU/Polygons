@@ -16,10 +16,10 @@
                 <span>Id:</span>&nbsp;
                 <span class="user-id">{{ owner.id }}</span>
             </div>
-            <div class="user-info-item">
+            <!-- <div class="user-info-item">
                 <span>{{ _('Email') }}:</span>&nbsp;
                 <span>{{ owner.email }}</span>
-            </div>
+            </div> -->
             <div class="user-info-item">
                 <span>{{ _('Chains count') }}:</span>&nbsp;
                 <span>{{ owner.chains.count() }}</span>
@@ -40,13 +40,22 @@
                     </svg>
                 </div>
             </div>
-            <div class="user-btns">
-                {% if owner.id == user.id %}
-                    <button class="user-delete">{{ _('Delete profile') }}</button>
-                {% else %}
-                    <button class="user-chat">{{ _('Open chat') }}</button>
-                {% endif %}
-            </div>
+            {% if user %}
+                <div class="user-btns">
+                    {% if owner.id == user.id %}
+                        <button class="user-delete">{{ _('Delete profile') }}</button>
+                        <button class="user-subs">{{ _('Subscribers') }}</button>
+                    {% else %}
+                        <button class="user-chat">{{ _('Open chat') }}</button>
+                        {% if sub %}
+                            <button class="user-unsubscribe">{{ _('Unsubscribe') }}</button>
+                        {% else %}    
+                            <button class="user-subscribe">{{ _('Subscribe') }}</button>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            {% endif %}
+            
         </div>
         <div class="user-chains">
             {% for chain in owner.chains %}

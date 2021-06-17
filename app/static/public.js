@@ -5,6 +5,7 @@ translate.add({
         create: 'Create here',
         delete: 'Delete',
         not: 'Not here',
+        needFill: 'Fill previous',
         edit: 'Edit',
         send: 'Send to chat',
         copy: 'Copy link',
@@ -56,10 +57,14 @@ translate.add({
             T: 'Turned hexagons',
             I: 'Inner numeration',
             Z: 'Zoom with ctrl button',
-            S: 'Slide speed'
+            S: 'Slide speed',
+            RC: 'Reverse comments',
         },
         save: 'Save',
         reset: 'Reset'
+    },
+    subs: {
+        title: 'Subscribers'
     },
     chats: {
         chooseToSend: 'Choose chat to send ',
@@ -85,6 +90,15 @@ translate.add({
         send: 'Send',
         close: 'Close'
     },
+    upload: {
+        cant: 'Cannot upload file',
+        cantD: 'Your browser don\'t support files uploads',
+        format: 'Wrong file format',
+        formatD: 'Please choose file with one of these extentions',
+        big: 'Big file',
+        max: 'Max file size is ',
+        one: 'Choose one file'
+    },
     ptl: 'Please try later',
     ptls: 'Please try later. Status: '
 }, 'en');
@@ -103,6 +117,11 @@ translate.add({
         uid: 'Uid',
         date: 'Дата',
         not: 'Не здесь',
+        needFill: 'Заполните предыдущие',
+        copyMsgs: {
+            s: 'Ссылка скопирована',
+            uns: 'Не удалось скопировать ссылку'
+        },
     },
     defaults: {
         askTitle: 'Вы уверены?',
@@ -145,10 +164,14 @@ translate.add({
             T: 'Повернутые шестиугольники',
             I: 'Нумерация внутри',
             Z: 'Зум только с зажатым ctrl',
-            S: 'Скорость навигации'
+            S: 'Скорость навигации',
+            RC: 'Обратный порядок комментариев',
         },
         save: 'Сохранить',
         reset: 'Сбросить'
+    },
+    subs: {
+        title: 'Подписчики'
     },
     chatAbout: {
         h1: 'Информация о чате',
@@ -170,6 +193,15 @@ translate.add({
         send: 'Отправить',
         close: 'Закрыть'
     },
+    upload: {
+        cant: 'Невозможно залить файл',
+        cantD: 'Ваш браузер не поддерживает отправку файлов',
+        format: 'Неподходящее расширение',
+        formatD: 'Выберите файл с расширением из этого списка',
+        big: 'Слишком большой файл',
+        max: 'Максимальный размер файла - ',
+        one: 'Выберите один файл'
+    },
     ptl: 'Пожалуйста, попробуйте позже',
     ptls: 'Пожалуйста, попробуйте позже. Статус: ',
     errors: {
@@ -179,9 +211,14 @@ translate.add({
 }, 'ru');
 
 const allowedLangs = ['ru'];
+const searchParams = new URLSearchParams(window.location.search);
 
-const currentShortLocale = window.navigator.language.split('-')[0];
+const savedLocale = localStorage.getItem('lang');
+
+const currentShortLocale = !savedLocale || savedLocale === 'auto' ? window.navigator.language.split('-')[0] || searchParams.get('lang') : savedLocale;
 document.documentElement.setAttribute('lang', currentShortLocale);
+
+if(!searchParams.get('lang') && savedLocale && savedLocale != 'auto') window.location.search += `&lang=${currentShortLocale}`;
 
 translate.setLocale(allowedLangs.includes(currentShortLocale) ? currentShortLocale : 'en');
 
@@ -228,7 +265,7 @@ const setHexVisible = (hexagon, num) => {
         hexagon.style.setProperty('--bgc', hexsColors[((num-1) - hexsColors.length * (Math.ceil((num-1) / hexsColors.length) - 1)) - 1]);
         if(num == 1){
             hexagon.classList.add('hexagon-first');
-            hexagon.style.setProperty('--bgc', colors.MAIN_C);
+            hexagon.style.setProperty('--bgc', '');
         }
     }
 
@@ -391,7 +428,7 @@ const MAX_SIZE = 3000000;
 const EXTENTIONS = ['png', 'jpg', 'jpeg', 'gif'];
 const uploadFile = (files, url, successCB, evt=null) => {
     if(!window.FileReader){
-        showModal('Cannot upload file', 'Your browser don\'t support files uploads');
+        showModal(translate('upload.cant'), translate('upload.cantD'));
         return;
     }
     
@@ -401,18 +438,20 @@ const uploadFile = (files, url, successCB, evt=null) => {
     }
 
     if(files.length > 1){
-        showModal('Choose one file');
+        showModal(translate('upload.one'));
         return;
     }
     
     let file = files[0];
     
     if(!EXTENTIONS.map(ext => `image/${ext}`).includes(file.type)){
-        showModal('Wrong file format', `Please choose file with one of these extentions:\n ${EXTENTIONS.map(ext => ext.toUpperCase()).join(', ')}`);
+        showModal(translate('upload.format'), `${translate('upload.formatD')}:\n ${EXTENTIONS.map(ext => ext.toUpperCase()).join(', ')}`);
         return;
     }
+
     if(file.size > MAX_SIZE){
-        showModal('Big file', 'Max file size is ' + MAX_SIZE / 1000000 + 'MB')
+        showModal(translate('upload.big'), translate('upload.max') + MAX_SIZE / 1000000 + 'MB');
+        return
     }
 
     const fileForm = new FormData();
@@ -425,18 +464,39 @@ const uploadFile = (files, url, successCB, evt=null) => {
             body: fileForm
         }).then(res => {
             if(!res.ok){
-                showModal('An error occurred while uploading the image', 'Please try again. Status: ' + res.status);
+                showModal('An error occurred while uploading the image', translate('ptls') + res.status);
             }else{
                 return res.json()
             }
         }).then(imgUploadRes => {
-            if(!imgUploadRes || !imgUploadRes.success) return showModal('An error occurred while uploading the image', 'Please try again');
+            if(!imgUploadRes || !imgUploadRes.success) return showModal('An error occurred while uploading the image', translate('ptls'));
             successCB(imgUploadRes);
         });
     }); 
 
     return file;
 }
+
+const localTimeZoneOffset = (new Date).getTimezoneOffset() * 60;
+
+const shortDateFormater = Intl.DateTimeFormat(currentShortLocale, {
+    hour: 'numeric',
+    minute: 'numeric',
+});
+const middleDateFormater = Intl.DateTimeFormat(currentShortLocale, {
+    hour: 'numeric',
+    minute: 'numeric',
+    weekday: 'short'
+});
+const longDateFormater = Intl.DateTimeFormat(currentShortLocale, {
+    day: 'numeric',
+    month: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric',
+    weekday: 'short'
+});
 
 const tasks = [];
 
@@ -450,12 +510,10 @@ let otherSettings = {
 }
 
 let colors = {
-    BODY_BGC:'#f0f0f0',
+    FIELD_BGC:'#f0f0f0',
     ABOUT_BGC: '#dfdfdf',
     BLACK_C:'#333333',
     WHITE_C: '#f0f0f0',
-    MAIN_C:'#974E9E',
-    DARK_MAIN_C: '#703868',
     HEX_STROKE_C: '#333333',
 }
 const defaultColors = Object.assign({}, colors);
@@ -494,17 +552,182 @@ let hexSizes = {
 hexSizes.setBodyHeight(52 * 1.5);
 
 let hexPath = () => `M 0 ${hexSizes.TRIANGLE_HEIGHT} L ${hexSizes.HEXAGON_WIDTH/2} 0 L ${hexSizes.HEXAGON_WIDTH} ${hexSizes.TRIANGLE_HEIGHT} L ${hexSizes.HEXAGON_WIDTH} ${hexSizes.HEXAGON_HEIGHT-hexSizes.TRIANGLE_HEIGHT} L ${hexSizes.HEXAGON_WIDTH/2} ${hexSizes.HEXAGON_HEIGHT} L 0 ${hexSizes.HEXAGON_HEIGHT-hexSizes.TRIANGLE_HEIGHT} Z`;
-const createBgHex = (hexagon, url, path = hexPath()) => {
+
+const setHexAboutPosition = (hexagon, hexagonAbout) => {
+    const checkHexVisibility = (r, h) => document.querySelector(`#r${r} #h${h}`) ? document.querySelector(`#r${r} #h${h}`).classList.contains('hexagon-visible') : false;
+    let rId = hexagon.rowId;
+    let hId = +hexagon.id.replace('h', '');
+
+    if(checkHexVisibility(rId, hId + 1) && checkHexVisibility(rId, hId - 1)){
+        if(hexagon.parentElement.classList.contains('row-moved')){
+            if(checkHexVisibility(rId - 1 , hId) || checkHexVisibility(rId - 1, hId + 1)){
+                hexagonAbout.style.top = (hexSizes.HEXAGON_HEIGHT + 5) + 'px';
+            }else if(checkHexVisibility(rId + 1, hId) || checkHexVisibility(rId + 1, hId + 1)){
+                hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5) + 'px';
+            }else{
+                hexagonAbout.style.top = (hexSizes.HEXAGON_HEIGHT + 5) + 'px';
+            }
+        }else{
+            if(checkHexVisibility(rId - 1 , hId) || checkHexVisibility(rId - 1, hId - 1)){
+                hexagonAbout.style.top = (hexSizes.HEXAGON_HEIGHT + 5) + 'px';
+            }else if(checkHexVisibility(rId + 1, hId) || checkHexVisibility(rId + 1, hId - 1)){
+                hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5) + 'px';
+            }else{
+                hexagonAbout.style.top = (hexSizes.HEXAGON_HEIGHT + 5) + 'px';
+            }
+        }
+    }else if(checkHexVisibility(rId, hId + 1)){
+        hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
+    }else if(checkHexVisibility(rId, hId - 1)){
+        hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
+    }else{
+        if(hexagon.parentElement.classList.contains('row-moved')){
+            if(checkHexVisibility(rId + 1, hId) && checkHexVisibility(rId + 1, hId+ 1)){
+                hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5 - hexSizes.TRIANGLE_HEIGHT) + 'px';
+                if(checkHexVisibility(rId - 1, hId)){
+                    hexagonAbout.style.bottom = 0
+                    hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
+                }else if(checkHexVisibility(rId - 1, hId + 1)){
+                    hexagonAbout.style.bottom = 0
+                    hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
+                }else{
+                    hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
+                }
+            }else if(checkHexVisibility(rId + 1, hId)){
+                hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
+            }else if(checkHexVisibility(rId + 1, hId + 1)){
+                hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
+            }else{
+                hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
+            }
+        }else{
+            if(checkHexVisibility(rId + 1, hId - 1) && checkHexVisibility(rId + 1, hId)){
+                hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5 - hexSizes.TRIANGLE_HEIGHT) + 'px';
+                if(checkHexVisibility(rId - 1, hId)){
+                    hexagonAbout.style.bottom = 0
+                    hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
+                }else if(checkHexVisibility(rId - 1, hId + 1)){
+                    hexagonAbout.style.bottom = 0
+                    hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
+                }else{
+                    hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
+                }
+            }else if(checkHexVisibility(rId + 1, hId - 1)){
+                hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
+            }else if(checkHexVisibility(rId + 1, hId)){
+                hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
+            }else{
+                hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
+            }
+        }
+    }
+}
+
+/**
+ * 
+ * @param {HTMLElement} hexagon 
+ */
+const createBgHex = (hexagon, url, path = hexPath(), onlyView = false) => {
+    if(hexagon.querySelector('.hexagon-editedField') && !onlyView) return;
+    
+    hexagon.BGImg = url;
     hexagon.querySelector('.polygon').innerHTML = `
     <mask id="hexagon-bgImg-mask">
-        <path fill="#fff" d="${path}"></path>
+    <path fill="#fff" d="${path}"></path>
     </mask>
     <image draggable="false" style="pointer-events: none;" mask="url(#hexagon-bgImg-mask)" href="/${url}" preserveAspectRatio="xMidYMid slice" width="100%" height="100%"></image>`;
+    if(!onlyView){
+        hexagon.classList.add('hexagon-bg');
+
+        hexagon.addEventListener('click', (evt) => {
+            if(hexagon.querySelector('.hexagon-about')){
+                evt.stopImmediatePropagation();
+                return;
+            }
+            const imgAbout = setClassName(document.createElement('div'), 'hexagon-about image-about');
+            
+            imgAbout.addEventListener('mousedown', (evt) => {
+                evt.stopImmediatePropagation();
+            }, {passive: false});
+
+            const clearAbouts = () => {
+                if(hexagon.isContextmenu || document.querySelectorAll('.ask').length) return;
+                document.querySelectorAll('.hexagon-about').forEach(elem => {
+                    elem.remove();
+                });
+                document.removeEventListener('mousedown', clearAbouts);
+            }
+            clearAbouts();
+
+            imgAbout.innerHTML = `<img src="/${url}" alt="Hexagon image">`;
+            hexagon.append(imgAbout);
+            imgAbout.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center',
+                inline: 'center'
+            });
+
+            setHexAboutPosition(hexagon, imgAbout);
+
+            document.addEventListener('mousedown', clearAbouts);
+            
+        }, {passive: false})
+    }
 }
 
 const main = async () => {
-    if(isIOS()) document.body.classList.add('ios')
-    if(isTouchDevice()) document.body.classList.add('touch-device')
+    if(isIOS()) document.body.classList.add('ios');
+    if(isTouchDevice()) document.body.classList.add('touch-device');
+
+    const menuBtnsActions = {
+        lang: (btn) => {
+            const langDrop = setClassName(document.createElement('div'), 'menu-cont-drop menu-cont-langDrop');
+            
+            for(let l of allowedLangs.concat(['en', 'auto'])){
+                langDrop.innerHTML += `<div class="menu-cont-dropItem${l == currentShortLocale ? ' menu-cont-dropItem-selected' : ''}">${l}</div>`;
+            }
+            langDrop.onclick = (evt) => {
+                if(evt.target.classList.contains('menu-cont-dropItem') && !evt.target.classList.contains('menu-cont-dropItem-selected')){
+                    if(evt.target.innerText !== 'auto') window.location.search = 'lang=' + evt.target.innerText;
+                    localStorage.setItem('lang', evt.target.innerText);
+                }
+            }
+            
+            langDrop.style.left = btn.offsetLeft + 'px';
+            btn.parentElement.append(langDrop);
+            langDrop.style.top = btn.parentElement.offsetHeight + 'px';
+        }
+    }
+
+    const clearDrops = () => {
+        const drops = document.querySelectorAll('.menu-cont-drop');
+        for(let drop of drops){
+            drop.remove();
+        };
+
+        document.removeEventListener('click', clearDrops);
+        return drops.length;
+    }
+    for(let action in menuBtnsActions){
+        const actionBtn = document.querySelector('.menu-cont-' + action); 
+        if(actionBtn) actionBtn.onclick = () => {
+            if(!clearDrops()){
+                menuBtnsActions[action](actionBtn);
+                setTimeout(() => {
+                    document.addEventListener('click', clearDrops);
+                }, 0)
+            } 
+        }; 
+    }
+
+    socket.on('new-notification-for-' + document.documentElement.getAttribute('userId'), (data) => {
+        if(document.title.toLowerCase().includes('notifications')) return;
+        const notificationCount = document.querySelector('.notifications-count');
+        if(notificationCount){
+            ++notificationCount.innerText;
+            notificationCount.classList.remove('notifications-countInvisible');
+        }
+    });
     
     let mainLogo = document.querySelector('.header-img.big');
     let smallLogo = document.querySelector('.header-img.small');
@@ -568,10 +791,16 @@ const main = async () => {
         'max-about-height': (document.documentElement.clientHeight - 100) + 'px',
         'grid-c': hexToRgb(colors.MAIN_C, 0.1),
         'red-c': '#f52e2e',
+        'green-c': '#1bb123',
+        'grey-c': '#dfdfdf',
+        'main-c':'#974E9E',
+        'body-bgc': '#f0f0f0',
+        'dark-main-c': '#703868',
         'font': font.family,
         'font-size': font.size,
-        'trans': 'all .2s ease',
+        'trans-dur': '.2s',
     }
+    cssProps.trans = `all ${cssProps['trans-dur']} ease`;
     for(let color in defaultColors){
         cssProps[color.toLowerCase().replace(/_/g, '-',)] = colors[color] || defaultColors[color];
     }
@@ -584,13 +813,14 @@ const main = async () => {
         showModal('Error', `${msg} in ${url.split('/').pop()}:${line}`);
     };
 
+    // поиск
     if(document.querySelector('.find-button')){
         const search = document.querySelector('.find-button').onclick = async (evt) => {
             let input = document.querySelector('.find-input').value.trim().toLowerCase();
 
             if(!input) return;
             
-            let keywords = input.split(/[,-\.:]/).filter(word => word);
+            let keywords = input.split(/[,-\.:]\s?/).filter(word => word);
             let hexs = await fetch('/hexs/all');
             
             let hexsFound = []; 
@@ -599,10 +829,16 @@ const main = async () => {
             if(hexs.ok){
                 hexs = await hexs.json();
     
-                let first = keywords.shift()
+                let first = keywords.shift();
+                const splitedFirst = first.split(' '); 
                 for(let hex of hexs.body){
-                    if(hex.innerText.toLowerCase().includes(first)){
-                        hexsFound.push(hex)
+                    const hexText = hex.innerText.toLowerCase(); 
+                    if(hexText.includes(first)){
+                        hexsFound.push(hex);
+                    }
+                    
+                    if(hexText.split(' ').length > 2 && hexText.match(new RegExp(`(${splitedFirst.join('|')})?\\s*`.repeat(hexText.split(' ').length)))){
+                        hexsFound.push(hex);
                     }
                 }
     
@@ -612,12 +848,12 @@ const main = async () => {
                     neededHex = hexsFound[getRand(0, hexsFound.length - 1)]
                 }else{
                     hexsFound.forEach(hex => {
-                        let hexChain = hexs.body.filter(hexToCheck => hexToCheck.chainId == hex.chainId && hexToCheck != hex && hexToCheck.categ == hex.categ);
+                        let hexChain = hexs.body.filter(hexToCheck => hexToCheck.chainId == hex.chainId && hexToCheck != hex);
     
                         for(let chainHex of hexChain){
                             if(keywords.includes(chainHex.innerText)){
                                 neededHex = hex;
-                                return
+                                return;
                             }
                         }
                     });
@@ -699,22 +935,20 @@ const main = async () => {
         }, 100)
     }
     
-    setTimeout(() => {
-        tasks.forEach(task => {
-            try{
-                task();
-            }catch(err){
-                showModal('Critical error', err)
-            }
-            
-        });
-    }, 0)
+    tasks.forEach(task => {
+        try{
+            task();
+        }catch(err){
+            showModal('Critical error', `${err} in tasks`)
+        }
+    });
 }
 window.addEventListener('load', main);
 
 socket.on('reload', () => {
     window.location.href = '/'
 });
+
 
 
 const loading = `<div class="inline-loading loading">

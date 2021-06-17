@@ -41,12 +41,14 @@
     </style>
     <script>
         tasks.push(() => {
-            document.querySelector('.chat-admin').onclick = () => {
-                const chatsURL = new URL('/chats', window.location.origin);
-                chatsURL.searchParams.append('with', 1);
-                chatsURL.searchParams.append('send', `There is {{error_message}} [link here:${window.location.href}]`);
-
-                window.location = chatsURL;
+            if(document.querySelector('.chat-admin')){
+                document.querySelector('.chat-admin').onclick = () => {
+                    const chatsURL = new URL('/chats', window.location.origin);
+                    chatsURL.searchParams.append('with', 1);
+                    chatsURL.searchParams.append('send', `There is {{error_message}} [link here:${window.location.href}]`);
+    
+                    window.location = chatsURL;
+                }
             }
         });
     </script>

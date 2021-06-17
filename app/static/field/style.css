@@ -41,6 +41,7 @@ html{
   transition: none;
   touch-action: pan-x pan-y !important;
   /* touch-action: auto !important; */
+  background-color: var(--field-bgc);
 }
 .hexagon-visible{
   --bgc: var(--main-c);
@@ -67,6 +68,10 @@ html{
   /* transform: scale(.92); */
   filter: drop-shadow(6px 6px 3px rgba(68, 68, 68, 0.4));
   /* transform: scale(.9) translate(-1px, -1px); */
+}
+.hexagon-bg{
+  cursor: zoom-in;
+  z-index: 5;
 }
 .hexagon-num{
   border-radius: 50%;
@@ -147,7 +152,7 @@ html{
 .hexagon-about{
   background: var(--about-bgc);
   color: var(--black-c);
-  width: 420px;
+  width: 470px;
   min-height: 100px;
   max-height: var(--max-about-height);
   
@@ -313,6 +318,7 @@ html{
   top: 5px;
   right: 0;
 }
+.hexagon-about-comment-complaintBtn,
 .hexagon-about-comment-replyBtn{
   width: var(--size);
   height: var(--size);
@@ -328,12 +334,20 @@ html{
 .hexagon-about-comment-userInReply{
   font-size: .85em;
   opacity: .6;
+  margin-left: 2px;
+}
+.hexagon-about-comment-userCont{
+  opacity: .7;
+  font-size: .95em;
+}
+.hexagon-about-comment-num{
+  font-style: italic;
+  font-size: .8em;
+  user-select: none;
 }
 .hexagon-about-comment-user{
-  opacity: .7;
-  text-decoration: none;
-  font-size: .95em;
   position: relative;
+  text-decoration: none;
 }
 .hexagon-about-comment-user::after{
   content: '';
@@ -418,6 +432,10 @@ html{
 }
 .about-loading-svg{
   width: 50px;
+}
+
+.image-about{
+  cursor: default;
 }
 
 

@@ -1,0 +1,13 @@
+<el-notification type="{{ notification.type }}" uuid="{{ notification.id }}" date="{{ date_parse(notification.date) }}" class="notification">
+    <h4 class="notification-title">{{ _('New') }} <b>{{ notification.type }}</b></h4>
+    <div class="notification-content">
+        <span class="notification-text">{{ notification.text }}.</span>
+        <a href="{{ notification.url }}" class="notification-link">{{ _('See more') }}</a>
+    </div>
+    <div class="notification-btns">
+        <svg class="notification-btns-delete">
+            <line x1="0%" y1="0%" x2="100%" y2="100%"></line>
+            <line x1="0%" y1="100%" x2="100%" y2="0%"></line>
+        </svg>
+    </div>
+</el-notification>

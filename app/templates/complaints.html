@@ -11,12 +11,22 @@
                     <b>{{complaint.author.username}}</b>&nbsp;
                     <span>{{complaint.author.email}}</span>
                 </div>
-
-                <span>Hex:</span>&nbsp;
-                <div class="complaint-hex">
-                    <h4 class="complaint-hex-title"><a href="/fields/{{complaint.hex.categ.name}}?{{complaint.hex.selector}}">{{complaint.hex.inner_text}}</a></h3>
-                    <div class="complaint-hex-about">{{complaint.hex.about}}</div>
-                </div>
+                {% if complaint.hex_id %}
+                    <span>Hex:</span>&nbsp;
+                    <div class="complaint-hex">
+                        <h4 class="complaint-hex-title"><a href="/fields/{{complaint.hex.categ.name}}?hexId={{complaint.hex.id}}">{{complaint.hex.inner_text}}</a></h3>
+                    </div>
+                {% elif complaint.to %}
+                    {% set to = json.loads(complaint.to) %}
+                    <span>Entity: {{ to['entity'] }}</span>&nbsp;
+                    <div class="complaint-hex">
+                        <h4 class="complaint-hex-title"><a href="{{ to['url'] }}">{{ to['urlText']}}</a></h3>
+                        <div class="complaint-hex-about">
+                            {{ to['entityText'] }}
+                        </div>
+                    </div>
+                {% endif %}
+                
 
                 <span>Text:</span>&nbsp;
                 <div class="complaint-text">{{complaint.body}}</div>

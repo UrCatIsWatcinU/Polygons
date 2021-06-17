@@ -8,8 +8,8 @@ from datetime import datetime
 
 from app import app, socketio, db, babel
 from app.forms import LoginForm, RegistrationForm
-from app.models import BannedIp, Chain, Chat, ChatMember, ChatRole, Comment, Complaint, Hexagon, Image, Message, RatingChange, User, Categ, UserRating
-from app.lib import create_dir, delete_dir, serialize
+from app.models import BannedIp, Chain, Chat, ChatMember, ChatRole, Comment, Complaint, Hexagon, Image, Message, Notification, RatingChange, Subscription, User, Categ, UserRating
+from app.lib import create_dir, date_to_timestamp, delete_dir, serialize
 from app.email import send_email
 
 from flask import render_template, redirect, url_for, request, abort
@@ -21,10 +21,9 @@ from flask_sqlalchemy import sqlalchemy
 from sqlalchemy import func
 from sqlalchemy.sql.expression import select
 
-
 @babel.localeselector
 def get_locale():
-    return request.accept_languages.best_match(app.config['LANGUAGES'])
+    return request.args.get('lang') or request.accept_languages.best_match(app.config['LANGUAGES'])
 
 @app.before_request
 def block_method():
@@ -270,17 +269,62 @@ def user(id):
     allowed_change = 0
 
     user = None
+    subscription = None
     if current_user.is_authenticated and current_user.id:
         user = current_user
         user_change = UserRating.query.filter_by(user_id=id, user_who_change_id=user.id).first()
         if user_change:
             allowed_change = -user_change.change
+        subscription = Subscription.query.filter_by(user_id=owner.id, subscriber_id=current_user.id).first()
 
     def hexs_sort_fn(hexs):
         list(hexs).sort(key=lambda hex: hex.num)
         return hexs or []
 
-    return render_template('user.html', title=owner.username if owner.id != user.id else 'Profile', owner=owner, allowed_change=allowed_change, hexs_sort_fn=hexs_sort_fn, user=user)
+
+    return render_template('user.html', 
+        title=owner.username if (not user or owner.id != user.id) else 'Profile', 
+        owner=owner, 
+        allowed_change=allowed_change, 
+        hexs_sort_fn=hexs_sort_fn, 
+        user=user,
+        sub=subscription
+    )
+
+@app.route('/users/<id>/subscribe')
+@login_required
+def subscribe(id):
+    user = User.query.get_or_404(id)
+
+    subscription = Subscription(user_id = user.id, subscriber_id=current_user.id)
+    db.session.add(subscription)
+    db.session.commit()
+
+    return json.dumps({'success': True})
+
+@app.route('/users/<id>/unsubscribe')
+@login_required
+def unsubscribe(id):
+    user = User.query.get_or_404(id)
+    
+    subscription = Subscription.query.filter_by(user_id=user.id, subscriber_id=current_user.id).first_or_404()
+    db.session.delete   (subscription)
+    db.session.commit()
+
+    return json.dumps({'success': True})
+
+@app.route('/users/subscribers')
+@login_required
+def all_subs():
+    subs = current_user.subscriptions_to_me
+    
+    return json.dumps([{
+        'id': sub.id,
+        'user': {
+            'id': sub.subscriber_id,
+            'username': sub.subscriber.username
+        }
+    } for sub in subs])
 
 @app.route('/users/<id>/json')
 def user_json(id):
@@ -692,6 +736,21 @@ def get_hex_json(id):
 @app.route('/hexs/<id>/about')
 def get_hex_about(id): 
     return Hexagon.query.get_or_404(id).about if Hexagon.query.get_or_404(id).about else ''
+
+def create_notification(recipient_id, text, type, url):
+    notification = Notification(
+        recipient_id=recipient_id, 
+        text=text, 
+        type=type,
+        url=url
+    ) 
+
+    db.session.add(notification)
+    db.session.commit()
+    notification.send_notification()
+    
+    return notification
+
 @app.route('/hexs/<id>/about/change', methods=['POST'])
 @login_required
 def change_hex_about(id):
@@ -748,6 +807,15 @@ def upload_hex_img(id):
         db.session.delete(img)
         db.session.commit()
         return json.dumps({'success': False})
+    
+    subs = current_user.subscriptions_to_me
+    for sub in subs:
+        create_notification(
+            sub.subscriber_id, 
+            _('User %(username)s changed his/her hexagon in category %(categname)s', categname=hex.categ.name, username=current_user.username),
+            'change',
+            url_for('get_hex', id=hex.id)
+        )
 
     return json.dumps({'success': True, 'url': filename, 'uuid': img.id, "isBG": img.is_BG})
 
@@ -820,12 +888,23 @@ def new_hex(categ_name):
 
         hexs_to_send.append(prepare_hex_to_send(hex))
 
+
     if(categ):
         socketio.emit('hexs', {
             "action": 'new',
             "categ": categ.name,
             "body": json.dumps(hexs_to_send)
         })
+
+        subs = current_user.subscriptions_to_me
+        for sub in subs:
+            create_notification(
+                sub.subscriber_id, 
+                _('User %(username)s changed his/her hexagon in category %(categname)s', categname=hex.categ.name, username=current_user.username),
+                'change',
+                url_for('get_hex', id=hex.id)
+            )
+
         return json.dumps({"success": True, "userId": current_user.id, 'hexs': hexs_to_send})
     else:
         return json.dumps({"success": False})
@@ -933,6 +1012,14 @@ def create_comment(id):
     db.session.add(comment)
     db.session.commit()
 
+    if current_user.id != chain.user_id:
+        create_notification(
+            recipient_id=chain.user_id, 
+            text=_('New comment for you chain number %(chain)s in category %(categ)s', chain=chain.id, categ=chain.categ.name), 
+            type='comment', 
+            url=url_for('get_hex', id=chain.hexs[0].id)
+        )
+
     socketio.emit(f'newComment{chain.id}', json.dumps(prepare_comment_to_send(comment)))
     return json.dumps({'success': True})
 
@@ -1038,22 +1125,26 @@ def get_complaints():
     if current_user.role_id != 2:
         return '', 403
 
-    return render_template('complaints.html', complaints=Complaint.query.all(), title="Complaints", user=current_user)
+    return render_template('complaints.html', complaints=Complaint.query.all(), title="Complaints", user=current_user, json=json)
 
 @app.route('/complaints/new', methods=['POST'])
 @login_required
 def create_complaint():
     raw_complaint = request.get_json(True)
-    raw_hex = raw_complaint['hexagon']
-    hex_id = Hexagon.query.filter(Hexagon.selector == raw_hex['selector'], Hexagon.categ_id == Categ.query.filter_by(name=raw_hex['categ']).first_or_404().id).first().id
+    
+    hex_id = None
+    if 'hexagon' in raw_complaint and raw_complaint['hexagon']:
+        raw_hex = raw_complaint['hexagon']
+        hex_id = Hexagon.query.filter(Hexagon.selector == raw_hex['selector'], Hexagon.categ_id == Categ.query.filter_by(name=raw_hex['categ']).first_or_404().id).first().id
 
-    if not hex_id:
+    if not hex_id and not 'to' in raw_complaint:
         return json.dumps({'success': False, 'message': _('No such hexagon')})
 
     complaint = Complaint(
         body=raw_complaint['text'],
         hex_id=hex_id, 
-        user_id=current_user.id
+        user_id=current_user.id,
+        to=raw_complaint['to'] if 'to' in raw_complaint else ''
     )
 
     db.session.add(complaint)
@@ -1087,9 +1178,45 @@ def delete_all_complaints():
 
 
 
+@app.route('/notifications')
+@login_required
+def notifications():
+    user = current_user
+    user.last_notification_seen = datetime.utcnow()
+    
+    db.session.add(user)
+    db.session.commit()
+
+    return render_template('notifications.html', 
+        user=user, 
+        title='Notifications', 
+        notifications=Notification.query.filter_by(recipient_id=user.id).order_by(db.desc(Notification.date)).all()
+    )
+
+@app.route('/notifications/<int:id>/delete', methods=['DELETE'])
+@login_required
+def delte_notifications(id):
+    notification = Notification.query.get_or_404(id)
+    
+    if notification.recipient_id != current_user.id and current_user.role.name != 'admin':
+        return json.dumps({'success': False, 'message': _('Access denied')})
+        
+    db.session.delete(notification)
+    db.session.commit()
+
+    return json.dumps({'success': True})
+
 @app.route('/help')
 def help():
     user = None
     if current_user and current_user.is_authenticated:
         user = current_user
     return render_template('help.html', user=user, title='Help')
+
+@app.route('/contacts')
+def contacts():
+    user = None
+    if current_user and current_user.is_authenticated:
+        user = current_user
+    return render_template('contacts.html', user=user, title='Contacts')
+

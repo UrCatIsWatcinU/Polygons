@@ -164,6 +164,7 @@ a{
     z-index: 10;
     padding: 7.5px;
     font-size: .9em;
+    cursor: default;
 }
 .contextmenu, button, input, textarea{
     background-color: var(--body-bgc);
@@ -179,7 +180,10 @@ a{
 }
 .contextmenu-line{
     cursor: unset;
-    margin: 4px 0;
+    margin: 6px 0;
+}
+.contextmenu-item:not(.contextmenu-item:last-child){
+    margin-bottom: 4px;
 }
 
 
@@ -541,6 +545,40 @@ a{
     text-decoration: underline;
     user-select: none;
     font-size: .9em;
+    
+}
+.menu-cont{
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+.menu-cont-btn{
+    --size: 1.1em;
+    margin: 0 2px;
+    cursor: pointer;
+    flex: none;
+    height: var(--size);
+}
+.menu-cont-svg{
+    height: var(--size);
+    width: var(--size);
+    stroke: var(--main-c);
+    stroke-width: 1.5px;
+    fill: none;
+}
+.menu-cont-drop{
+    position: absolute;
+    background-color: var(--grey-c);
+    padding: 3px 5px;
+    border-radius: 2px;
+}
+.menu-cont-dropItem{
+    font-size: .95em;
+    cursor: pointer;
+    user-select: none;
+}
+.menu-cont-dropItem-selected{
+    color: var(--main-c);
 }
 .user-cont{
     display: flex;
@@ -548,6 +586,34 @@ a{
     cursor: pointer;
     position: relative;
 }
+.user-cont .username{
+    margin-left: 5px;
+}
+.menu-cont-notifications{
+    position: relative;
+}
+.notifications-count{
+    --size: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: var(--size);
+    height: var(--size);
+    border-radius: 50%;
+    background-color: var(--red-c);
+    color: var(--white-c);
+    font-size: 9px;
+}
+.notifications-countInvisible{
+    display: none;
+}
+
+
+
+
 .complaint{
     position: relative;
     padding-left: 30px;
@@ -619,6 +685,12 @@ a{
 .user-rating-num{
     margin: 0 5px;
 }
+.rating-positive{
+    color: var(--green-c);
+}
+.rating-negative{
+    color: var(--red-c)
+}
 .user-rating-btn{
     --size: 1em;
     width: var(--size);
@@ -656,6 +728,14 @@ a{
 .user-chains{
     overflow-y: auto;
     overflow-x: hidden;
+}
+
+.contacts-item{
+    margin-bottom: 7.5px;
+}
+
+.subs{
+    position: relative;
 }
 
 

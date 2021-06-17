@@ -75,7 +75,54 @@ window.addEventListener('load', async () => {
             const GRID_HEIGHT = size[0]; // измеряется в шестиугольниках
             const GRID_WIDTH = size[1]; // измеряется в шестиугольниках
 
+            const showComplaintModal = (hex, to = null) => {
+                let complaint = showModal('','', true);
+                complaint = complaint.firstElementChild;
+                complaint.classList.add('complaint');
+
+                complaint.innerHTML = `
+                <h1 class="complaint-title">${translate('contextmenu.complain')}</h1>
+                <svg class="complaint-close"><line x1="50%" y1="0%" x2="50%" y2="100%"></line><line x1="0%" y1="50%" x2="100%" y2="50%"></line></svg>
+                <div class="complaint-textarea">
+                    <label for="complaint-text">${translate('complaint.text')}</label> 
+                    <br> 
+                    <textarea id="complaint-text" autofocus maxlength="400" spellcheck="true" wrap="soft"></textarea>
+                </div>
+                <div class="btn-cont" style="display: flex;">
+                    <button class="send-button">${translate('btns.send')}</button>
+                    <button class="close-button">${translate('btns.close')}</button>
+                </div>
+                `;
+
+                complaint.querySelector('.send-button').onclick = async () => {
+                    try{
+                        let res = await fetch('/complaints/new', {
+                            method: 'POST',
+                            body:JSON.stringify({
+                                hexagon: hex,
+                                to: to,
+                                text: complaint.querySelector('#complaint-text').value
+                            })
+                        })
+
+                        if(res.ok){
+                            res = await res.json();
+
+                            if(res.success) showModal(translate('complaint.successT'), translate('complaint.successB'));
+                            else showModal('An error occurred while recording the complaint', translate('ptl'));
+                        }else{
+                            showModal('An error occurred while recording the complaint', translate('ptl'));
+                        }
+                    }catch(err){
+                        showModal('An error occurred while sending the complaint', err);
+                    }
+                };
+                complaint.querySelector('.close-button').onclick = hideModal;
+                complaint.querySelector('.complaint-close').onclick = hideModal;
+            }
+
             const createEditedField = hexagon => {
+                if(hexagon.BGImg) return null;
                 let editedField = hexagon.querySelector('.hexagon-editedField');
                 if(!editedField){
                     editedField = document.createElement('div');
@@ -450,21 +497,30 @@ window.addEventListener('load', async () => {
                     }
 
                     const createComments = async () => {
+                        hexagonAbout.comments = [];
                         const commentsElem = hexagonAbout.querySelector('.hexagon-about-comments-cont');
-                        const createComment = (comment) => {
+                        const createComment = (comment, num) => {
+                            typeof(hexagonAbout.comments) === 'object' && hexagonAbout.comments.push(comment);
                             let commentElem = setClassName(document.createElement('div'), 'hexagon-about-comment');
                             commentElem.id = 'comment' + comment.id;
                             commentElem.userId = comment.userId
             
-                            commentElem.innerHTML = `<div class="hexagon-about-comment-userCont">
+                            commentElem.innerHTML = `
+                            <div class="hexagon-about-comment-userCont">
+                                <span class="hexagon-about-comment-num">#${num + 1 || ''}</span>&nbsp;
                                 <a href="/users/${comment.userId}" class="hexagon-about-comment-user"></a>
                             </div>
                             <div class="hexagon-about-comment-body"></div>
                             <div class="hexagon-about-comment-btns">
-                            <svg xmlns="http://www.w3.org/2000/svg" title="reply" class='hexagon-about-comment-replyBtn' viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="15 14 20 9 15 4"></polyline>
-                                <path d="M4 20v-7a4 4 0 0 1 4-4h12"></path>
-                            </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" title="complain" class="hexagon-about-comment-complaintBtn" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" title="reply" class="hexagon-about-comment-replyBtn" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="15 14 20 9 15 4"></polyline>
+                                    <path d="M4 20v-7a4 4 0 0 1 4-4h12"></path>
+                                </svg>
                             </div>`;
                             const commentUser = commentElem.querySelector('.hexagon-about-comment-user');
                             commentElem.username = commentUser.innerText = comment.username;
@@ -508,6 +564,17 @@ window.addEventListener('load', async () => {
                                 const input = hexagonAbout.querySelector('#newComment');
                                 input.value = `[reply ${comment.id}]`
                             }
+
+                            commentElem.querySelector('.hexagon-about-comment-complaintBtn').onclick = () => {
+                                showComplaintModal(null, JSON.stringify({
+                                    entity: 'comment',
+                                    url: `/hexs/${hexagon.uuid}`,
+                                    urlText: `#${num} ${comment.username}:`,
+                                    entityText: comment.body,
+                                    text: comment.body
+                                }))
+                            };
+                            
                             
                             if(comment.userId == user.userId){
                                 commentElem.style.setProperty('--underline-color', 'var(--main-c)')
@@ -520,7 +587,7 @@ window.addEventListener('load', async () => {
                                     commentElem.classList.add('hexagon-about-comment-reply');
                                     replyTo.after(commentElem);
 
-                                    commentUser.parentElement.innerHTML += `&nbsp;
+                                    commentUser.parentElement.innerHTML += `
                                     <span class="hexagon-about-comment-userInReply">${translate('hexAbout.inReply')} 
                                         <a href="/users/${replyTo.userId}">${replyTo.username}</a>
                                     </span>`;
@@ -528,7 +595,8 @@ window.addEventListener('load', async () => {
                                     return;
                                 }
                             }
-                            commentsElem.append(commentElem)
+                            if(otherSettings.reverseComments) commentsElem.append(commentElem);
+                            else commentsElem.prepend(commentElem);
                         }
 
                         const commentsRes = await fetch(`/chains/${hexagon.chainId}/comments`);
@@ -539,13 +607,12 @@ window.addEventListener('load', async () => {
                         if(!comments || !comments.length){
                             commentsElem.innerHTML = '<h3 class="hexagon-about-comments-empty">No comments</h3>';
                         }else{
-                            hexagonAbout.comments = comments;
                             comments.forEach(createComment)
                         }
             
                         socket.on('newComment' + hexagon.chainId, (data) => {
                             try{
-                                createComment(JSON.parse(data))
+                                createComment(JSON.parse(data), hexagonAbout.comments.length)
                             }catch(err){
                                 console.log(err);
                             }
@@ -626,10 +693,15 @@ window.addEventListener('load', async () => {
                         }, 0)
                     }
                     
-                    fetch(`/chains/${hexagon.chainId}/rating`).then(async rating =>{
+                    fetch(`/chains/${hexagon.chainId}/rating`).then(async rating => {
                         if(rating.ok){
                             rating = await rating.json()
-                            hexagonAbout.querySelector('.hexagon-about-rating-num').innerText = rating.num ? rating.num : '0';
+
+                            const ratingNumElem = hexagonAbout.querySelector('.hexagon-about-rating-num');
+                            if(!ratingNumElem) return; 
+
+                            ratingNumElem.innerText = rating.num ? rating.num : '0';
+
                             hexagonAbout.allowedChange = rating.allowedChange;
                             if(rating.allowedChange == -1){
                                 hexagonAbout.querySelector('.rating-plus').style.opacity = 0;
@@ -637,6 +709,12 @@ window.addEventListener('load', async () => {
                             }else if(rating.allowedChange == 1){
                                 hexagonAbout.querySelector('.rating-minus').style.opacity = 0;
                                 hexagonAbout.querySelector('.rating-minus').style.pointerEvents = 'none';
+                            }
+
+                            if(rating.num > 0){
+                                ratingNumElem.classList.add('rating-positive')
+                            }else if(rating.num < 0){
+                                ratingNumElem.classList.add('rating-negative')
                             } 
                         } 
                     });
@@ -762,7 +840,17 @@ window.addEventListener('load', async () => {
                                             b.style.pointerEvents = 'auto';
                                         });
                                     }
-                                    num.innerText = res.num ? res.num : '0'
+
+                                    num.innerText = res.num ? res.num : '0';
+
+                                    if(res.num > 0){
+                                        num.classList.add('rating-positive');
+                                    }else if(res.num < 0){
+                                        num.classList.add('rating-negative');
+                                    }else{
+                                        num.classList.remove('rating-negative');
+                                        num.classList.remove('rating-positive');
+                                    }
                                 }else{
                                     change = 0;
                                 }
@@ -812,75 +900,9 @@ window.addEventListener('load', async () => {
                     });
             
                     hexagon.append(hexagonAbout);
-            
-                    const checkHexVisibility = (r, h) => document.querySelector(`#r${r} #h${h}`) ? document.querySelector(`#r${r} #h${h}`).classList.contains('hexagon-visible') : false;
-                    let rId = hexagon.rowId;
-                    let hId = +hexagon.id.replace('h', '');
                     
                     if(!isIOS()){
-                        if(checkHexVisibility(rId, hId + 1) && checkHexVisibility(rId, hId - 1)){
-                            if(hexagon.parentElement.classList.contains('row-moved')){
-                                if(checkHexVisibility(rId - 1 , hId) || checkHexVisibility(rId - 1, hId + 1)){
-                                    hexagonAbout.style.top = (hexSizes.HEXAGON_HEIGHT + 5) + 'px';
-                                }else if(checkHexVisibility(rId + 1, hId) || checkHexVisibility(rId + 1, hId + 1)){
-                                    hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5) + 'px';
-                                }else{
-                                    hexagonAbout.style.top = (hexSizes.HEXAGON_HEIGHT + 5) + 'px';
-                                }
-                            }else{
-                                if(checkHexVisibility(rId - 1 , hId) || checkHexVisibility(rId - 1, hId - 1)){
-                                    hexagonAbout.style.top = (hexSizes.HEXAGON_HEIGHT + 5) + 'px';
-                                }else if(checkHexVisibility(rId + 1, hId) || checkHexVisibility(rId + 1, hId - 1)){
-                                    hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5) + 'px';
-                                }else{
-                                    hexagonAbout.style.top = (hexSizes.HEXAGON_HEIGHT + 5) + 'px';
-                                }
-                            }
-                        }else if(checkHexVisibility(rId, hId + 1)){
-                            hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
-                        }else if(checkHexVisibility(rId, hId - 1)){
-                            hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
-                        }else{
-                            if(hexagon.parentElement.classList.contains('row-moved')){
-                                if(checkHexVisibility(rId + 1, hId) && checkHexVisibility(rId + 1, hId+ 1)){
-                                    hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5 - hexSizes.TRIANGLE_HEIGHT) + 'px';
-                                    if(checkHexVisibility(rId - 1, hId)){
-                                        hexagonAbout.style.bottom = 0
-                                        hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
-                                    }else if(checkHexVisibility(rId - 1, hId + 1)){
-                                        hexagonAbout.style.bottom = 0
-                                        hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
-                                    }else{
-                                        hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
-                                    }
-                                }else if(checkHexVisibility(rId + 1, hId)){
-                                    hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
-                                }else if(checkHexVisibility(rId + 1, hId + 1)){
-                                    hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
-                                }else{
-                                    hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
-                                }
-                            }else{
-                                if(checkHexVisibility(rId + 1, hId - 1) && checkHexVisibility(rId + 1, hId)){
-                                    hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5 - hexSizes.TRIANGLE_HEIGHT) + 'px';
-                                    if(checkHexVisibility(rId - 1, hId)){
-                                        hexagonAbout.style.bottom = 0
-                                        hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
-                                    }else if(checkHexVisibility(rId - 1, hId + 1)){
-                                        hexagonAbout.style.bottom = 0
-                                        hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
-                                    }else{
-                                        hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
-                                    }
-                                }else if(checkHexVisibility(rId + 1, hId - 1)){
-                                    hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
-                                }else if(checkHexVisibility(rId + 1, hId)){
-                                    hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
-                                }else{
-                                    hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
-                                }
-                            }
-                        }
+                        setHexAboutPosition(hexagon, hexagonAbout);
                     }
                     
                     document.addEventListener('mousedown', clearAbouts);
@@ -908,6 +930,7 @@ window.addEventListener('load', async () => {
                 hexagon.ondblclick = (evt) => {
                     if(user.userId != hexagon.userId && user.userRole != 2) return;     
                     let editedField = createEditedField(hexagon);
+                    if(!editedField) return;
                     evt.preventDefault();
                     if(!hexagon.classList.contains('hexagon-visible')) return;
                     hexagon.isFocused = true;
@@ -930,6 +953,8 @@ window.addEventListener('load', async () => {
                 
                 hexagon.addEventListener('drop', (evt) => {
                     hexagon.classList.remove('hexagon-drag');
+
+                    if(hexagon.querySelector('.hexagon-editedField')) return;
                     uploadFile(evt.dataTransfer.files,`/hexs/${hexagon.uuid}/imgs/upload`, (imgUploadRes) => {
                         delete imgUploadRes.success;
             
@@ -1035,10 +1060,10 @@ window.addEventListener('load', async () => {
                         
                         if(hex.num == 1){
                             hexagon.classList.add('hexagon-first');
-                            hexagon.style.setProperty('--bgc', colors.MAIN_C);
+                            hexagon.style.setProperty('--bgc', '');
                         }
     
-                        ['chainId', 'userId', 'username', 'creationDate', 'uuid', 'num'].forEach(prop => {
+                        ['chainId', 'userId', 'username', 'creationDate', 'uuid', 'num', 'BGImg'].forEach(prop => {
                             hexagon[prop] = hex[prop];
                         });
                         hexagon.imgs = hex.imgs ? !hex.imgs.length ? [] : hex.imgs : [];
@@ -1388,30 +1413,50 @@ window.addEventListener('load', async () => {
         
                 if(!hexagon.classList.contains('hexagon-visible')){
                     let noCreate = false;
+                    let needFillLast = false;
         
-                    let hexVisibleNeighbors = getNeighbors(hexagon).filter(elem => elem.classList.contains('hexagon-visible'));
+                    let hexVisibleNeighbors = getNeighbors(hexagon)
+                    .filter(elem => elem.classList.contains('hexagon-visible'));
+
                     for(let hex of hexVisibleNeighbors){
                         for(let hexToCheck of hexVisibleNeighbors){
-                            if(hex != hexToCheck && hex.chainId != hexToCheck.chainId) noCreate = true; 
+                            if(hex != hexToCheck && hex.chainId != hexToCheck.chainId){
+                                noCreate = true; 
+                                break;
+                            } 
                         }
-                        if(user.userRole != 2 && getChain(hex.chainId).userId != user.userId) noCreate = true; 
+                        if(user.userRole != 2 && getChain(hex.chainId).userId != user.userId){
+                            noCreate = true; 
+                            break;
+                        } 
                     }
+
+                    let chain = getChain(hexVisibleNeighbors[0] && hexVisibleNeighbors[0].chainId);
+
+                    chain && chain.hexs.forEach(hexToCheck => {
+                        const editedField = hexToCheck.querySelector('.hexagon-editedField'); 
+                        if((!editedField || !editedField.innerText) && !hexToCheck.BGImg){
+                            needFillLast = true;
+                            return;
+                        }
+                    });
+
                     if(noCreate){
                         contextmenu.innerHTML = translate('contextmenu.not');
-                        contextmenu.style.color = 'var(--red-c)' 
+                        contextmenu.style.color = 'var(--red-c)'; 
+                    }else if(needFillLast){
+                        contextmenu.innerHTML = translate('contextmenu.needFill');
+                        contextmenu.style.color = 'var(--red-c)'; 
                     }else{
                         contextmenu.innerHTML = translate('contextmenu.create');
                         
-                        contextmenu.onclick = () => {
-                            
+                        contextmenu.onclick = () => {       
                             hexagon.userId = user.userId;
                             hexagon.creationDate = (new Date()).getTime() / 1000;
                             hexagon.username = document.querySelector('.username').innerText;
                             
-                            let chain;
                             let hexagonIdInChain = 0;
                             if(hexVisibleNeighbors.length){
-                                
                                 chain = getChain(hexVisibleNeighbors[0].chainId);
                                 hexagon.chainId = chain.id;
                                 chain.hexs.push(hexagon);
@@ -1426,39 +1471,39 @@ window.addEventListener('load', async () => {
                             }else{
                                 hexagon.chainId = 0;
                                 hexagon.classList.add('hexagon-first');
-                                hexagon.style.setProperty('--bgc', colors.MAIN_C);
+                                hexagon.style.setProperty('--bgc', '');
                                 hexagonIdInChain = 0;
                             }
                             
-                            hexagon.querySelector('.hexagon-num').innerText = hexagonIdInChain + 1;
+                            hexagon.querySelector('.hexagon-num').innerText = hexagon.num = hexagonIdInChain + 1;
 
-                            sendHexsCreationReq([hexagon])
+                            sendHexsCreationReq([hexagon]);
                         }
                     }
                 }else{
                     hexagon.isContextmenu = true;
                     let hexDate = new Date(hexagon.creationDate * 1000);
                     contextmenu.innerHTML = ` 
-                    <div style="margin-bottom: 5px;" class="contextmenu-item send-btn">Send to chat</div> 
-                    <div style="margin-bottom: 5px;" class="contextmenu-item copy-btn">Copy link</div> 
+                    <div class="contextmenu-item send-btn">Send to chat</div> 
+                    <div class="contextmenu-item copy-btn">Copy link</div> 
                     <div class="contextmenu-item complain-btn">Complain</div>
                     <hr class="contextmenu-line">
-                    <div style="margin-bottom: 5px" class="contextmenu-item contextmenu-info">${translate('contextmenu.user')}: <a href="/users/${hexagon.userId}">${hexagon.username}</a></div>
-                    <div style="margin: 5px 0;" class="contextmenu-item contextmenu-info">${translate('contextmenu.chain')}: ${hexagon.chainId}</div>
-                    <div style="margin: 5px 0;" class="contextmenu-item contextmenu-info">${translate('contextmenu.uid')}: ${hexagon.uuid}</div>
-                    <div style="" class="contextmenu-item contextmenu-info">${translate('contextmenu.date')}: ${hexDate.toLocaleDateString()}</div>`;
+                    <div class="contextmenu-item contextmenu-info">${translate('contextmenu.user')}: <a href="/users/${hexagon.userId}">${hexagon.username}</a></div>
+                    <div class="contextmenu-item contextmenu-info">${translate('contextmenu.chain')}: ${hexagon.chainId}</div>
+                    <div class="contextmenu-item contextmenu-info">${translate('contextmenu.uid')}: ${hexagon.uuid}</div>
+                    <div class="contextmenu-item contextmenu-info">${translate('contextmenu.date')}: ${hexDate.toLocaleDateString()}</div>`;
 
                     if(!hexagon.userId || (user.userId == hexagon.userId) || user.userRole == 2){
                         contextmenu.insertAdjacentHTML('afterbegin', `
-                        <div style="margin-bottom: 5px;" class="delete-btn contextmenu-item">Delete</div>
-                        <div style="margin-bottom: 5px;" class="contextmenu-item edit-btn">Edit</div>
-                        ${user.userRole == 2 ? '<div style="margin-bottom: 5px;" class="move-btn contextmenu-item">Move</div>' : ''}`);
+                        <div class="delete-btn contextmenu-item">Delete</div>
+                        ${hexagon.BGImg ? '' : '<div class="contextmenu-item edit-btn">Edit</div>'}
+                        ${user.userRole == 2 ? '<div class="move-btn contextmenu-item">Move</div>' : ''}`);
                     }
 
                     
                     if(user.userRole == 2){
                         // contextmenu.innerHTML += ``;
-                        contextmenu.innerHTML += `<div style="margin-bottom: 5px;" class="contextmenu-item contextmenu-info">Row: ${hexagon.rowId}</div>`;
+                        contextmenu.innerHTML += `<div class="contextmenu-item contextmenu-info">Row: ${hexagon.rowId}</div>`;
                         contextmenu.innerHTML += `<div class="contextmenu-item contextmenu-info">Column: ${hexagon.id.replace('h', '')}</div>`;
                     }
 
@@ -1537,51 +1582,10 @@ window.addEventListener('load', async () => {
                             })
                         },
                         complain: () => {
-                            let complaint = showModal('','', true);
-                            complaint = complaint.firstElementChild;
-                            complaint.classList.add('complaint');
-
-                            complaint.innerHTML = `
-                            <h1 class="complaint-title">${translate('contextmenu.complain')}</h1>
-                            <svg class="complaint-close"><line x1="50%" y1="0%" x2="50%" y2="100%"></line><line x1="0%" y1="50%" x2="100%" y2="50%"></line></svg>
-                            <div class="complaint-textarea">
-                                <label for="complaint-text">${translate('complaint.text')}</label> 
-                                <br> 
-                                <textarea id="complaint-text" autofocus maxlength="400" spellcheck="true" wrap="soft"></textarea>
-                            </div>
-                            <div class="btn-cont" style="display: flex;">
-                                <button class="send-button">${translate('btns.send')}</button>
-                                <button class="close-button">${translate('btns.close')}</button>
-                            </div>
-                            `;
-
-                            complaint.querySelector('.send-button').onclick = async () => {
-                                try{
-                                    let res = await fetch('/complaints/new', {
-                                        method: 'POST',
-                                        body:JSON.stringify({
-                                            hexagon: {
-                                                selector: giveHexSelector(hexagon),
-                                                categ: document.title
-                                            },
-                                            text: complaint.querySelector('#complaint-text').value
-                                        })
-                                    })
-
-                                    if(res.ok){
-                                        res = await res.json();
-
-                                        if(res.success) showModal(translate('complaint.successT'), translate('complaint.successB'));
-                                        else showModal('An error occurred while recording the complaint', translate('ptl'));
-                                    }else{
-                                        showModal('An error occurred while recording the complaint', translate('ptl'));
-                                    }
-                                }catch(err){
-                                    showModal('An error occurred while sending the complaint', err);
-                                }
-                            };
-                            complaint.querySelector('.close-button').onclick = hideModal;
-                            complaint.querySelector('.complaint-close').onclick = hideModal;
+                            showComplaintModal({
+                                selector: giveHexSelector(hexagon),
+                                categ: document.title
+                            })
                         },
                         edit: () => {
                             hexagon.dispatchEvent(new Event('stopClearing'));
@@ -1762,7 +1766,7 @@ window.addEventListener('load', async () => {
                         <h2 class="settings-title">${translate('sets.font')}</h2>
                         <div class="font-cont">
                             <span class="font-input-cont"><label for="font-family">${translate('sets.fontF')} <a target="_blank" href="https://fonts.google.com/">Google</a></label>:&nbsp<input type="text" id="font-family" value="${font.family}"></span>
-                            <span class="font-input-cont"><label for="font-size">${translate('sets.fontS')}</label>:&nbsp<input type="text" id="font-size" value="${font.size.replace('em', '')}"></span>
+                            <span class="font-input-cont"><label for="font-size">${translate('sets.fontS')}</label>:&nbsp<input type="range" max="2" step="0.05" id="font-size" value="${font.size.replace('em', '')}"></span>
                         </div>
                         <div class="font-preview">
                         <h3 style="font-family: inherit; margin: 10px 0">Font settings example</h3>
@@ -1777,7 +1781,8 @@ window.addEventListener('load', async () => {
                             <!-- <div class="turned-cont check-cont"><label class="check-label" for="turned">${translate('sets.check.B')}</label><input class="check-input" type="checkbox" id="turned"><div class="check-custom"></div></div> -->
                             <div class="innerNum-cont check-cont"><label class="check-label" for="innerNum">${translate('sets.check.I')}</label><input class="check-input" type="checkbox" id="innerNum"><div class="check-custom"></div></div>
                             <div class="ctrlZoom-cont check-cont"><label class="check-label" for="ctrlZoom">${translate('sets.check.Z')}</label><input class="check-input" type="checkbox" id="ctrlZoom"><div class="check-custom"></div></div>
-                            <div class="slideSpeed-cont check-cont short-text-cont"><label class="check-label" for="slideSpeed">${translate('sets.check.S')}</label><input class="short-text-input" type="text" value="${otherSettings.slideSpeed}" id="slideSpeed"></div>
+                            <div class="reverseComments-cont check-cont"><label class="check-label" for="reverseComments">${translate('sets.check.RC')}</label><input class="check-input" type="checkbox" id="reverseComments"><div class="check-custom"></div></div>
+                            <!-- <div class="slideSpeed-cont check-cont short-text-cont"><label class="check-label" for="slideSpeed">${translate('sets.check.S')}</label><input class="short-text-input" type="text" value="${otherSettings.slideSpeed}" id="slideSpeed"></div> -->
                         </div>
                     </div>
                 </div>

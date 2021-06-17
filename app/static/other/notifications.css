@@ -1,0 +1,52 @@
+.notifications-cont{
+    width: 100%;
+}
+.notification{
+    display: block;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid var(--grid-c);
+    position: relative;
+}
+.notification-title{
+    margin: 0;
+    margin-bottom: 5px;
+    font-weight: normal;
+    position: relative;
+    font-size: 1.1em;
+}
+.notification-title::before{
+    content: '';
+    position: absolute;
+    width: 100%;
+    bottom: -2px;
+    border-bottom: 1px solid var(--grid-c);
+}
+.notification-content{
+    padding-left: 10px;
+    font-size: .98em;
+}
+.notification-link{
+    font-size: .9em;
+    opacity: .9;
+}
+.notification-date{
+    position: relative;
+    font-size: .85em;
+    opacity: .6;
+}
+.notification-btns{
+    position: absolute;
+    top: 5px;
+    right: 10px;
+}
+.notification-btns > *{
+    --size: .8em;
+    width: var(--size);
+    height: var(--size);
+    fill: none;
+    stroke: var(--main-c);
+    stroke-width: 1.5px;
+    cursor: pointer;
+}

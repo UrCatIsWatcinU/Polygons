@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-05-28 19:37+0300\n"
+"POT-Creation-Date: 2021-06-17 18:44+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -42,7 +42,7 @@ msgid "Repeat password"
 msgstr ""
 
 #: app/forms.py:19 app/templates/help.html:50 app/templates/help.html:56
-#: app/templates/layout.html:224 app/templates/noedite-field.html:27
+#: app/templates/layout.html:244 app/templates/noedite-field.html:29
 #: app/templates/registration.html:8
 msgid "Register"
 msgstr ""
@@ -55,42 +55,64 @@ msgstr ""
 msgid "Email is used"
 msgstr ""
 
-#: app/routes.py:41
+#: app/routes.py:40
 msgid "If you write URL manually, check if it is correct"
 msgstr ""
 
-#: app/routes.py:49
+#: app/routes.py:48
 msgid "Some troubles happend on server. Please send message to admin"
 msgstr ""
 
-#: app/routes.py:233
+#: app/routes.py:213
+msgid "Registration error"
+msgstr ""
+
+#: app/routes.py:213
+msgid "Please try later or contact the site administrator."
+msgstr ""
+
+#: app/routes.py:237
 msgid "Verification required"
 msgstr ""
 
-#: app/routes.py:233
+#: app/routes.py:237
 msgid ""
 "An email with a link to confirm your email address has been sent to your "
 "email address. If you have not received the email, please contact the "
 "site administrator."
 msgstr ""
 
-#: app/routes.py:431 app/routes.py:483 app/routes.py:534
+#: app/routes.py:483 app/routes.py:535 app/routes.py:586 app/routes.py:1202
 msgid "Access denied"
 msgstr ""
 
-#: app/routes.py:476
+#: app/routes.py:528
 msgid "No such user"
 msgstr ""
 
-#: app/routes.py:479
+#: app/routes.py:531
 msgid "This user alredy is a member of this chat"
 msgstr ""
 
-#: app/routes.py:1046
+#: app/routes.py:815 app/routes.py:903
+#, python-format
+msgid "User %(username)s changed his/her hexagon in category %(categname)s"
+msgstr ""
+
+#: app/routes.py:1018
+#, python-format
+msgid "New comment for you chain number %(chain)s in category %(categ)s"
+msgstr ""
+
+#: app/routes.py:1141
 msgid "No such hexagon"
 msgstr ""
 
-#: app/templates/error-page.html:20 app/templates/noedite-field.html:25
+#: app/templates/contacts.html:4
+msgid "Contacts"
+msgstr ""
+
+#: app/templates/error-page.html:20 app/templates/noedite-field.html:27
 msgid "Back"
 msgstr ""
 
@@ -98,12 +120,12 @@ msgstr ""
 msgid "Open chat with admin"
 msgstr ""
 
-#: app/templates/field.html:27 app/templates/index.html:45
-#: app/templates/noedite-field.html:23
+#: app/templates/field.html:28 app/templates/index.html:45
+#: app/templates/noedite-field.html:25
 msgid "Search"
 msgstr ""
 
-#: app/templates/field.html:29 app/templates/help.html:188
+#: app/templates/field.html:30 app/templates/help.html:188
 #: app/templates/help.html:232
 msgid "Settings"
 msgstr ""
@@ -576,13 +598,17 @@ msgstr ""
 msgid "Profile"
 msgstr ""
 
-#: app/templates/layout.html:35
+#: app/templates/layout.html:53
 msgid "Logout"
 msgstr ""
 
-#: app/templates/layout.html:221 app/templates/login.html:4
-#: app/templates/noedite-field.html:26
+#: app/templates/layout.html:241 app/templates/login.html:4
+#: app/templates/noedite-field.html:28
 msgid "Login"
+msgstr ""
+
+#: app/templates/layout.html:260
+msgid "Contact us"
 msgstr ""
 
 #: app/templates/messages.html:44
@@ -601,6 +627,10 @@ msgstr ""
 msgid "Send"
 msgstr ""
 
+#: app/templates/notifications.html:10
+msgid "Notifications"
+msgstr ""
+
 #: app/templates/user.html:24
 msgid "Chains count"
 msgstr ""
@@ -613,12 +643,24 @@ msgstr ""
 msgid "Rating"
 msgstr ""
 
-#: app/templates/user.html:45
+#: app/templates/user.html:46
 msgid "Delete profile"
 msgstr ""
 
 #: app/templates/user.html:47
+msgid "Subscribers"
+msgstr ""
+
+#: app/templates/user.html:49
 msgid "Open chat"
+msgstr ""
+
+#: app/templates/user.html:51
+msgid "Unsubscribe"
+msgstr ""
+
+#: app/templates/user.html:53
+msgid "Subscribe"
 msgstr ""
 
 #: app/templates/users.html:8
@@ -639,5 +681,13 @@ msgstr ""
 
 #: app/templates/users.html:51
 msgid "me in list"
+msgstr ""
+
+#: app/templates/parts/notification.html:2
+msgid "New"
+msgstr ""
+
+#: app/templates/parts/notification.html:5
+msgid "See more"
 msgstr ""
 

@@ -652,7 +652,7 @@ window.addEventListener('load', async () => {
                     
                     if(hex.num == 1){
                         hexagon.classList.add('hexagon-first');
-                        hexagon.style.setProperty('--bgc', colors.MAIN_C);
+                        hexagon.style.setProperty('--bgc', '');
                     }
 
                     ['chainId', 'userId', 'username', 'creationDate', 'uuid'].forEach(prop => {
@@ -661,7 +661,7 @@ window.addEventListener('load', async () => {
                     hexagon.imgs = hex.imgs ? !hex.imgs.length ? [] : hex.imgs : [];
 
                     if(hex.BGImg){
-                        createBgHex(hexagon, hex.BGImg);
+                        createBgHex(hexagon, hex.BGImg, hexPath(), true);
                     }
 
                     visibleHexs.push(hexagon);

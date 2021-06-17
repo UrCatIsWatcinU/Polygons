@@ -1,6 +1,6 @@
-from app import db, login
+from app import db, login, socketio
 from app import app
-from app.lib import date_to_timestamp
+from app.lib import date_to_timestamp, serialize
 
 
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -15,11 +15,17 @@ import jwt
 @login.user_loader
 def load_user(id):
     return User.query.get(int(id))
+
 class UserRating(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     change = db.Column(db.Integer, default=0)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
     user_who_change_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
+
+class Subscription(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
+    subscriber_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -31,15 +37,19 @@ class User(UserMixin, db.Model):
     is_hidden =  db.Column(db.Boolean, default=False)
     addr = db.Column(db.String(16))
     is_verify = db.Column(db.Boolean, default=False)
+    last_notification_seen = db.Column(db.DateTime, default=datetime.utcnow, index=True)
     
     hexs = db.relationship('Hexagon', backref='author', lazy='dynamic', cascade="all, delete-orphan")
     chains = db.relationship('Chain', backref='author', lazy='dynamic', cascade="all, delete-orphan")
     complaints = db.relationship('Complaint', backref='author', lazy='dynamic', cascade="all, delete-orphan")
     comments = db.relationship('Comment', backref='author', lazy='dynamic', cascade="all, delete-orphan")
+    notifications = db.relationship('Notification', backref='recipient', lazy='dynamic', cascade="all, delete-orphan")
     ratings_changes = db.relationship('UserRating', foreign_keys=[UserRating.user_who_change_id], backref='author', lazy='dynamic', cascade="all, delete-orphan")
     ratings = db.relationship('UserRating', foreign_keys=[UserRating.user_id], backref='target', lazy='dynamic', cascade="all, delete-orphan")
     messages = db.relationship('Message', backref='author', lazy='dynamic', cascade="all, delete-orphan")
     chats_memberships = db.relationship('ChatMember', backref='member', lazy='dynamic', cascade="all, delete-orphan")
+    my_subscriptions = db.relationship('Subscription', foreign_keys=[Subscription.subscriber_id], backref='subscriber', lazy='dynamic', cascade="all, delete-orphan")
+    subscriptions_to_me = db.relationship('Subscription', foreign_keys=[Subscription.user_id], backref='user', lazy='dynamic', cascade="all, delete-orphan")
     ip_bans = db.relationship('BannedIp', backref='user', lazy='dynamic', cascade="all, delete-orphan")
 
     def gen_confirm_token(self):
@@ -66,7 +76,13 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password_hash, password)
 
     def get_rating(self):
-        return db.session.execute(select([func.sum(UserRating.change)]).where(UserRating.user_id == self.id)).first()[0] or 0
+        return db.session.execute(select([func.sum(UserRating.change)]).where(UserRating.user_id == self.id)).scalar() or 0
+    
+    def get_unreaded_notifications_count(self):
+        return db.session.execute(
+            select([func.count(Notification.id)])
+            .where(Notification.recipient_id == self.id, Notification.date > self.last_notification_seen)
+        ).scalar() if self.last_notification_seen else 0 or 0
 
 class BannedIp(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -120,6 +136,7 @@ class Complaint(db.Model):
     body = db.Column(db.String(400), index=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
     hex_id = db.Column(db.Integer, db.ForeignKey('hexagon.id'), index=True)
+    to = db.Column(db.String(400), index=True)
 
 class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -178,3 +195,17 @@ class Message(db.Model):
     
     def __repr__(self):
         return render_template('parts/message.html', message=self, date_parse=date_to_timestamp)
+
+class Notification(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    recipient_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
+    text = db.Column(db.Text)
+    date = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    type = db.Column(db.String(20), index=True)
+    url = db.Column(db.String(100))
+        
+    def send_notification(self):
+        socketio.emit(f'new-notification-for-{self.recipient_id}', {'date': date_to_timestamp(self.date), 'id': self.id, 'type': self.type})
+
+    def __repr__(self):
+        return render_template('parts/notification.html', notification=self, date_parse=date_to_timestamp)

@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block head %}
+    <script src="{{ url_for('static', filename='other/notifications.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='other/notifications.css') }}">
+{% endblock %}
+
+
+{% block content %}
+    <h1>{{ _('Notifications') }}</h1>
+    <div class="notifications-cont">
+        {% for notification in notifications %}
+            {{ notification | safe }}
+        {% endfor %}
+        
+    </div>
+{% endblock %}
