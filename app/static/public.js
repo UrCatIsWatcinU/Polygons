@@ -523,7 +523,7 @@ const constColors = {
     GREEN_C: '#1bb123',
     GREY_C: '#dfdfdf',
     MAIN_C:'#974E9E',
-    BODU_BGC: '#f0f0f0',
+    BODY_BGC: '#f0f0f0',
     DARK_MAIN_C: '#703868',
 }
 
