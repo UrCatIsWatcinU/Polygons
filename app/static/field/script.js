@@ -1766,7 +1766,7 @@ window.addEventListener('load', async () => {
                         <h2 class="settings-title">${translate('sets.font')}</h2>
                         <div class="font-cont">
                             <span class="font-input-cont"><label for="font-family">${translate('sets.fontF')} <a target="_blank" href="https://fonts.google.com/">Google</a></label>:&nbsp<input type="text" id="font-family" value="${font.family}"></span>
-                            <span class="font-input-cont"><label for="font-size">${translate('sets.fontS')}</label>:&nbsp<input type="range" max="2" step="0.05" id="font-size" value="${font.size.replace('em', '')}"></span>
+                            <span class="font-input-cont"><label for="font-size">${translate('sets.fontS')}</label>:&nbsp<input type="range" min=".5" max="2" step="0.05" id="font-size" value="${font.size.replace('em', '')}"></span>
                         </div>
                         <div class="font-preview">
                         <h3 style="font-family: inherit; margin: 10px 0">Font settings example</h3>

@@ -937,7 +937,7 @@ const main = async () => {
             if(!transEnd){
                 deleteLoading();
             }
-        }, 100)
+        }, 1000)
     }
     
     tasks.forEach(task => {
