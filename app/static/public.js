@@ -838,12 +838,14 @@ const main = async () => {
                 const splitedFirst = first.split(' '); 
                 for(let hex of hexs.body){
                     const hexText = hex.innerText.toLowerCase(); 
+                    console.log(hexText);
                     if(hexText.includes(first)){
                         hexsFound.push(hex);
                     }
                     
                     if(hexText.split(' ').length > 2 && hexText.match(new RegExp(`(${splitedFirst.join('|')})?\\s*`.repeat(hexText.split(' ').length)))){
                         hexsFound.push(hex);
+                        console.log('push');
                     }
                 }
     
