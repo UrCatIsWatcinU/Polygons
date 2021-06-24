@@ -916,7 +916,8 @@ window.addEventListener('load', async () => {
                     uuid: 0,
                     chainId: 0,
                     userId: 0,
-                    creationDate: 0
+                    creationDate: 0,
+                    selector: ''
                 };
                 
                 for(let prop in hexagon.obj){
@@ -1108,6 +1109,7 @@ window.addEventListener('load', async () => {
                 let firstHexs = hexs.filter(hexToCheck => !hexToCheck.chainId);
                 
                 if(!firstHexs.length || !needToCheckFirsts){
+                    console.log(hexs);
                     fetch(`/hexs/${document.title}/new`, {
                         method: 'POST',
                         headers:{
@@ -1153,8 +1155,8 @@ window.addEventListener('load', async () => {
             const hexPad = 6;
             const hexsContPad = 400;
             document.sectorSettings = {
-                width: 10,
-                height: 10,
+                width: 16,
+                height: 16,
             }
             document.sectorSettings.heightPx = document.sectorSettings.height * (hexSizes.HEXAGON_HEIGHT + hexPad) - document.sectorSettings.height * (hexSizes.TRIANGLE_HEIGHT - hexPad);
             document.sectorSettings.widthPx = document.sectorSettings.width * (hexSizes.HEXAGON_WIDTH + hexPad * 2);
@@ -1499,6 +1501,7 @@ window.addEventListener('load', async () => {
                     let chain = getChain(hexVisibleNeighbors[0] && hexVisibleNeighbors[0].chainId);
 
                     chain && chain.hexs.forEach(hexToCheck => { 
+                        hexToCheck = visibleHexs.find(h => h.selector == hexToCheck.selector)
                         if(!hexToCheck.innerText && !hexToCheck.BGImg){
                             needFillLast = true;
                             return;
@@ -1515,13 +1518,11 @@ window.addEventListener('load', async () => {
                         contextmenu.innerHTML = translate('contextmenu.create');
                         
                         contextmenu.onclick = () => {
-                            hexagon.obj = {
-                                userId: user.userId,
-                                username: document.querySelector('.username').innerText,
-                                creationDate: (new Date()).getTime() / 1000,
-                                selector: giveHexSelector(hexagon),
-                                innerText: ''
-                            };
+                            hexagon.userId = user.userId,
+                            hexagon.username = document.querySelector('.username').innerText,
+                            hexagon.creationDate = (new Date()).getTime() / 1000,
+                            hexagon.selector = giveHexSelector(hexagon),
+                            hexagon.obj.innerText = ''
                             
                             let hexagonIdInChain = 0;
                             if(hexVisibleNeighbors.length){
@@ -1544,6 +1545,7 @@ window.addEventListener('load', async () => {
                             
                             setHexVisible(hexagon);
                             
+                            console.log(hexagon.obj);
                             hexagon.querySelector('.hexagon-num').innerText = hexagon.obj.num = hexagonIdInChain + 1;
                             
                             sendHexsCreationReq([hexagon.obj]);
