@@ -1806,6 +1806,7 @@ window.addEventListener('load', async () => {
                 for(let s of nearSectors){
                     if(s){
                         s.fill();
+                        s.el().dispatchEvent(new Event('sectorLoaded'))
                     }
                 }
             }
@@ -1835,9 +1836,10 @@ window.addEventListener('load', async () => {
                 foundedHex = visibleHexs.find(hex => hex.selector == urlParams.get('selector') || hex.uuid == urlParams.get('hexId'))  
 
                 if(foundedHex){
-                    getSectorForHex(foundedHex).el().scrollIntoView();
+                    const sectorEl = getSectorForHex(foundedHex).el();
+                    sectorEl.scrollIntoView();
                     
-                    setTimeout(() => {
+                    sectorEl.addEventListener('sectorLoaded', () => {
                         const foundedElem = document.querySelector(foundedHex.selector)
                         foundedElem.scrollIntoView({
                             block: 'center',
@@ -1850,7 +1852,7 @@ window.addEventListener('load', async () => {
                             foundedElem.classList.remove('founded-polygon');
                             history.pushState(null, null, '/fields/' + document.title); 
                         }, 4000)
-                    }, 0)
+                    }, {once: true})
                     
                 }else{
                     let scrollCoords = JSON.parse(localStorage.getItem('userScroll-' + document.title) || `{"x": ${document.body.scrollWidth / 2}, "y":  ${document.body.scrollHeight / 2}}`);
