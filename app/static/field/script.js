@@ -917,7 +917,8 @@ window.addEventListener('load', async () => {
                     chainId: 0,
                     userId: 0,
                     creationDate: 0,
-                    selector: ''
+                    selector: '',
+                    images: []
                 };
                 
                 for(let prop in hexagon.obj){
