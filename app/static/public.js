@@ -273,7 +273,7 @@ const setHexVisible = (hexagon, num) => {
     hexagon.style.transition = 'inherit';
     hexagon.classList.add('hexagon-visible');
     
-    if(hexagon.querySelector('.polygon')) return;
+    if(hexagon.querySelector('.polygon')) hexagon.querySelector('.polygon').remove();
     
     hexagon.insertAdjacentHTML('afterbegin', `<svg class="polygon"> 
     <use href="#hex-path" x="0" y="0"></use>
@@ -804,13 +804,12 @@ const main = async () => {
         'trans-dur': '.2s',
     }
     cssProps.trans = `all ${cssProps['trans-dur']} ease`;
-    let allColors = Object.assign(defaultColors, constColors);
+    let allColors = Object.assign(colors, constColors);
     for(let color in allColors){
         cssProps[color.toLowerCase().replace(/_/g, '-',)] = allColors[color] || defaultColors[color];
     }
-    
 
-    cssProps['scroll-thumb-c'] = tinycolor(colors.BLACK_C).setAlpha(.1);
+    cssProps['scroll-thumb-c'] = tinycolor(colors.BLACK_C).setAlpha(.3);
     
     setCSSProps(Object.assign(cssProps, hexSizes.createCSSProps()));
     
@@ -837,15 +836,14 @@ const main = async () => {
                 let first = keywords.shift();
                 const splitedFirst = first.split(' '); 
                 for(let hex of hexs.body){
-                    const hexText = hex.innerText.toLowerCase(); 
-                    console.log(hexText);
+                    const hexText = hex.innerText.toLowerCase().trim(); 
+                    if(!hexText) continue;
                     if(hexText.includes(first)){
                         hexsFound.push(hex);
                     }
                     
-                    if(hexText.split(' ').length > 2 && hexText.match(new RegExp(`(${splitedFirst.join('|')})?\\s*`.repeat(hexText.split(' ').length)))){
+                    if(splitedFirst.length >= 2 && hexText.split(' ').length > 2 && hexText.match(new RegExp(`.*(${splitedFirst.join('|')}).*`.repeat(splitedFirst.length)))){
                         hexsFound.push(hex);
-                        console.log('push');
                     }
                 }
     

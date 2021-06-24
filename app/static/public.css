@@ -233,7 +233,7 @@ a{
 .drop-menu button{
     min-width: 100%;
     width: max-content;
-    border-width: 0px;
+    border-width: 0px; 
     margin: 0;
     background-color: var(--body-bgc);
 }
@@ -243,9 +243,9 @@ a{
 
 
 .row {
-    --pad: calc(8px * 1.5);
+    --hex-pad: calc(8px * 1.5); 
     height: calc(var(--triangle-height) * 2 + var(--body-height));
-    padding: var(--pad);
+    padding: var(--hex-pad);
     overflow: visible;
     display: flex;
     align-items: center;
@@ -254,7 +254,8 @@ a{
 }
   
 .row.row-moved {
-    padding-left: calc(var(--hexagon-width) / 2 + var(--pad) * 2);
+    position: relative;
+    padding-left: calc(var(--hexagon-width) / 2 + var(--hex-pad) * 2);
 }
 
   
@@ -270,11 +271,12 @@ a{
     color: var(--white-c);
     z-index: 2;
     overflow: visible;
-    padding: var(--pad);
+    padding: var(--hex-pad);
     opacity: 0;
 
     --webkit-scrollbar-width: none;
     scrollbar-width: none;
+    flex: none;
 }
 .hexagon *{
     scrollbar-width: none;
@@ -304,7 +306,7 @@ a{
     padding: 4px;
     color: var(--white-c);
     position: absolute;
-    top: calc(var(--triangle-height) + var(--pad));
+    top: calc(var(--triangle-height) + var(--hex-pad));
     border-radius: 3px;
     
     font-size: 1.07em;
@@ -553,7 +555,7 @@ a{
     position: relative;
 }
 .menu-cont-btn{
-    --size: 1.1em;
+    --size: 1.15em;
     margin: 0 2px;
     cursor: pointer;
     flex: none;
@@ -580,15 +582,6 @@ a{
 .menu-cont-dropItem-selected{
     color: var(--main-c);
 }
-.user-cont{
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    position: relative;
-}
-.user-cont .username{
-    margin-left: 5px;
-}
 .menu-cont-notifications{
     position: relative;
 }
@@ -609,6 +602,16 @@ a{
 }
 .notifications-countInvisible{
     display: none;
+}
+.user-cont{
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+}
+.user-cont .username{
+    font-size: 1.05em;
+    margin-left: 5px;
 }
 
 
@@ -684,6 +687,7 @@ a{
 }
 .user-rating-num{
     margin: 0 5px;
+    font-size: 1.07em;
 }
 .rating-positive{
     color: var(--green-c);

@@ -34,8 +34,8 @@ html{
 .hexsCont{
   width: max-content;
   height: max-content;
-  padding: 400px;
-  transform-origin: bottom right;
+  padding: var(--cont-pad);
+  transform-origin: left top;
   position: relative;
   will-change: transform;
   transition: none;
@@ -82,8 +82,8 @@ html{
   color: var(--black-c);
   border: 1px var(--main-c) solid;
   position: absolute;
-  top: calc(var(--triangle-height) - 8px + var(--pad));
-  right: calc(-4px + var(--pad));
+  top: calc(var(--triangle-height) - 8px + var(--hex-pad));
+  right: calc(-4px + var(--hex-pad));
   display: flex;
   justify-content: center;
   align-items: center;
@@ -109,13 +109,13 @@ html{
 }
 .hexagon-turned .hexagon-num{
   transform: rotate(-90deg);
-  left: calc(var(--hexagon-width) / 2 - 18px / 2 + var(--pad));
-  top: var(--pad);
+  left: calc(var(--hexagon-width) / 2 - 18px / 2 + var(--hex-pad));
+  top: var(--hex-pad);
   right: unset;
 }
 .hexagon-turned.hexagon-innerNum .hexagon-num{
   top: unset;
-  bottom: calc(var(--triangle-height) + 4px + var(--pad));
+  bottom: calc(var(--triangle-height) + 4px + var(--hex-pad));
   left: 6px;
 }
 .hexagon-innerNum .hexagon-num{
@@ -124,8 +124,8 @@ html{
   border: none;
   background-color: transparent;
   color: var(--white-c);
-  top: calc(var(--triangle-height) + 6px + var(--pad) / 2);
-  left: calc(4px + var(--pad));
+  top: calc(var(--triangle-height) + 6px + var(--hex-pad) / 2);
+  left: calc(4px + var(--hex-pad));
   font-size: .94em;
 }
 .hexagon-innerNum .hexagon-num::after{
@@ -220,7 +220,7 @@ html{
   flex: none;
   overflow: hidden;
   box-sizing: border-box;
-  padding: calc(var(--size) + var(--arrow-pad) * 2);
+  padding: calc(var(--size) + var(--arhex-pad) * 2);
   background-color: var(--body-bgc);
 }
 .hexagon-about-images img{
@@ -245,22 +245,22 @@ html{
   cursor: default;
 }
 .hexagon-about-images-prev{
-  left: var(--arrow-pad);
+  left: var(--arhex-pad);
   transform: rotate(180deg);
 }
 .hexagon-about-images-next{
-  right: var(--arrow-pad);
+  right: var(--arhex-pad);
 }
 .hexagon-about-images-bullets{
   position: absolute;
-  bottom: var(--arrow-pad);
+  bottom: var(--arhex-pad);
   height: var(--size);
 }
 .hexagon-about-images-bullet{
   stroke: var(--main-c);
   fill: transparent;
   stroke-width: .4em;
-  margin-right: var(--arrow-pad);
+  margin-right: var(--arhex-pad);
 }
 .hexagon-about-images-bullet:last-child{
   margin: 0;
@@ -376,16 +376,16 @@ html{
   cursor: pointer;
 }
 .hexagon-about-img-close{
-  top: var(--arrow-pad);
-  right: var(--arrow-pad);
+  top: var(--arhex-pad);
+  right: var(--arhex-pad);
 }
 
 .hexagon-about-controls{
-  --pad: 4px;
+  --hex-pad: 4px;
   display: flex;
   justify-content: space-between;
-  margin-bottom: var(--pad);
-  padding-bottom: var(--pad);
+  margin-bottom: var(--hex-pad);
+  padding-bottom: var(--hex-pad);
   border-bottom: 1px solid var(--main-c);
 }
 .hexagon-about-controls-btns{
@@ -410,6 +410,7 @@ html{
 }
 .hexagon-about-rating-num{
   margin: 0 5px;
+  font-size: 1.07em;
 }
 .hexagon-about-rating-btn{
   --size: 1em;
@@ -675,25 +676,51 @@ html{
 }
 
 
-.row{
-  border-left: 5px var(--grid-c) solid;
-  border-right: 5px var(--grid-c) solid;
-  --pad: 6.5px;
-}
-.hexagon:last-child,
+
+/* .hexagon:last-child,
 .hexagon:first-child,
 .row:last-child,
 .row:first-child{
   pointer-events: none;
-}
-.row-first{
+} */
+/* .row-first{
   border-top: 5px var(--grid-c) solid;
 }
 .row:last-child{
   border-bottom: 5px var(--grid-c) solid;
+} */
+/* #r1{
+  border: none;
+} */
+
+
+.hexsCont{
+  display: grid;
+  grid-template: var(--cont-grid);
 }
-#r1{
- border: none;
+.sector{
+  width: 100%;
+  height: 100%;
+  /* border: 2px solid; */
+}
+.sector-in-first-col{
+  /* padding-left: calc(var(--hexagon-width) / 2); */
+  border-left: 5px var(--grid-c) solid;
+}
+.sector-in-last-col{
+  padding-right: calc((var(--hexagon-width) + var(--field-hex-pad)) / 2 + var(--field-hex-pad) * 2);
+  border-right: 5px var(--grid-c) solid;
+}
+.sector-in-first-row{
+  padding-top: var(--triangle-height);
+  border-top: 5px var(--grid-c) solid;
+}
+.sector-in-last-row{
+  /* padding-bo: var(--triangle-height); */
+  border-bottom: 5px var(--grid-c) solid;
+}
+.row{
+  --hex-pad: var(--field-hex-pad); 
 }
 
 

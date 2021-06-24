@@ -103,7 +103,8 @@ window.addEventListener('load', async () => {
         }
 
         for(let action in actions){
-            if(contextmenu.querySelector(action + '-btn')) contextmenu.querySelector('btn-' + action).onclick = actions[action];
+            const btn = contextmenu.querySelector(`.${action}-btn`);
+            if(btn) btn.onclick = actions[action];
         }
 
         contextmenu.style.top = evt.clientY + 'px';
