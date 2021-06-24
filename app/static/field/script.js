@@ -918,7 +918,8 @@ window.addEventListener('load', async () => {
                     userId: 0,
                     creationDate: 0,
                     selector: '',
-                    images: []
+                    images: [],
+                    BGImg: ''
                 };
                 
                 for(let prop in hexagon.obj){
