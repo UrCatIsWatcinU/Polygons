@@ -940,8 +940,8 @@ window.addEventListener('load', async () => {
                 let hexRow = hex.selector.match(/r\d+/);
                 let hexCol = hex.selector.match(/h\d+/);
 
-                hexRow = hexRow && Math.round(+hexRow[0].replace(/^\w/, '') / (document.sectorSettings.width - 1));
-                hexCol = hexCol && Math.round(+hexCol[0].replace(/^\w/, '') / (document.sectorSettings.height - 1));
+                hexRow = hexRow && Math.ceil(+hexRow[0].replace(/^\w/, '') / (document.sectorSettings.width));
+                hexCol = hexCol && Math.ceil(+hexCol[0].replace(/^\w/, '') / (document.sectorSettings.height));
 
                 console.log(hexRow, hexCol);
 
