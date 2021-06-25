@@ -28,56 +28,6 @@ window.addEventListener('load', async () => {
             let size = params.size.split(/[x\sх]/);
             const GRID_HEIGHT = size[0]; // измеряется в шестиугольниках
             const GRID_WIDTH = size[1]; // измеряется в шестиугольниках
-
-            const deleteHex = hexagon => {
-                let deletedHexs = [];
-                const deleteHexInner = hexagon => {
-                    deletedHexs.push(prepareHex(hexagon));
-                    
-                    hexagon.classList.remove('hexagon-visible');
-                    hexagon.classList.remove('hexagon-active');
-                    hexagon.classList.remove('hexagon-first');
-                    hexagon.style.setProperty('--bgc', 'transparent');
-                    
-                    ['.hexagon-editedField', '.hexagon-about', '.polygon'].forEach(s => {
-                        if(hexagon.querySelector(s)){
-                            if(s.innerText) s.innerText = '';
-                            hexagon.querySelector(s).remove();
-                        }
-                    });
-                    hexagon.about = '';
-                    hexagon.images = [];
-                    
-                    let chain = getChain(hexagon.chainId);
-                    if(+hexagon.querySelector('.hexagon-num').innerText === 1){
-                        if(chain){
-                            deletedHexs.concat(chain.hexs.map(prepareHex));
-                
-                            chain.hexs.splice(getChain(hexagon.chainId).hexs.indexOf(hexagon), 1);
-                            delete chains[chains.indexOf(chain)]
-                            chain.hexs.forEach(deleteHexInner);
-                        } 
-                    }else{
-                        if(chain){
-                            if(chain.hexs.indexOf(hexagon) > 0){
-                                let hexsToDelete = chain.hexs.splice(chain.hexs.indexOf(hexagon) + 1, chain.hexs.length);
-                                deletedHexs.concat(hexsToDelete.map(prepareHex));
-                                hexsToDelete.forEach(deleteHexInner);
-                                
-                            }
-                        }
-                    }
-                    
-                    delete hexagon.chainId;
-            
-                    hexagon.querySelector('.hexagon-num').innerText = '0';
-            
-                    visibleHexs = visibleHexs.filter(hex => hex != hexagon);
-                }
-                deleteHexInner(hexagon);
-        
-                return deletedHexs;
-            }
         
             const createEditedField = hexagon => {
                 let editedField = hexagon.querySelector('.hexagon-editedField');
@@ -610,19 +560,91 @@ window.addEventListener('load', async () => {
             }
 
             const setHexProps = hexagon => {
+                hexagon.classList = 'hexagon';
                 // ид ряда и ид шестиугольника
                 let row = hexagon.parentElement;
-                hexagon.id = 'h' +  ([].indexOf.call(row.children, hexagon) + 1);
+                hexagon.id = 'h' +  ([].indexOf.call(row.children, hexagon) + 1 + hexagon.sectorCol * document.sectorSettings.width);
                 hexagon.rowId = idToNum(row.id);
 
-                createEditedField(hexagon);
+                hexagon.obj = {
+                    innerText: '',
+                    username: '',
+                    uuid: 0,
+                    chainId: 0,
+                    userId: 0,
+                    creationDate: 0,
+                    selector: '',
+                    images: [],
+                    BGImg: ''
+                };
+                
+                for(let prop in hexagon.obj){
+                    if(typeof(hexagon[prop]) != 'undefined') continue;
+                    Object.defineProperty(hexagon, prop, {
+                        get() {
+                            return hexagon.obj[prop];
+                        },
+                        set(value) {
+                            hexagon.obj[prop] = value;
+                        }
+                    });
+                }
+            }
+
+            const deleteHex = hexagon => {
+                let deletedHexs = [];
+                
+                const deleteHexInner = hexagon => {
+                    if(!hexagon) return;
+                    deletedHexs.push(hexagon);
+                    let chain = getChain(hexagon.chainId);
+                    
+                    let elem = document.querySelector(hexagon.selector);
+                    if(elem){
+                        setHexProps(elem);
+                        elem.innerHTML = '<div class="hexagon-num">0</div>'
+                    }
+                    
+                    if(hexagon.num === 1){
+                        if(chain){
+                            console.log(chain.hexs, chain);
+                            deletedHexs.concat(chain.hexs);
+                
+                            chain.hexs = chain.hexs.filter(h => h.selector != hexagon.selector);
+                            delete chains[chains.indexOf(chain)]
+                            chain.hexs.forEach(deleteHexInner);
+                        } 
+                    }else{
+                        if(chain){
+                            if(hexagon.num > 1){
+                                let hexsToDelete = [];
+                                chain.hexs = chain.hexs.filter(h => {
+                                    if(h.num <   hexagon.num) return true;
+
+                                    hexsToDelete.push(h);
+                                });
+
+                                console.log(hexsToDelete);
+                                deletedHexs.concat(hexsToDelete);
+                                hexsToDelete.forEach(deleteHexInner);
+                            }
+                        }
+                    }
+                    
+                    visibleHexs = visibleHexs.filter(hex => hex.uuid != hexagon.uuid);
+                }
+                deleteHexInner(hexagon);
+        
+                return deletedHexs.filter(h => h);
             }
             class ElHexagon extends HTMLElement{
                 constructor() {
                     super();
                 }
                 connectedCallback() { 
-                    setHexProps(this)
+                    this.sectorCol = this.getAttribute('sectorCol');
+                    this.sectorRow = this.getAttribute('sectorRow');
+                    setHexProps(this);
                 }
             }
             
@@ -633,44 +655,44 @@ window.addEventListener('load', async () => {
         
                 let parsedHexs = [];
                 for(let hex of savedHexs){
-                    let hexagon = document.querySelector(hex.selector);
-                    if(hexagon.classList.contains('hexagon-visible')) continue;
-                    setHexVisible(hexagon);      
-                    
-                    if(hex.innerText){
-                        let editedField = createEditedField(hexagon); 
+                    try{
+                        let hexagon = document.querySelector(hex.selector);
+                        if(!hexagon || !hexagon.classList || hexagon.classList.contains('hexagon-visible')) continue;
+                        setHexVisible(hexagon);      
                         
-                        editedField.innerText = hex.innerText;
-                    }
-        
-                    // if(hex.about){
-                    //     hexagon.about = hex.about
-                    // }
-                    
-                    hexagon.querySelector('.hexagon-num').innerText = hex.num;
-                    hexagon.style.setProperty('--bgc', hexsColors[((hex.num-1) - hexsColors.length * (Math.ceil((hex.num-1) / hexsColors.length) - 1)) - 1]);
-                    
-                    if(hex.num == 1){
-                        hexagon.classList.add('hexagon-first');
-                        hexagon.style.setProperty('--bgc', '');
-                    }
+                        if(hex.innerText){
+                            let editedField = createEditedField(hexagon); 
+                            
+                            editedField.innerText = hex.innerText;
+                        }
+                        
+                        hexagon.querySelector('.hexagon-num').innerText = hex.num;
+                        hexagon.style.setProperty('--bgc', hexsColors[((hex.num-1) - hexsColors.length * (Math.ceil((hex.num-1) / hexsColors.length) - 1)) - 1]);
+                        
+                        if(hex.num == 1){
+                            hexagon.classList.add('hexagon-first');
+                            hexagon.style.setProperty('--bgc', '');
+                        }
+    
+                        ['chainId', 'userId', 'username', 'creationDate', 'uuid', 'num', 'BGImg', 'selector'].forEach(prop => {
+                            hexagon[prop] = hex[prop];
+                        });
+                        hexagon.imgs = hex.imgs ? !hex.imgs.length ? [] : hex.imgs : [];
+    
+                        if(hex.BGImg){
+                            createBgHex(hexagon, hex.BGImg);
+                        }
 
-                    ['chainId', 'userId', 'username', 'creationDate', 'uuid'].forEach(prop => {
-                        hexagon[prop] = hex[prop];
-                    });
-                    hexagon.imgs = hex.imgs ? !hex.imgs.length ? [] : hex.imgs : [];
+                        hexagon.obj = hex;
 
-                    if(hex.BGImg){
-                        createBgHex(hexagon, hex.BGImg, hexPath(), true);
+                        parsedHexs.push(hexagon);   
+                    }catch(err){
+                        console.log(err);
                     }
-
-                    visibleHexs.push(hexagon);
-                    parsedHexs.push(hexagon);   
                 }
         
                 return parsedHexs
             }
-    
             
             if(!document.querySelector('.loading')) return;
             document.body.className = 'field';
@@ -683,23 +705,76 @@ window.addEventListener('load', async () => {
             // document.documentElement.style.width = (GRID_WIDTH * hexSizes.HEXAGON_WIDTH + hexSizes.HEXAGON_WIDTH/2) + 'px';
             
             // создание сетки
-            let rowsStr = '';
-            let hexagonStr = `<el-hexagon class="hexagon">
-            <div class="hexagon-num">0</div>
-            </el-hexagon>`.repeat(GRID_WIDTH);
-            for(let i = 1; i <= GRID_HEIGHT; i+=2){
-                rowsStr += `
-                <div id="r${i}" class="row">${hexagonStr}</div>
-                <div id="r${i+1}" class="row row-moved">${hexagonStr}</div>`;
+            const hexPad = 6;
+            const hexsContPad = 400;
+            document.sectorSettings = {
+                width: 16,
+                height: 16,
             }
+            document.sectorSettings.heightPx = document.sectorSettings.height * (hexSizes.HEXAGON_HEIGHT + hexPad) - document.sectorSettings.height * (hexSizes.TRIANGLE_HEIGHT - hexPad);
+            document.sectorSettings.widthPx = document.sectorSettings.width * (hexSizes.HEXAGON_WIDTH + hexPad * 2);
+            setCSSProps({
+                'field-hex-pad': hexPad + 'px',
+                'cont-pad': hexsContPad + 'px',
+                'cont-grid': `${document.sectorSettings.heightPx + hexSizes.TRIANGLE_HEIGHT}px repeat(${GRID_HEIGHT - 1}, ${document.sectorSettings.heightPx}px) / repeat(${GRID_WIDTH}, ${document.sectorSettings.widthPx}px)`,
+            }); 
+            
+            let sectorsStr = '';
+            
+            const sectors = document.sectors = [];
+            const filledSectors = document.filledSectors = [];
 
-            hexsCont.innerHTML = rowsStr;
+            for(let i = 0; i < GRID_HEIGHT; i++){
+                // sectorsStr += `<div id="sr${i}" class="sectors-row">`
+                sectors.push([]);
+                for (let j = 0; j < GRID_WIDTH; j++) {
+                    sectorsStr += `
+                    <div 
+                        id="s-r${i}c${j}" 
+                        class="sector${i == 0 ? ' sector-in-first-row' : i == GRID_HEIGHT - 1 ? ' sector-in-last-row' : ''}${j == 0 ? ' sector-in-first-col' : j == GRID_WIDTH - 1 ? ' sector-in-last-col' : ''}">
+                    </div>`;
 
-            document.querySelector('#r2').classList.add('row-first');
-            document.querySelector('#r' + GRID_HEIGHT).classList.add('row-last');
-            document.querySelectorAll(`#r1, #r${GRID_HEIGHT}, #h1, #h${GRID_WIDTH}`).forEach(elem => {
-                elem.style.pointerEvents = 'none';
-            });
+                    sectors[i].push({
+                        rowId: i,
+                        colId: j,
+                        isActive: false,
+                        el(){
+                            return document.querySelector(`#s-r${this.rowId}c${this.colId}`)
+                        },
+                        fill(){
+                            if(this.isActive) return false;
+                            
+                            const hexsStr = `<el-hexagon sectorRow="${this.rowId}" sectorCol="${this.colId}" class="hexagon"><div class="hexagon-num">0</div> </el-hexagon>`.repeat(document.sectorSettings.width);
+                            let rowsStr = '';
+                            for(let m = 0; m < document.sectorSettings.height; m += 2){
+                                rowsStr += `
+                                    <div id="r${m + 1 + this.rowId * document.sectorSettings.height}" class="row">${hexsStr}</div>
+                                    <div id="r${m + 2 + this.rowId * document.sectorSettings.height}" class="row row-moved">${hexsStr}</div>
+                                `;
+                            }
+                            const sectorElem = this.el();
+                            sectorElem.innerHTML = rowsStr;
+                            
+                            this.isActive = true;
+
+                            filledSectors.push(this);
+                            if(filledSectors.length > 6) filledSectors.shift().clear();
+
+                            if(typeof(visibleHexs) == 'object'){
+                                parseHexsFromJson(visibleHexs);
+                            }
+
+                            return true;
+                        },
+                        clear(){
+                            this.el().innerHTML = '';
+                            this.isActive = false;
+                        }
+                    });
+                }   
+                // sectorsStr += '</div>'
+            }
+            hexsCont.innerHTML = sectorsStr;
 
             if(!isTouchDevice()){
                 const SLIDE_SPEED = otherSettings.slideSpeed || 2.1;
@@ -754,7 +829,33 @@ window.addEventListener('load', async () => {
                 });
             }
             
-            let zoomIndex = 1;
+            let zoomIndex = document.zoomIndex = 1;
+            let maxScrollY = hexsCont.scrollHeight;
+            const changeZoom = (change) => {
+                document.zoomIndex = zoomIndex += change;
+                if(zoomIndex <= 0.01) document.zoomIndex = zoomIndex = 0.01;
+                
+                let user = JSON.parse(sessionStorage.getItem('user') || '{}');
+                if(user.userRole != 2 && zoomIndex < 0.6) document.zoomIndex = zoomIndex = 0.6;
+                
+                const rectBefore = hexsCont.getBoundingClientRect();
+                hexsCont.style.transform = `scale(${zoomIndex})`;
+                const rectAfter = hexsCont.getBoundingClientRect();
+
+                maxScrollY = rectAfter.height - document.documentElement.clientHeight;
+
+
+                document.body.scrollTop += (rectAfter.height - rectBefore.height) * document.body.scrollTop / rectBefore.height;
+                document.body.scrollLeft += (rectAfter.width - rectBefore.width) * document.body.scrollLeft / rectBefore.width;
+                
+                hexsCont.style.padding = (hexsContPad / zoomIndex) + 'px';
+                
+                const openAbout = document.querySelector('.hexagon-about')
+                if(openAbout){
+                    openAbout.style.transform = `scale(${1 / zoomIndex})`;
+                }
+            }   
+
             document.addEventListener('wheel', evt => {
                 if(otherSettings.ctrlZoom){
                     if(!(evt.metaKey || evt.ctrlKey)) return;
@@ -764,15 +865,8 @@ window.addEventListener('load', async () => {
                 } 
                 document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});
                 evt.preventDefault();
-                
-                zoomIndex += -(evt.deltaY/1260);
-                
-                if(zoomIndex <= 0) zoomIndex = 0.01;
 
-
-                hexsCont.style.top = -(hexsCont.offsetHeight - (hexsCont.offsetHeight * zoomIndex)) + 'px';
-                hexsCont.style.left = -(hexsCont.offsetWidth - (hexsCont.offsetWidth * zoomIndex)) + 'px';
-                hexsCont.style.transform = `scale(${zoomIndex})`;
+                changeZoom(-(evt.deltaY/1260))
             }, {passive: false});
         
             let visibleHexs = [];
@@ -796,14 +890,7 @@ window.addEventListener('load', async () => {
                 }
             }, {passive: false})
             
-            document.addEventListener('click', evt => {
-                document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});
-            })
-            
             document.body.oncontextmenu = (evt) => {
-                document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});
-                window.onscroll = () => {document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});}
-        
                 return false
             }
             
@@ -817,58 +904,138 @@ window.addEventListener('load', async () => {
         
             socket.on('hexs', (data) => {
                 if(data.categ != document.title) return;
-        
+                
                 data.body = JSON.parse(data.body || '[]');
-        
-                if(data.action == 'new'){
-                    parseHexsFromJson(data.body);
+                
+                if(data.action == 'new' && typeof(data.body) == 'object'){
+                    visibleHexs.push(...data.body);
                 }else if(data.action == 'delete'){
-                    data.body.map(selector => document.querySelector(selector)).forEach(deleteHex);
+                    data.body.forEach(deleteHex);
                 }else if(data.action == 'change'){
                     data.body.forEach(hex => {
-                        let hexagon = document.querySelector(hex.selector);
-                        let editedField = createEditedField(hexagon);
-                        
-                        editedField.innerText = hex.innerText;
-                    })
-                }
-            })
+                        let hexagon = visibleHexs.find(h => h.selector == hex.selector);
+                        hexagon.innerText = hex.innerText;
+                        const elem = document.querySelector(hexagon.selector);
+                        if(elem){
+                            let editedField = createEditedField(elem);
+                            
+                            editedField.innerText = hex.innerText;
+                        }
 
-            const urlParams = new URLSearchParams(window.location.search);
-            let foundedHex = null;
-            window.addEventListener('hexsLoaded', () => {
-                if(urlParams.get('selector')){
-                    foundedHex = document.querySelector(urlParams.get('selector'));
-                }else if(urlParams.get('hexId')){
-                    foundedHex = visibleHexs.filter(hex => hex.uuid == urlParams.get('hexId'))[0];
-                }   
-
-                if(foundedHex){
-                    foundedHex.scrollIntoView({
-                        block: 'center',
-                        inline: 'center'
-                    })
-                    
-                    foundedHex.classList.add('founded-polygon');
-                    
-                    setTimeout(() => {
-                        foundedHex.classList.remove('founded-polygon');
-                        history.pushState(null, null, '/fields/' + document.title); 
-                    }, 4000)
-                }else{
-                    let scrollCoords = JSON.parse(localStorage.getItem('userScroll-' + document.title) || `{"x": ${document.body.scrollWidth / 2}, "y":  ${document.body.scrollHeight / 2}}`);
-                    document.body.scrollTo(scrollCoords.x, scrollCoords.y)
+                    });
                 }
             });
 
+            let scrollChangeY = 0;
+            let scrollChangeX = 0;
+            let prevScrollX = document.body.scrollTop;
+            let prevScrollY = document.body.scrollLeft;
+            const sW = document.sectorSettings.widthPx;
+            const sH = document.sectorSettings.heightPx;
+            const b = document.body;
+
+            const chooseRow = i => i > 0 ? i < sectors.length ? i : sectors.length - 1 : 0;
+            const getSectorForHex = hex => {
+                let hexRow = hex.selector.match(/r\d+/);
+                let hexCol = hex.selector.match(/h\d+/);
+
+                hexRow = hexRow && Math.round(+hexRow[0].replace(/^\w/, '') / (document.sectorSettings.width - 1));
+                hexCol = hexCol && Math.round(+hexCol[0].replace(/^\w/, '') / (document.sectorSettings.height - 1));
+
+                console.log(hexRow, hexCol);
+
+                return sectors[chooseRow(hexRow - 1)][hexCol - 1 >= 0 ? hexCol - 1 : 0];
+            } 
+
+            const fillSectors = () => {
+                const rawRowIndex = Math.round(b.scrollTop / sH / zoomIndex);
+                const rawColIndex = Math.round(b.scrollLeft / sW / zoomIndex);
+                
+                const nearSectors = [
+                    sectors[chooseRow(rawRowIndex)][rawColIndex - 1],
+                    sectors[chooseRow(rawRowIndex)][rawColIndex],
+                    sectors[chooseRow(rawRowIndex - 1)][rawColIndex],
+                    sectors[chooseRow(rawRowIndex - 1)][rawColIndex - 1],
+                ];
+
+                for(let s of nearSectors){
+                    if(s){
+                        s.fill();
+                        s.el().dispatchEvent(new Event('sectorLoaded'))
+                    }
+                }
+            }
+            document.body.addEventListener('scroll', (evt) => {
+                if(b.scrollTop > maxScrollY) b.scrollTop = maxScrollY;
+
+                scrollChangeY += (b.scrollTop - prevScrollX) / zoomIndex;
+                scrollChangeX += (b.scrollLeft - prevScrollY) / zoomIndex;
+                
+                if(Math.abs(scrollChangeY) > hexsContPad / 2){
+                    scrollChangeY = 0;
+                    
+                    fillSectors(scrollChangeY);
+                }
+                
+                if(Math.abs(scrollChangeX) > hexsContPad / 2){
+                    scrollChangeX = 0;
+                    
+                    fillSectors(scrollChangeX);
+                }
+                // if(scrollYChange > )
+                prevScrollX = b.scrollTop;
+                prevScrollY = b.scrollLeft;
+            });
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            let foundedHex = null;
+            window.addEventListener('hexsLoaded', () => {
+                foundedHex = visibleHexs.find(hex => hex.selector == urlParams.get('selector') || hex.uuid == urlParams.get('hexId'))  
+
+                if(foundedHex){
+                    const sectorEl = getSectorForHex(foundedHex).el();
+                    sectorEl.scrollIntoView();
+                    
+                    sectorEl.addEventListener('sectorLoaded', () => {
+                        console.log(foundedHex.selector);
+                        const foundedElem = document.querySelector(foundedHex.selector);
+                        foundedElem.scrollIntoView({
+                            block: 'center',
+                            inline: 'center'
+                        });
+                        
+                        foundedElem.classList.add('founded-polygon');
+                        
+                        setTimeout(() => {
+                            foundedElem.classList.remove('founded-polygon');
+                            history.pushState(null, null, '/fields/' + document.title); 
+                        history.pushState(null, null, '/fields/' + document.title); 
+                            history.pushState(null, null, '/fields/' + document.title); 
+                        }, 4000)
+                    }, {once: true})
+                    
+                }else{
+                    let scrollCoords = JSON.parse(localStorage.getItem('userScroll-' + document.title) || `{"x": ${document.body.scrollWidth / 2}, "y":  ${document.body.scrollHeight / 2}}`);
+                    document.body.scrollTo(scrollCoords.x, scrollCoords.y);
+                }
+            });
+            if(document.body.scrollLeft < hexsContPad) document.body.scrollLeft = hexsContPad;
+            if(document.body.scrollTop < hexsContPad) document.body.scrollTop = hexsContPad;
+
             try{
                 let res = await fetch('/chains/' + document.title);
-                if(!res.ok) return showModal('An error occurred when loading hexagons', 'Please try later. Status: ' + res.status);
+                if(!res.ok) return showModal('An error occurred when loading hexagons', translate('ptls') + res.status);
                 res = await res.json();
+                
+                sessionStorage.setItem('user', JSON.stringify({
+                    userId: res.userId,
+                    userRole: res.userRole
+                }));
 
+                console.log(res.body);
                 for(let chain of res.body){
-                    chain.hexs = parseHexsFromJson(chain.hexs); 
-                    chains.push(chain)
+                    visibleHexs.push(...chain.hexs);
+                    chains.push(chain);
                 }
 
                 window.dispatchEvent(new Event('hexsLoaded'));

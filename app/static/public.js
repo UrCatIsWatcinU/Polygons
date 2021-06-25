@@ -566,67 +566,76 @@ const setHexAboutPosition = (hexagon, hexagonAbout) => {
     const checkHexVisibility = (r, h) => document.querySelector(`#r${r} #h${h}`) ? document.querySelector(`#r${r} #h${h}`).classList.contains('hexagon-visible') : false;
     let rId = hexagon.rowId;
     let hId = +hexagon.id.replace('h', '');
+    const localHexSizes = {};
+    for(let p in hexSizes){
+        if(typeof(hexSizes[p]) == 'number') localHexSizes[p] = hexSizes[p] * (1 / document.zoomIndex);
+    }
+
+    const pads = {
+        top: (5 + (document.hexPad || 0)) * (1 / document.zoomIndex),
+        side: (7.5 + (document.hexPad || 0)) * (1 / document.zoomIndex)
+    }
 
     if(checkHexVisibility(rId, hId + 1) && checkHexVisibility(rId, hId - 1)){
         if(hexagon.parentElement.classList.contains('row-moved')){
             if(checkHexVisibility(rId - 1 , hId) || checkHexVisibility(rId - 1, hId + 1)){
-                hexagonAbout.style.top = (hexSizes.HEXAGON_HEIGHT + 5) + 'px';
+                hexagonAbout.style.top = (localHexSizes.HEXAGON_HEIGHT + pads.top) + 'px';
             }else if(checkHexVisibility(rId + 1, hId) || checkHexVisibility(rId + 1, hId + 1)){
-                hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5) + 'px';
+                hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + pads.top) + 'px';
             }else{
-                hexagonAbout.style.top = (hexSizes.HEXAGON_HEIGHT + 5) + 'px';
+                hexagonAbout.style.top = (localHexSizes.HEXAGON_HEIGHT + pads.top) + 'px';
             }
         }else{
             if(checkHexVisibility(rId - 1 , hId) || checkHexVisibility(rId - 1, hId - 1)){
-                hexagonAbout.style.top = (hexSizes.HEXAGON_HEIGHT + 5) + 'px';
+                hexagonAbout.style.top = (localHexSizes.HEXAGON_HEIGHT + pads.top) + 'px';
             }else if(checkHexVisibility(rId + 1, hId) || checkHexVisibility(rId + 1, hId - 1)){
-                hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5) + 'px';
+                hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + pads.top) + 'px';
             }else{
-                hexagonAbout.style.top = (hexSizes.HEXAGON_HEIGHT + 5) + 'px';
+                hexagonAbout.style.top = (localHexSizes.HEXAGON_HEIGHT + pads.top) + 'px';
             }
         }
     }else if(checkHexVisibility(rId, hId + 1)){
-        hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
+        hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + pads.side) + 'px';
     }else if(checkHexVisibility(rId, hId - 1)){
-        hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
+        hexagonAbout.style.left = (localHexSizes.HEXAGON_WIDTH + pads.side) + 'px'
     }else{
         if(hexagon.parentElement.classList.contains('row-moved')){
             if(checkHexVisibility(rId + 1, hId) && checkHexVisibility(rId + 1, hId+ 1)){
-                hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5 - hexSizes.TRIANGLE_HEIGHT) + 'px';
+                hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + pads.top - localHexSizes.TRIANGLE_HEIGHT) + 'px';
                 if(checkHexVisibility(rId - 1, hId)){
                     hexagonAbout.style.bottom = 0
-                    hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
+                    hexagonAbout.style.left = (localHexSizes.HEXAGON_WIDTH + pads.side) + 'px'
                 }else if(checkHexVisibility(rId - 1, hId + 1)){
                     hexagonAbout.style.bottom = 0
-                    hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
+                    hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + pads.side) + 'px';
                 }else{
-                    hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
+                    hexagonAbout.style.left = (localHexSizes.HEXAGON_WIDTH + pads.side) + 'px'
                 }
             }else if(checkHexVisibility(rId + 1, hId)){
-                hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
+                hexagonAbout.style.left = (localHexSizes.HEXAGON_WIDTH + pads.side) + 'px'
             }else if(checkHexVisibility(rId + 1, hId + 1)){
-                hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
+                hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + pads.side) + 'px';
             }else{
-                hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
+                hexagonAbout.style.left = (localHexSizes.HEXAGON_WIDTH + pads.side) + 'px'
             }
         }else{
             if(checkHexVisibility(rId + 1, hId - 1) && checkHexVisibility(rId + 1, hId)){
-                hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5 - hexSizes.TRIANGLE_HEIGHT) + 'px';
+                hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + pads.top - localHexSizes.TRIANGLE_HEIGHT) + 'px';
                 if(checkHexVisibility(rId - 1, hId)){
                     hexagonAbout.style.bottom = 0
-                    hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
+                    hexagonAbout.style.left = (localHexSizes.HEXAGON_WIDTH + pads.side) + 'px'
                 }else if(checkHexVisibility(rId - 1, hId + 1)){
                     hexagonAbout.style.bottom = 0
-                    hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
+                    hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + pads.side) + 'px';
                 }else{
-                    hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
+                    hexagonAbout.style.left = (localHexSizes.HEXAGON_WIDTH + pads.side) + 'px'
                 }
             }else if(checkHexVisibility(rId + 1, hId - 1)){
-                hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
+                hexagonAbout.style.left = (localHexSizes.HEXAGON_WIDTH + pads.side) + 'px'
             }else if(checkHexVisibility(rId + 1, hId)){
-                hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
+                hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + pads.side) + 'px';
             }else{
-                hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
+                hexagonAbout.style.left = (localHexSizes.HEXAGON_WIDTH + pads.side) + 'px'
             }
         }
     }

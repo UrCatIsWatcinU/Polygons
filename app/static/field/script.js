@@ -198,6 +198,7 @@ window.addEventListener('load', async () => {
             
                     let hexagonAbout = document.createElement('div');
                     hexagonAbout.className = 'hexagon-about';
+                    if(document.zoomIndex || document.zoomIndex > 1) hexagonAbout.style.transform = `scale(${1 / document.zoomIndex})`;
                     hexagonAbout.innerHTML = `
                     <div class="hexagon-about-controls">
                         <div class="hexagon-about-controls-btns">
@@ -340,7 +341,6 @@ window.addEventListener('load', async () => {
                         if(!conts || !conts.length || conts.length == 1) return;
             
                         const inner = () => {
-                            console.log('create slider');
                             images.slideTo = (n) => {
                                 const slider = images.firstElementChild;
                                 let neededScroll = 0;
@@ -907,7 +907,7 @@ window.addEventListener('load', async () => {
 
                 // ид ряда и ид шестиугольника
                 let row = hexagon.parentElement;
-                hexagon.id = 'h' +  ([].indexOf.call(row.children, hexagon) + 1 + hexagon.sectorCol* document.sectorSettings.width);
+                hexagon.id = 'h' +  ([].indexOf.call(row.children, hexagon) + 1 + hexagon.sectorCol * document.sectorSettings.width);
                 // hexagon.querySelector('polygon').id = 'p' + ([].indexOf.call(row.children, hexagon) + 1)
                 hexagon.rowId = idToNum(row.id);
                 hexagon.obj = {
@@ -994,8 +994,6 @@ window.addEventListener('load', async () => {
                     this.sectorCol = this.getAttribute('sectorCol');
                     this.sectorRow = this.getAttribute('sectorRow');
                     setHexProps(this);
-
-                    this.classList.add  ('hexagon')
                 }
             }
             
@@ -1017,7 +1015,6 @@ window.addEventListener('load', async () => {
                     
                     if(hexagon.num === 1){
                         if(chain){
-                            console.log(chain.hexs, chain);
                             deletedHexs.concat(chain.hexs);
                 
                             chain.hexs = chain.hexs.filter(h => h.selector != hexagon.selector);
@@ -1034,7 +1031,6 @@ window.addEventListener('load', async () => {
                                     hexsToDelete.push(h);
                                 });
 
-                                console.log(hexsToDelete);
                                 deletedHexs.concat(hexsToDelete);
                                 hexsToDelete.forEach(deleteHexInner);
                             }
@@ -1111,7 +1107,6 @@ window.addEventListener('load', async () => {
                 let firstHexs = hexs.filter(hexToCheck => !hexToCheck.chainId);
                 
                 if(!firstHexs.length || !needToCheckFirsts){
-                    console.log(hexs);
                     fetch(`/hexs/${document.title}/new`, {
                         method: 'POST',
                         headers:{
@@ -1154,7 +1149,7 @@ window.addEventListener('load', async () => {
 
             hexsCont.style.opacity = 1;
             
-            const hexPad = 6;
+            const hexPad = document.hexPad = 6;
             const hexsContPad = 400;
             document.sectorSettings = {
                 width: 16,
@@ -1224,32 +1219,38 @@ window.addEventListener('load', async () => {
                 // sectorsStr += '</div>'
             }
             hexsCont.innerHTML = sectorsStr;
-            
-            // document.querySelector('#sr0').classList.add('row-first');
 
-            if(otherSettings.turned){
-                hexsCont.style.transform = 'rotate(90deg)';
-                document.documentElement.style.width = 'auto';
-                document.documentElement.style.height = (GRID_WIDTH * document.sectorSettings.width * hexSizes.HEXAGON_WIDTH + hexSizes.HEXAGON_WIDTH/2) + 'px';
-            }
+            // if(otherSettings.turned){
+            //     hexsCont.style.transform = 'rotate(90deg)';
+            //     document.documentElement.style.width = 'auto';
+            //     document.documentElement.style.height = (GRID_WIDTH * document.sectorSettings.width * hexSizes.HEXAGON_WIDTH + hexSizes.HEXAGON_WIDTH/2) + 'px';
+            // }
 
-            let zoomIndex = 1;
+            let zoomIndex = document.zoomIndex = 1;
+            let maxScrollY = hexsCont.scrollHeight;
             const changeZoom = (change) => {
-                zoomIndex += change;
-
-                if(zoomIndex <= 0) zoomIndex = 0.01;
-
+                document.zoomIndex = zoomIndex += change;
+                if(zoomIndex <= 0.01) document.zoomIndex = zoomIndex = 0.01;
+                
                 let user = JSON.parse(sessionStorage.getItem('user') || '{}');
-                if(user.userRole != 2 && zoomIndex < 0.6) return;
-
-                // const oH = hexsCont.offsetHeight;
-                // const oW = hexsCont.offsetWidth;
-
-                // hexsCont.style.top =  (oH * zoomIndex - oH) + 'px';
-                // hexsCont.style.left = (oW * zoomIndex - oW) + 'px';
+                if(user.userRole != 2 && zoomIndex < 0.6) document.zoomIndex = zoomIndex = 0.6;
+                
+                const rectBefore = hexsCont.getBoundingClientRect();
                 hexsCont.style.transform = `scale(${zoomIndex})`;
+                const rectAfter = hexsCont.getBoundingClientRect();
 
+                maxScrollY = rectAfter.height - document.documentElement.clientHeight;
+
+
+                document.body.scrollTop += (rectAfter.height - rectBefore.height) * document.body.scrollTop / rectBefore.height;
+                document.body.scrollLeft += (rectAfter.width - rectBefore.width) * document.body.scrollLeft / rectBefore.width;
+                
                 hexsCont.style.padding = (hexsContPad / zoomIndex) + 'px';
+                
+                const openAbout = document.querySelector('.hexagon-about')
+                if(openAbout){
+                    openAbout.style.transform = `scale(${1 / zoomIndex})`;
+                }
             }   
             
 
@@ -1529,7 +1530,6 @@ window.addEventListener('load', async () => {
                             let hexagonIdInChain = 0;
                             if(hexVisibleNeighbors.length){
                                 chain = getChain(hexVisibleNeighbors[0].obj.chainId);
-                                console.log(chain);
                                 hexagon.obj.chainId = chain.id;
                                 chain.hexs.push(hexagon.obj);
                                 
@@ -1547,7 +1547,6 @@ window.addEventListener('load', async () => {
                             
                             setHexVisible(hexagon);
                             
-                            console.log(hexagon.obj);
                             hexagon.querySelector('.hexagon-num').innerText = hexagon.obj.num = hexagonIdInChain + 1;
                             
                             sendHexsCreationReq([hexagon.obj]);
@@ -1732,7 +1731,7 @@ window.addEventListener('load', async () => {
             }
             
             const backup = () => {
-                localStorage.setItem('userScroll-' + document.title, JSON.stringify({x: document.body.scrollLeft, y: document.body.scrollTop}));
+                localStorage.setItem('userScroll-' + document.title, JSON.stringify({x: document.body.scrollLeft / zoomIndex, y: document.body.scrollTop / zoomIndex}));
             }
             window.onunload = backup;
             window.addEventListener('beforeunload', (evt) => {
@@ -1782,16 +1781,13 @@ window.addEventListener('load', async () => {
 
             const chooseRow = i => i > 0 ? i < sectors.length ? i : sectors.length - 1 : 0;
             const getSectorForHex = hex => {
-                console.log(hex);
                 let hexRow = hex.selector.match(/r\d+/);
                 let hexCol = hex.selector.match(/h\d+/);
 
-                hexRow = hexRow && Math.round(+hexRow[0].replace(/^\w/, '') / document.sectorSettings.width);
-                hexCol = hexCol && Math.round(+hexCol[0].replace(/^\w/, '') / document.sectorSettings.height);
+                hexRow = hexRow && Math.round(+hexRow[0].replace(/^\w/, '') / (document.sectorSettings.width - 1));
+                hexCol = hexCol && Math.round(+hexCol[0].replace(/^\w/, '') / (document.sectorSettings.height - 1));
 
-                console.log(hexRow, hexCol);
-
-                return sectors[chooseRow(hexRow)][hexCol];
+                return sectors[chooseRow(hexRow - 1)][hexCol - 1 >= 0 ? hexCol - 1 : 0];
             } 
 
             const fillSectors = () => {
@@ -1815,6 +1811,8 @@ window.addEventListener('load', async () => {
                 }
             }
             document.body.addEventListener('scroll', (evt) => {
+                if(b.scrollTop > maxScrollY) b.scrollTop = maxScrollY;
+
                 scrollChangeY += (b.scrollTop - prevScrollX) / zoomIndex;
                 scrollChangeX += (b.scrollLeft - prevScrollY) / zoomIndex;
                 
@@ -1832,7 +1830,7 @@ window.addEventListener('load', async () => {
                 // if(scrollYChange > )
                 prevScrollX = b.scrollTop;
                 prevScrollY = b.scrollLeft;
-            });
+            }, {passive: false});
             
             const urlParams = new URLSearchParams(window.location.search);
             let foundedHex = null;
