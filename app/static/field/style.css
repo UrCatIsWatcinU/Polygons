@@ -167,6 +167,7 @@ html{
   transition: inherit;
   user-select: text;
   font-size: .97em;
+  opacity: 0;
 }
 .hexagon-about *{
   box-sizing: border-box;

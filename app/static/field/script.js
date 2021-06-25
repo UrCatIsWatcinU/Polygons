@@ -886,9 +886,7 @@ window.addEventListener('load', async () => {
             
                     hexagon.append(hexagonAbout);
                     
-                    if(!isIOS()){
-                        setHexAboutPosition(hexagon, hexagonAbout);
-                    }
+                    setHexAboutPosition(hexagon, hexagonAbout);
                     
                     document.addEventListener('mousedown', clearAbouts);
                     
@@ -897,6 +895,8 @@ window.addEventListener('load', async () => {
                         block: 'center',
                         inline: 'center'
                     });
+
+                    hexagonAbout.style.opacity = 1;
                 }
             
                 return editedField;
