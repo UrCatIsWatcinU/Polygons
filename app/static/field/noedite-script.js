@@ -57,6 +57,7 @@ window.addEventListener('load', async () => {
                     clearAbouts();
             
                     let hexagonAbout = document.createElement('div');
+                    if(document.zoomIndex || document.zoomIndex > 1) hexagonAbout.style.transform = `scale(${1 / document.zoomIndex})`;
                     hexagonAbout.className = 'hexagon-about';
                     hexagonAbout.innerHTML = `
                     <div class="hexagon-about-controls">
@@ -85,8 +86,6 @@ window.addEventListener('load', async () => {
                             hexagonAbout.querySelector(`.hexagon-about-${activeAboutTab}`).style.display = '';
                         }
                     }
-
-                    const content = () => hexagonAbout.querySelector('.hexagon-about-content');
 
                     const setUpEditor = () => {
                         let editorOptions = {
@@ -476,76 +475,8 @@ window.addEventListener('load', async () => {
                     });
             
                     hexagon.append(hexagonAbout);
-            
-                    const checkHexVisibility = (r, h) => document.querySelector(`#r${r} #h${h}`) ? document.querySelector(`#r${r} #h${h}`).classList.contains('hexagon-visible') : false;
-                    let rId = hexagon.rowId;
-                    let hId = +hexagon.id.replace('h', '');
                     
-                    if(!isIOS()){
-                        if(checkHexVisibility(rId, hId + 1) && checkHexVisibility(rId, hId - 1)){
-                            if(hexagon.parentElement.classList.contains('row-moved')){
-                                if(checkHexVisibility(rId - 1 , hId) || checkHexVisibility(rId - 1, hId + 1)){
-                                    hexagonAbout.style.top = (hexSizes.HEXAGON_HEIGHT + 5) + 'px';
-                                }else if(checkHexVisibility(rId + 1, hId) || checkHexVisibility(rId + 1, hId + 1)){
-                                    hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5) + 'px';
-                                }else{
-                                    hexagonAbout.style.top = (hexSizes.HEXAGON_HEIGHT + 5) + 'px';
-                                }
-                            }else{
-                                if(checkHexVisibility(rId - 1 , hId) || checkHexVisibility(rId - 1, hId - 1)){
-                                    hexagonAbout.style.top = (hexSizes.HEXAGON_HEIGHT + 5) + 'px';
-                                }else if(checkHexVisibility(rId + 1, hId) || checkHexVisibility(rId + 1, hId - 1)){
-                                    hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5) + 'px';
-                                }else{
-                                    hexagonAbout.style.top = (hexSizes.HEXAGON_HEIGHT + 5) + 'px';
-                                }
-                            }
-                        }else if(checkHexVisibility(rId, hId + 1)){
-                            hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
-                        }else if(checkHexVisibility(rId, hId - 1)){
-                            hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
-                        }else{
-                            if(hexagon.parentElement.classList.contains('row-moved')){
-                                if(checkHexVisibility(rId + 1, hId) && checkHexVisibility(rId + 1, hId+ 1)){
-                                    hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5 - hexSizes.TRIANGLE_HEIGHT) + 'px';
-                                    if(checkHexVisibility(rId - 1, hId)){
-                                        hexagonAbout.style.bottom = 0
-                                        hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
-                                    }else if(checkHexVisibility(rId - 1, hId + 1)){
-                                        hexagonAbout.style.bottom = 0
-                                        hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
-                                    }else{
-                                        hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
-                                    }
-                                }else if(checkHexVisibility(rId + 1, hId)){
-                                    hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
-                                }else if(checkHexVisibility(rId + 1, hId + 1)){
-                                    hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
-                                }else{
-                                    hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
-                                }
-                            }else{
-                                if(checkHexVisibility(rId + 1, hId - 1) && checkHexVisibility(rId + 1, hId)){
-                                    hexagonAbout.style.top = '-' + (+getComputedStyle(hexagonAbout).height.replace('px', '')  + 5 - hexSizes.TRIANGLE_HEIGHT) + 'px';
-                                    if(checkHexVisibility(rId - 1, hId)){
-                                        hexagonAbout.style.bottom = 0
-                                        hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
-                                    }else if(checkHexVisibility(rId - 1, hId + 1)){
-                                        hexagonAbout.style.bottom = 0
-                                        hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
-                                    }else{
-                                        hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
-                                    }
-                                }else if(checkHexVisibility(rId + 1, hId - 1)){
-                                    hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
-                                }else if(checkHexVisibility(rId + 1, hId)){
-                                    hexagonAbout.style.left = '-' + (+getComputedStyle(hexagonAbout).width.replace('px', '')  + 7.5) + 'px';
-                                }else{
-                                    hexagonAbout.style.left = (hexSizes.HEXAGON_WIDTH + 7.5) + 'px'
-                                }
-                            }
-                        }
-                    }
+                    setHexAboutPosition(hexagon, hexagonAbout)
                     
                     document.addEventListener('mousedown', clearAbouts);
                     
