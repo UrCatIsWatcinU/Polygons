@@ -837,6 +837,7 @@ window.addEventListener('load', async () => {
                 
                 let user = JSON.parse(sessionStorage.getItem('user') || '{}');
                 if(user.userRole != 2 && zoomIndex < 0.6) document.zoomIndex = zoomIndex = 0.6;
+                if(zoomIndex >= 2.5) document.zoomIndex = zoomIndex = 2.5
                 
                 const rectBefore = hexsCont.getBoundingClientRect();
                 hexsCont.style.transform = `scale(${zoomIndex})`;

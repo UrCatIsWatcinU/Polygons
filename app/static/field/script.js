@@ -1231,6 +1231,7 @@ window.addEventListener('load', async () => {
             const changeZoom = (change) => {
                 document.zoomIndex = zoomIndex += change;
                 if(zoomIndex <= 0.01) document.zoomIndex = zoomIndex = 0.01;
+                if(zoomIndex >= 2.5) document.zoomIndex = zoomIndex = 2.5;
                 
                 let user = JSON.parse(sessionStorage.getItem('user') || '{}');
                 if(user.userRole != 2 && zoomIndex < 0.6) document.zoomIndex = zoomIndex = 0.6;
