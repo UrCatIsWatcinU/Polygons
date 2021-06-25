@@ -1019,9 +1019,9 @@ window.addEventListener('load', async () => {
                     let scrollCoords = JSON.parse(localStorage.getItem('userScroll-' + document.title) || `{"x": ${document.body.scrollWidth / 2}, "y":  ${document.body.scrollHeight / 2}}`);
                     document.body.scrollTo(scrollCoords.x, scrollCoords.y);
                 }
+                if(document.body.scrollLeft < hexsContPad) document.body.scrollLeft = hexsContPad;
+                if(document.body.scrollTop < hexsContPad) document.body.scrollTop = hexsContPad;
             });
-            if(document.body.scrollLeft < hexsContPad) document.body.scrollLeft = hexsContPad;
-            if(document.body.scrollTop < hexsContPad) document.body.scrollTop = hexsContPad;
 
             try{
                 let res = await fetch('/chains/' + document.title);
