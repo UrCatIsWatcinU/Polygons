@@ -144,7 +144,7 @@ class Comment(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
     chain_id = db.Column(db.Integer,db.ForeignKey('chain.id'), index=True)
     reply_to_id = db.Column(db.Integer,db.ForeignKey('comment.id'), index=True)
-    replies = db.relationship('Comment', backref='to', lazy='dynamic', cascade="all, delete-orphan", remote_side=[id], single_parent=True, uselist=True)
+    replies = db.relationship('Comment', backref='to', cascade="all, delete-orphan", remote_side=[id], single_parent=True, uselist=True)
 
     
 
