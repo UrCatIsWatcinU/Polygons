@@ -198,7 +198,6 @@ window.addEventListener('load', async () => {
             
                     let hexagonAbout = document.createElement('div');
                     hexagonAbout.className = 'hexagon-about';
-                    if(document.zoomIndex || document.zoomIndex > 1) hexagonAbout.style.transform = `scale(${1 / document.zoomIndex})`;
                     hexagonAbout.innerHTML = `
                     <div class="hexagon-about-controls">
                         <div class="hexagon-about-controls-btns">
@@ -889,12 +888,6 @@ window.addEventListener('load', async () => {
                     setHexAboutPosition(hexagon, hexagonAbout);
                     
                     document.addEventListener('mousedown', clearAbouts);
-                    
-                    hexagonAbout.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'center',
-                        inline: 'center'
-                    });
                 }
             
                 return editedField;

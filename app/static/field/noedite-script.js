@@ -57,7 +57,6 @@ window.addEventListener('load', async () => {
                     clearAbouts();
             
                     let hexagonAbout = document.createElement('div');
-                    if(document.zoomIndex || document.zoomIndex > 1) hexagonAbout.style.transform = `scale(${1 / document.zoomIndex})`;
                     hexagonAbout.className = 'hexagon-about';
                     hexagonAbout.innerHTML = `
                     <div class="hexagon-about-controls">
@@ -480,11 +479,7 @@ window.addEventListener('load', async () => {
                     
                     document.addEventListener('mousedown', clearAbouts);
                     
-                    hexagonAbout.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'center',
-                        inline: 'center'
-                    });
+
                 }
         
                 return editedField;
@@ -708,7 +703,7 @@ window.addEventListener('load', async () => {
             hexsCont.innerHTML = sectorsStr;
 
             if(!isTouchDevice()){
-                const SLIDE_SPEED = otherSettings.slideSpeed || 2.1;
+                const SLIDE_SPEED = 1;
                 const MIN_CHANGE = 20;
                 const slider = document.body;
                 let isDown = false;

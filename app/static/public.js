@@ -562,6 +562,10 @@ hexSizes.setBodyHeight(52 * 1.5);
 
 let hexPath = () => `M 0 ${hexSizes.TRIANGLE_HEIGHT} L ${hexSizes.HEXAGON_WIDTH/2} 0 L ${hexSizes.HEXAGON_WIDTH} ${hexSizes.TRIANGLE_HEIGHT} L ${hexSizes.HEXAGON_WIDTH} ${hexSizes.HEXAGON_HEIGHT-hexSizes.TRIANGLE_HEIGHT} L ${hexSizes.HEXAGON_WIDTH/2} ${hexSizes.HEXAGON_HEIGHT} L 0 ${hexSizes.HEXAGON_HEIGHT-hexSizes.TRIANGLE_HEIGHT} Z`;
 
+/**
+ * @param {HTMLElement} hexagon 
+ * @param {HTMLElement} hexagonAbout 
+ */
 const setHexAboutPosition = (hexagon, hexagonAbout) => {
     const checkHexVisibility = (r, h) => document.querySelector(`#r${r} #h${h}`) ? document.querySelector(`#r${r} #h${h}`).classList.contains('hexagon-visible') : false;
     let rId = hexagon.rowId;
@@ -575,6 +579,7 @@ const setHexAboutPosition = (hexagon, hexagonAbout) => {
         top: (5 + (document.hexPad || 0)) * (1 / document.zoomIndex),
         side: (7.5 + (document.hexPad || 0)) * (1 / document.zoomIndex)
     }
+    if(document.zoomIndex || document.zoomIndex > 1) hexagonAbout.style.transform = `scale(${1 / document.zoomIndex})`;
 
     if(checkHexVisibility(rId, hId + 1) && checkHexVisibility(rId, hId - 1)){
         if(hexagon.parentElement.classList.contains('row-moved')){
@@ -639,11 +644,40 @@ const setHexAboutPosition = (hexagon, hexagonAbout) => {
             }
         }
     }
-    hexagonAbout.style.opacity = 1;
+    // hexagonAbout.style.opacity = 1;
+    const rect = hexagonAbout.getBoundingClientRect();
+
+    neededY = rect.top + document.body.scrollTop - (document.documentElement.clientHeight - rect.height) / 2;
+    neededX = rect.left + document.body.scrollLeft- (document.documentElement.clientWidth - rect.width) / 2;
+    
+    const SPEED = .12;
+    const oneStepY = (neededY - document.body.scrollTop) * SPEED;
+    const oneStepX = (neededX - document.body.scrollLeft) * SPEED;
+    
+    let previousY = document.body.scrollTop;
+    let previousX = document.body.scrollLeft;
+    
+    const changeScroll = () => {
+        if(
+            Math.abs(Math.floor(neededY - document.body.scrollTop)) < Math.abs(oneStepY) || 
+            Math.abs(Math.floor(neededX - document.body.scrollLeft)) < Math.abs(oneStepX) ||
+            Math.round(document.body.scrollTop) != Math.round(previousY) ||    
+            Math.round(document.body.scrollLeft) != Math.round(previousX)    
+        ) return;
+        
+        
+        document.body.scrollTop += oneStepY;
+        document.body.scrollLeft += oneStepX;
+        
+        previousY = document.body.scrollTop;
+        previousX = document.body.scrollLeft;
+        requestAnimationFrame(changeScroll);
+    }
+
+    requestAnimationFrame(changeScroll);
 }
 
 /**
- * 
  * @param {HTMLElement} hexagon 
  */
 const createBgHex = (hexagon, url, path = hexPath(), onlyView = false) => {
@@ -680,11 +714,6 @@ const createBgHex = (hexagon, url, path = hexPath(), onlyView = false) => {
 
             imgAbout.innerHTML = `<img src="/${url}" alt="Hexagon image">`;
             hexagon.append(imgAbout);
-            imgAbout.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center',
-                inline: 'center'
-            });
 
             setHexAboutPosition(hexagon, imgAbout);
 
