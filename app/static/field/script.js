@@ -895,8 +895,6 @@ window.addEventListener('load', async () => {
                         block: 'center',
                         inline: 'center'
                     });
-
-                    hexagonAbout.style.opacity = 1;
                 }
             
                 return editedField;

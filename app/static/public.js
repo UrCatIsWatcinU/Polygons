@@ -639,6 +639,7 @@ const setHexAboutPosition = (hexagon, hexagonAbout) => {
             }
         }
     }
+    hexagonAbout.style.opacity = 1;
 }
 
 /**
