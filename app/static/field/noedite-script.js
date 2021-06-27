@@ -62,7 +62,6 @@ window.addEventListener('load', async () => {
                     <div class="hexagon-about-controls">
                         <div class="hexagon-about-controls-btns">
                             <span class="hexagon-about-btn contentBtn">${translate('hexAbout.content')}</span>
-                            <span class="hexagon-about-btn imagesBtn">${translate('hexAbout.images')}</span>
                             <span class="hexagon-about-btn commentsBtn">${translate('hexAbout.comments')}</span>
                         </div>
                         <div class="hexagon-about-rating"> 
@@ -113,6 +112,7 @@ window.addEventListener('load', async () => {
                         editor.disable();
 
                         hexagonAbout.editor = editor;
+                        hexagonAbout.dispatchEvent(new Event('contentLoaded'));
                     }
                     
                     const createImageCont = (imgObj) => {
@@ -413,7 +413,7 @@ window.addEventListener('load', async () => {
                                     loading.remove();
                                     loading.isDeleted = true;
                                 }
-                                setTimeout(() => {if(!loading.isDeleted) loading.remove()}, 1000)
+                                setTimeout(() => {if(!loading.isDeleted) loading.remove()}, 1000);
                             });
                         }
                         loadAbout();
