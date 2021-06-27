@@ -58,6 +58,10 @@
 
 {% macro loading_head() -%}
 <script>
+  window.onerror = (msg, url, line) => {
+    alert(`${msg} in ${url.split('/').pop()}:${line}`)
+  }
+
   let loadingColors = JSON.parse(localStorage.getItem('colors'));
   if(!loadingColors){
     loadingColors = {

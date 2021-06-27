@@ -672,7 +672,6 @@ const setHexAboutPosition = (hexagon, hexagonAbout) => {
     }
     // hexagonAbout.style.opacity = 1;
     hexagonAbout.addEventListener('contentLoaded', () => {
-        console.log('loaded');
         const rect = hexagonAbout.getBoundingClientRect();
         
         neededY = rect.top + document.body.scrollTop - (document.body.clientHeight - rect.height) / 2;
@@ -686,7 +685,6 @@ const setHexAboutPosition = (hexagon, hexagonAbout) => {
         let previousX = document.body.scrollLeft;
         
         const changeScroll = () => {
-            console.log(Math.abs(neededX - document.body.scrollLeft), oneStepX);
             let needNext = false;
             if(
                 Math.round(document.body.scrollTop) != Math.round(previousY) ||    
