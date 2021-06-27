@@ -1,5 +1,6 @@
 html{
   overflow: hidden;
+  --field-hex-pad : 7px;
 }
 
 .field {
@@ -56,7 +57,7 @@ html{
 }
 .hexagon-active{
   --bgc: var(--main-c);
-  z-index: 10;
+  z-index: 11 !important;
 }
 .hexagon-first .polygon{
   transform: scale(1.04);
@@ -150,9 +151,10 @@ html{
 }
 
 .hexagon-about{
+  --about-w: 470px;
   background: var(--about-bgc);
-  color: var(--black-c);
-  width: 470px;
+  color: var(--about-fgc);
+  width: var(--about-w);
   min-height: 100px;
   max-height: var(--max-about-height);
   
@@ -438,6 +440,11 @@ html{
 
 .image-about{
   cursor: default;
+  width: max-content;
+}
+.image-about img{
+  min-width: 300px;
+  max-width: var(--about-w);;
 }
 
 

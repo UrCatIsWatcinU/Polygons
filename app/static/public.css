@@ -182,6 +182,9 @@ a{
     cursor: unset;
     margin: 6px 0;
 }
+.contextmenu-item{
+    display: block;   
+}
 .contextmenu-item:not(.contextmenu-item:last-child){
     margin-bottom: 4px;
 }
@@ -260,7 +263,7 @@ a{
 
   
 .hexagon {
-    --bgc: transparent;
+    --bgc: var(--main-c);
     box-sizing: content-box;
     position: relative;
     width: var(--hexagon-width);
@@ -268,7 +271,7 @@ a{
     display: block;
     transition: none;
     cursor: default;
-    color: var(--white-c);
+    color: var(--hex-fgc);
     z-index: 2;
     overflow: visible;
     padding: var(--hex-pad);
@@ -304,7 +307,7 @@ a{
     box-sizing: border-box;
     background: transparent;
     padding: 4px;
-    color: var(--white-c);
+    color: var(--hex-fgc);
     position: absolute;
     top: calc(var(--triangle-height) + var(--hex-pad));
     border-radius: 3px;
@@ -384,6 +387,7 @@ a{
     cursor: pointer;
     top: unset;
     background-color: transparent;
+    color: var(--white-c);
 }
 
 
@@ -591,14 +595,15 @@ a{
     justify-content: center;
     align-items: center;
     position: absolute;
-    top: 0;
-    right: 0;
+    top: -5px;
+    right: -5px;
     width: var(--size);
     height: var(--size);
     border-radius: 50%;
     background-color: var(--red-c);
     color: var(--white-c);
     font-size: 9px;
+    padding: 2px;
 }
 .notifications-countInvisible{
     display: none;

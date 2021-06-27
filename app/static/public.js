@@ -10,6 +10,7 @@ translate.add({
         send: 'Send to chat',
         copy: 'Copy link',
         move: 'Move',
+        img: 'Add image',
         copyMsgs: {
             s: 'Copied',
             uns: 'Was not possible to copy the link'
@@ -61,7 +62,14 @@ translate.add({
             RC: 'Reverse comments',
         },
         save: 'Save',
-        reset: 'Reset'
+        reset: 'Reset',
+        colorTs: {
+            FIELD_BGC: 'Field background',
+            ABOUT_BGC: 'About background',
+            HEX_FGC: 'Hexagon\'s font',
+            ABOUT_FGC: 'About\'s font',
+            HEX_STROKE_C: 'Hexagon stroke',
+        }
     },
     subs: {
         title: 'Subscribers'
@@ -97,7 +105,9 @@ translate.add({
         formatD: 'Please choose file with one of these extentions',
         big: 'Big file',
         max: 'Max file size is ',
-        one: 'Choose one file'
+        one: 'Choose one file',
+        fitstT: 'First hexagon',
+        fitstD: 'You can\'t upload image to the first hexagon'
     },
     ptl: 'Please try later',
     ptls: 'Please try later. Status: '
@@ -111,6 +121,7 @@ translate.add({
         send: 'Отправить',
         move: 'Переместить',
         copy: 'Ссылка',
+        img: 'Вставить картинку',
         complain: 'Пожаловаться',
         user: 'Автор',
         chain: 'Цепочка',
@@ -168,7 +179,14 @@ translate.add({
             RC: 'Обратный порядок комментариев',
         },
         save: 'Сохранить',
-        reset: 'Сбросить'
+        reset: 'Сбросить',
+        colorTs: {
+            FIELD_BGC: 'Фон поля',
+            ABOUT_BGC: 'Фон "подробнее"',
+            HEX_FGC: 'Шрифт в шестиугольнике',
+            ABOUT_FGC: 'Шрифт в "подробнее"',
+            HEX_STROKE_C: 'Обводка шестиугольников',
+        }
     },
     subs: {
         title: 'Подписчики'
@@ -200,7 +218,11 @@ translate.add({
         formatD: 'Выберите файл с расширением из этого списка',
         big: 'Слишком большой файл',
         max: 'Максимальный размер файла - ',
-        one: 'Выберите один файл'
+        one: 'Выберите один файл',
+        fitstT: 'Этот шестиугольник - первый',
+        fitstD: 'Вы не можете добавить фоновое изображение в первый шестиугольник цепочки',
+        limitT: 'Достигнут лимит',
+        limitD: 'В одной цепочке может быть не больше <b>пяти</b> хексов с фоновой картинокой',
     },
     ptl: 'Пожалуйста, попробуйте позже',
     ptls: 'Пожалуйста, попробуйте позже. Статус: ',
@@ -312,7 +334,6 @@ function showModal(title, body, empty = false){
         modal.innerHTML = ''
         modal.onclick = null;
         needToClose = false;
-
     } 
 
     modal.style.display = 'flex';
@@ -328,8 +349,8 @@ function showModal(title, body, empty = false){
             modal.onclick = () => {
                 modal.style.display = 'none';
             
-                modal.querySelector('.modal-title').innerText = '';
-                modal.querySelector('.modal-body').innerText = '';
+                modal.querySelector('.modal-title').innerHTML = '';
+                modal.querySelector('.modal-body').innerHTML = '';
             }
         }else{
             let clickCount = 0;
@@ -348,8 +369,8 @@ function showModal(title, body, empty = false){
             } 
         }
 
-        modal.querySelector('.modal-title').innerText = title;
-        modal.querySelector('.modal-body').innerText = body;
+        modal.querySelector('.modal-title').innerHTML = title;
+        modal.querySelector('.modal-body').innerHTML = body;
     }
     
     return modal;
@@ -426,7 +447,7 @@ function createDropMenu(dropMenu = null, userCont = null, attachElem = null){
 
 const MAX_SIZE = 3000000;
 const EXTENTIONS = ['png', 'jpg', 'jpeg', 'gif'];
-const uploadFile = (files, url, successCB, evt=null) => {
+const uploadFile = (files, url, successCB, evt=null, filename='img') => {
     if(!window.FileReader){
         showModal(translate('upload.cant'), translate('upload.cantD'));
         return;
@@ -457,7 +478,7 @@ const uploadFile = (files, url, successCB, evt=null) => {
     const fileForm = new FormData();
     file.arrayBuffer().then(result => {
         const blob = new Blob([result], {type: file.type});
-        fileForm.append('file', blob, 'BG');
+        fileForm.append('file', blob, filename);
 
         fetch(url, {
             method: 'POST',
@@ -512,13 +533,15 @@ let otherSettings = {
 let colors = {
     FIELD_BGC:'#f0f0f0',
     ABOUT_BGC: '#dfdfdf',
-    BLACK_C:'#333333',
-    WHITE_C: '#f0f0f0',
+    ABOUT_FGC:'#333333',
+    HEX_FGC: '#f0f0f0',
     HEX_STROKE_C: '#333333',
 }
 const defaultColors = Object.assign({}, colors);
 
 const constColors = {
+    BLACK_C:'#333333',
+    WHITE_C: '#f0f0f0',
     RED_C: '#f52e2e',
     GREEN_C: '#1bb123',
     GREY_C: '#dfdfdf',
@@ -693,11 +716,23 @@ const createBgHex = (hexagon, url, path = hexPath(), onlyView = false) => {
         hexagon.classList.add('hexagon-bg');
 
         hexagon.addEventListener('click', (evt) => {
+            if(hexagon.classList.contains('hexagon-active')) return;
+            hexagon.classList.add('hexagon-active');
+
+            
             if(hexagon.querySelector('.hexagon-about')){
                 evt.stopImmediatePropagation();
                 return;
             }
             const imgAbout = setClassName(document.createElement('div'), 'hexagon-about image-about');
+            const deleteObserver = new MutationObserver((mList) => {
+                mList.forEach(mutation => {
+                    if(Array.from(mutation.removedNodes).includes(imgAbout)){
+                        hexagon.classList.remove('hexagon-active');
+                    }
+                });
+            });
+            deleteObserver.observe(hexagon, { childList: true });
             
             imgAbout.addEventListener('mousedown', (evt) => {
                 evt.stopImmediatePropagation();
@@ -799,7 +834,7 @@ const main = async () => {
                         settings = JSON.parse(settings.body);
         
                         otherSettings = settings.otherSettings;
-                        if(settings.colors) colors = settings.colors;
+                        if(settings.colors) colors = Object.assign(colors, settings.colors);
                         hexsColors = settings.hexsColors;
                         font = settings.font;
                     }
@@ -835,9 +870,11 @@ const main = async () => {
         })
     }
 
+    const tinyAbouFgc = tinycolor(colors.ABOUT_FGC);
     const cssProps = {
         'max-about-height': (document.documentElement.clientHeight - 100) + 'px',
         'grid-c': hexToRgb(constColors.MAIN_C, 0.1),
+        'about-fgc-a': tinyAbouFgc.isDark() ? tinyAbouFgc.lighten(25) : tinyAbouFgc.darken(30),
         'font': font.family,
         'font-size': font.size,
         'trans-dur': '.2s',

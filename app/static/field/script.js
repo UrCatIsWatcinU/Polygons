@@ -909,7 +909,7 @@ window.addEventListener('load', async () => {
                     userId: 0,
                     creationDate: 0,
                     selector: '',
-                    images: [],
+                    imgs: [],
                     BGImg: ''
                 };
                 
@@ -921,6 +921,12 @@ window.addEventListener('load', async () => {
                         },
                         set(value) {
                             hexagon.obj[prop] = value;
+
+                            const globalObj = visibleHexs.find(h => h.selector == giveHexSelector(hexagon));
+                            if(globalObj) globalObj[prop] = value;
+
+                            const chainObj = getChain(hexagon.obj.chainId) && getChain(hexagon.obj.chainId).hexs.find(h => h.selector == giveHexSelector(hexagon));
+                            if(chainObj) chainObj[prop] = value;
                         }
                     });
                 }
@@ -952,6 +958,15 @@ window.addEventListener('load', async () => {
                 
                 hexagon.addEventListener('drop', (evt) => {
                     hexagon.classList.remove('hexagon-drag');
+                    evt.preventDefault();
+
+                    if(hexagon.obj.num === 1){
+                        return showModal(translate('upload.fitstT'), translate('upload.fitstD'));
+                    } 
+                    
+                    if(getChain(hexagon.obj.chainId).hexs.filter(hex => hex.BGImg).length >= 5){
+                        return showModal(translate('upload.limitT'), translate('upload.limitD'));
+                    } 
 
                     if(hexagon.querySelector('.hexagon-editedField')) return;
                     uploadFile(evt.dataTransfer.files,`/hexs/${hexagon.uuid}/imgs/upload`, (imgUploadRes) => {
@@ -960,7 +975,7 @@ window.addEventListener('load', async () => {
                         hexagon.imgs.push(imgUploadRes);
         
                         createBgHex(hexagon, imgUploadRes.url);
-                    }, evt);
+                    }, evt, 'BG');
                 }, {passive: false});
                 
                 hexagon.ondragleave = () => {
@@ -1417,7 +1432,7 @@ window.addEventListener('load', async () => {
 
             let visibleHexs = document.visibleHexs =  [];
             let chains = [];
-            const getChain = id => {
+            function getChain(id){
                 for(let chain of chains){
                     if(chain && chain.id == id) return chain
                 }
@@ -1496,7 +1511,7 @@ window.addEventListener('load', async () => {
                     let chain = getChain(hexVisibleNeighbors[0] && hexVisibleNeighbors[0].chainId);
 
                     chain && chain.hexs.forEach(hexToCheck => { 
-                        hexToCheck = visibleHexs.find(h => h.selector == hexToCheck.selector)
+                        hexToCheck = visibleHexs.find(h => h.selector == hexToCheck.selector);
                         if(!hexToCheck.innerText && !hexToCheck.BGImg){
                             needFillLast = true;
                             return;
@@ -1558,8 +1573,11 @@ window.addEventListener('load', async () => {
                     <div class="contextmenu-item contextmenu-info">${translate('contextmenu.date')}: ${hexDate.toLocaleDateString()}</div>`;
 
                     if(!hexagon.obj.userId || (user.userId == hexagon.obj.userId) || user.userRole == 2){
+                        const addFileStr = `<label for="hex-img" class="contextmenu-item">${translate('contextmenu.img')}</label><input class="img-btn" id="hex-img" type="file" style="display: none;">`
+                        
                         contextmenu.insertAdjacentHTML('afterbegin', `
                         <div class="delete-btn contextmenu-item">Delete</div>
+                        ${hexagon.obj.innerText ? '' : addFileStr}
                         ${hexagon.obj.BGImg ? '' : '<div class="contextmenu-item edit-btn">Edit</div>'}
                         ${user.userRole == 2 ? '<div class="move-btn contextmenu-item">Move</div>' : ''}`);
                     }
@@ -1704,6 +1722,20 @@ window.addEventListener('load', async () => {
                             const nextLink = new URL('/chats', window.location.origin); 
                             nextLink.searchParams.append('send', `[hex ${hexagon.uuid}]`);
                             window.location = nextLink;
+                        },
+                        img: (evt) => {
+                            if(hexagon.obj.num === 1) return showModal(translate('upload.fitstT'), translate('upload.fitstD'));
+                            
+                            const imageInput = evt.target;
+                            if(!imageInput.files || imageInput.files.length > 1) return;
+
+                            uploadFile(imageInput.files,`/hexs/${hexagon.uuid}/imgs/upload`, (imgUploadRes) => {
+                                delete imgUploadRes.success;
+                    
+                                hexagon.imgs.push(imgUploadRes);
+                
+                                createBgHex(hexagon, imgUploadRes.url);
+                            }, evt, 'BG');
                         }
                     } 
 
@@ -1711,7 +1743,7 @@ window.addEventListener('load', async () => {
                         const actionBtn = contextmenu.querySelector(`.${action}-btn`); 
                         if(actionBtn){
                             actionBtn.innerText = translate(`contextmenu.${action}`)
-                            actionBtn.addEventListener('click', actions[action], {passive: false})
+                            actionBtn.addEventListener(action == 'img' ? 'input' : 'click', actions[action], {passive: false})
                         } 
                     }
                 }
@@ -1899,7 +1931,7 @@ window.addEventListener('load', async () => {
                         <h2 class="settings-title">${translate('sets.font')}</h2>
                         <div class="font-cont">
                             <span class="font-input-cont"><label for="font-family">${translate('sets.fontF')} <a target="_blank" href="https://fonts.google.com/">Google</a></label>:&nbsp<input type="text" id="font-family" value="${font.family}"></span>
-                            <span class="font-input-cont"><label for="font-size">${translate('sets.fontS')}</label>:&nbsp<input type="range" min=".5" max="2" step="0.05" id="font-size" value="${font.size.replace('em', '')}"></span>
+                            <span class="font-input-cont"><label for="font-size">${translate('sets.fontS')}</label>:&nbsp<input type="range" min="${+font.size.replace('em', '') - .5}" max="${+font.size.replace('em', '') + .5}" step="${.5 / 3}" id="font-size" value="${font.size.replace('em', '')}"></span>
                         </div>
                         <div class="font-preview">
                         <h3 style="font-family: inherit; margin: 10px 0">Font settings example</h3>
@@ -1928,7 +1960,7 @@ window.addEventListener('load', async () => {
 
 
                 for(let color in defaultColors){
-                    settingsCont.querySelector('.settings-grid.colors').innerHTML += `<div><label for="${color}">${color}: </label><br> <input id="${color}" class="color-input" value="${colors[color] || defaultColors[color]}" data-jscolor="{}"></div>`
+                    settingsCont.querySelector('.settings-grid.colors').innerHTML += `<div><label for="${color}">${translate('sets.colorTs.' + color)}: </label><br> <input id="${color}" class="color-input" value="${colors[color] || defaultColors[color]}" data-jscolor="{}"></div>`
                 }
                 settingsCont.querySelectorAll('.color-input').forEach(input => {
                     input.onchange = () => {
@@ -2095,7 +2127,7 @@ window.addEventListener('load', async () => {
                         loadConf.inactive();
                     }
                 }
-                settingsCont.querySelector('#font-size').onchange = (evt) => {
+                settingsCont.querySelector('#font-size').oninput = (evt) => {
                     settingsCont.querySelector('.font-preview').style.fontSize = evt.target.value + 'em';
 
                     font = {family: settingsCont.querySelector('#font-family').value, size: evt.target.value + 'em'};

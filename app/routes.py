@@ -83,27 +83,28 @@ def create_new_categ():
         db.session.commit()
     except sqlalchemy.exc.IntegrityError:
         db.session.rollback()
-        return json.dumps({"success":False, "message": 'Category already exists'})
+        return json.dumps({"success": False, "message": 'Category already exists'})
     socketio.emit('reload')
     return json.dumps({"success":True})
 
-@app.route('/categ/change', methods=['POST'])
+@app.route('/categ/<old_name>/change', methods=['POST'])
 @login_required
-def change_categ():
+def change_categ(old_name):
     if not current_user or not current_user.is_authenticated or current_user.role_id != 2:
         return json.dumps({"success":False})
     
     changed_categ = request.get_json(True)
-    categ = db.session.query(Categ).filter(Categ.name == changed_categ['oldName']).first_or_404()
+    categ = db.session.query(Categ).filter_by(name=old_name).first_or_404()
     categ.name = changed_categ['name']
     categ.color = changed_categ['color']
     categ.text_color = changed_categ['textColor']
-    try:
-        db.session.add(categ)
-        db.session.commit()
-    except sqlalchemy.exc.IntegrityError:
-        db.session.rollback()
-        return json.dumps({"success": False, "message": 'Category already exists'})
+    categ.params = changed_categ['params']
+    db.session.add(categ)
+    db.session.commit()
+    # try:
+    # except sqlalchemy.exc.IntegrityError:
+    #     db.session.rollback()
+    #     return json.dumps({"success": False, "message": 'Category already exists'})
 
         
     socketio.emit('reload')
@@ -790,7 +791,7 @@ def upload_hex_img(id):
     create_dir(f"/app/static/uploadedImgs/{categ_name}/{hex.chain.id}/{hex.id}")
 
     filename = f"static/uploadedImgs/{categ_name}/{hex.chain.id}/{hex.id}/{img.id}.{img.ext}"
-    if 'BG' in file.filename:
+    if 'BG' in file.filename:   
         hex.BG_img = filename
         for img in hex.imgs:
             img.is_BG = False

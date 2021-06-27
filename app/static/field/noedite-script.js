@@ -784,18 +784,18 @@ window.addEventListener('load', async () => {
             }   
 
             document.addEventListener('wheel', evt => {
+                document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});
                 if(otherSettings.ctrlZoom){
                     if(!(evt.metaKey || evt.ctrlKey)) return;
                     else{
                         evt.preventDefault();
                     }
                 } 
-                document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});
                 evt.preventDefault();
-
+                
                 changeZoom(-(evt.deltaY/1260))
             }, {passive: false});
-        
+            
             let visibleHexs = [];
             let chains = [];
             const getChain = id => {
@@ -805,6 +805,7 @@ window.addEventListener('load', async () => {
             }
             
             document.documentElement.addEventListener('keydown', evt => {
+                document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});
                 if(evt.key == '=' && (evt.ctrlKey || evt.metaKey)){
                     evt.preventDefault();
                     
@@ -812,12 +813,111 @@ window.addEventListener('load', async () => {
                 }
                 if(evt.key == '-' && (evt.ctrlKey || evt.metaKey)){
                     evt.preventDefault();
-        
+                    
                     hexsCont.style.transform = `scale(${zoomIndex += -(0.1)})`
                 }
             }, {passive: false})
             
+            document.body.addEventListener('click', () => {
+                document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});
+            })
             document.body.oncontextmenu = (evt) => {
+                document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});
+
+                let hexagon = document.elementFromPoint(evt.clientX, evt.clientY);
+                if(hexagon == document.body) return false;
+                while(!hexagon.classList.contains('hexagon')){
+                    hexagon = hexagon.parentElement;
+                    if(hexagon == document.body) return false;
+                }
+        
+                let contextmenu  = document.createElement('div');
+                contextmenu.className = 'contextmenu';
+        
+                const deleteObserver = new MutationObserver((mList) => {
+                    mList.forEach(mutation => {
+                        if(Array.from(mutation.removedNodes).includes(contextmenu)){
+                            hexagon.isContextmenu = false;
+                            deleteObserver.disconnect();
+                        }
+                    });
+                });
+                deleteObserver.observe(document.body, {
+                    childList: true
+                });
+                
+                if(!hexagon.classList.contains('hexagon-visible')) return false;
+
+                hexagon.isContextmenu = true;
+                let hexDate = new Date(hexagon.obj.creationDate * 1000);
+                contextmenu.innerHTML = `  
+                <div class="contextmenu-item copy-btn">Copy link</div>
+                <div class="contextmenu-item complain-btn">Complain</div>
+                <hr class="contextmenu-line">
+                <div class="contextmenu-item contextmenu-info">${translate('contextmenu.user')}: <a href="/users/${hexagon.obj.userId}">${hexagon.obj.username}</a></div>
+                <div class="contextmenu-item contextmenu-info">${translate('contextmenu.chain')}: ${hexagon.obj.chainId}</div>
+                <div class="contextmenu-item contextmenu-info">${translate('contextmenu.uid')}: ${hexagon.obj.uuid}</div>
+                <div class="contextmenu-item contextmenu-info">${translate('contextmenu.date')}: ${hexDate.toLocaleDateString()}</div>`;
+
+                const actions = {
+                    complain: () => {
+                        const loginUrl = new URL('/login', window.location.origin);
+                        loginUrl.searchParams.append('next', '/hexs/' + hexagon.uuid);
+                        console.log(loginUrl);
+                        window.location = loginUrl;
+                    },
+                    copy: () => {
+                        let link = new URL(window.location.pathname, window.location.origin);
+                        link.searchParams.append('hexId', hexagon.uuid);
+                        
+                        if (!navigator.clipboard) {
+                            let textArea = document.createElement("textarea");
+                            textArea.setAttribute('value', link);
+                            textArea.value = link;
+
+                            textArea.style.position = "fixed";
+                            // textArea.style.visibility = "hidden";
+
+                            document.body.appendChild(textArea);
+
+                            setTimeout(() => {
+                                textArea.focus();
+                                textArea.select();
+                            
+                                try {
+                                    let success = document.execCommand('copy');
+                                    if(success){
+                                        showFlash(translate('contextmenu.copyMsgs.s'));
+                                    }else{
+                                        showModal(translate('contextmenu.copyMsgs.uns'));
+                                    }
+                                } catch (err) {
+                                    showModal(translate('contextmenu.copyMsgs.uns'), err);
+                                }
+                            
+                                document.body.removeChild(textArea); 
+                            }, 10)           
+                        }else{
+                            window.navigator.clipboard.writeText(link)
+                            .then(() => showFlash(translate('contextmenu.copyMsgs.s')))
+                            .catch(err => {
+                                showModal(translate('contextmenu.copyMsgs.uns'), err);
+                            });
+                        }
+                    }
+                } 
+
+                for(let action in actions){
+                    const actionBtn = contextmenu.querySelector(`.${action}-btn`); 
+                    if(actionBtn){
+                        actionBtn.innerText = translate(`contextmenu.${action}`)
+                        actionBtn.addEventListener(action == 'img' ? 'input' : 'click', actions[action], {passive: false})
+                    } 
+                }
+                contextmenu.style.top = evt.clientY + 'px';
+                contextmenu.style.left = evt.clientX + 'px';
+                document.body.append(contextmenu);
+        
                 return false
             }
             
