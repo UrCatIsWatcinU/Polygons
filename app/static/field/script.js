@@ -911,10 +911,14 @@ window.addEventListener('load', async () => {
                     imgs: [],
                     BGImg: ''
                 };
+
+                const aliases = {
+                    innerText: 'text'
+                }
                 
                 for(let prop in hexagon.obj){
                     if(typeof(hexagon[prop]) != 'undefined') continue;
-                    Object.defineProperty(hexagon, prop, {
+                    Object.defineProperty(hexagon, aliases[prop] || prop, {
                         get() {
                             return hexagon.obj[prop];
                         },
@@ -929,6 +933,8 @@ window.addEventListener('load', async () => {
                         }
                     });
                 }
+
+
                 const user = JSON.parse(sessionStorage.getItem('user') || '{}');
                 
                 hexagon.addEventListener('dblclick', (evt) => {
@@ -944,7 +950,7 @@ window.addEventListener('load', async () => {
                     editedField.setAttribute('contenteditable','true');
                     setTimeout(() => {
                         editedField.focus();
-                    }, 0) 
+                    }, 0); 
                 }, {passive: false});
             
                 const canCreateBgHex = () => hexagon.classList.contains('hexagon-visible') && !hexagon.obj.about;
