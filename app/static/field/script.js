@@ -1359,25 +1359,28 @@ window.addEventListener('load', async () => {
                 let touchIsDown = false;
                 let contextMenuOpen = false;
                 let startMoveX, startMoveY;
+                let timeOut = null;
                 document.body.ontouchstart = (evt) => {
                     if(hexsCont.isPinched) return;
 
                     touchIsDown = true;
                     startMoveX = evt.changedTouches[0].clientX;
                     startMoveY = evt.changedTouches[0].clientY;
-                    setTimeout(() => {
-                        if(touchIsDown){
-                            let contextMenuEvt = new Event('contextmenu', {
-                                clientX: evt.changedTouches[0].clientX,
-                                clientY: evt.changedTouches[0].clientY,
-                            });
-                            contextMenuEvt.clientX = evt.changedTouches[0].clientX;
-                            contextMenuEvt.clientY = evt.changedTouches[0].clientY;
-                            document.body.dispatchEvent(contextMenuEvt);
-    
-                            contextMenuOpen = true;
-                        }
-                    }, 400)
+                    if(!timeOut){
+                        timeOut = setTimeout(() => {
+                            if(touchIsDown){
+                                let contextMenuEvt = new Event('contextmenu', {
+                                    clientX: evt.changedTouches[0].clientX,
+                                    clientY: evt.changedTouches[0].clientY,
+                                });
+                                contextMenuEvt.clientX = evt.changedTouches[0].clientX;
+                                contextMenuEvt.clientY = evt.changedTouches[0].clientY;
+                                document.body.dispatchEvent(contextMenuEvt);
+        
+                                contextMenuOpen = true;
+                            }
+                        }, 600)
+                    }
                 }
                 document.body.addEventListener('touchmove', (evt) => {
                     if(startMoveX - evt.changedTouches[0].clientX > MAX_CHANGE || startMoveY - evt.changedTouches[0].clientY > MAX_CHANGE){
