@@ -942,7 +942,9 @@ window.addEventListener('load', async () => {
                     
                     
                     editedField.setAttribute('contenteditable','true');
-                    editedField.focus(); 
+                    setTimeout(() => {
+                        editedField.focus();
+                    }, 0) 
                 }, {passive: false});
             
                 const canCreateBgHex = () => hexagon.classList.contains('hexagon-visible') && !hexagon.obj.about;
