@@ -753,6 +753,79 @@ window.addEventListener('load', async () => {
                         if(isDown) requestAnimationFrame(scroll);
                     })
                 });
+            }else{
+                const MAX_CHANGE = 5;
+                let touchIsDown = false;
+                let contextMenuOpen = false;
+                let startMoveX, startMoveY;
+                document.body.ontouchstart = (evt) => {
+                    if(hexsCont.isPinched) return;
+
+                    touchIsDown = true;
+                    startMoveX = evt.changedTouches[0].clientX;
+                    startMoveY = evt.changedTouches[0].clientY;
+                    setTimeout(() => {
+                        if(touchIsDown){
+                            let contextMenuEvt = new Event('contextmenu', {
+                                clientX: evt.changedTouches[0].clientX,
+                                clientY: evt.changedTouches[0].clientY,
+                            });
+                            contextMenuEvt.clientX = evt.changedTouches[0].clientX;
+                            contextMenuEvt.clientY = evt.changedTouches[0].clientY;
+                            document.body.dispatchEvent(contextMenuEvt);
+    
+                            contextMenuOpen = true;
+                        }
+                    }, 400)
+                }
+                document.body.addEventListener('touchmove', (evt) => {
+                    if(startMoveX - evt.changedTouches[0].clientX > MAX_CHANGE || startMoveY - evt.changedTouches[0].clientY > MAX_CHANGE){
+                        clearContextMenus();
+                        touchIsDown = false;
+                    }
+                });
+    
+                let touchEnd = evt => {
+                    if(contextMenuOpen){
+                        if(evt.cancelable){
+                            evt.preventDefault();
+                        } 
+                        contextMenuOpen = false;
+                    }else{
+    
+                    }
+                    touchIsDown = false;
+                }
+                addEventListener('touchend', touchEnd, {
+                    passive: false,
+                });
+                addEventListener('touchcancel', touchEnd, {
+                    passive: false,
+                });
+
+                // let pz = new PinchZoom(hexsCont, {
+                //     maxZoom: 10, 
+                //     minZoom: 5,
+                //     tapZoomFactor: 5
+                // });
+                let hammerHexsCont = new Hammer(hexsCont);
+                hammerHexsCont.get('pinch').set({ enable: true });
+
+                let lastScale = 1;
+                hammerHexsCont.on('pinch pinchend', evt => {
+                    if (evt.type == 'pinch'){
+                        hexsCont.isPinched = true;
+                        clearContextMenus();
+                        
+                        zoomIndex = Math.max(.2, Math.min(lastScale * (evt.scale), 4));
+                        changeZoom(0);
+                    }
+                    if(evt.type == "pinchend"){
+                        hexsCont.isPinched = false;
+
+                        lastScale = zoomIndex;
+                    }
+                });
             }
             
             let zoomIndex = document.zoomIndex = 1;
