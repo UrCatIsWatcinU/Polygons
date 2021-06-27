@@ -5,6 +5,7 @@
 <html lang="en" >
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
   <title>{{ field_name }}</title>
   {{ layout.loading_head() }}
   {{ layout.public_scripts() }}
@@ -25,8 +26,8 @@
       <button class="find-button">{{ _('Search') }}</button>
     </div>  
     <button class="back" onclick="window.location.href = `{{ url_for('index') }}`">{{ _('Back') }}</button>
-    <button onclick="window.location.href = `{{ url_for('login') }}`">{{ _('Login') }}</button>
-    <button class="auth" onclick="window.location.href = `{{ url_for('registration') }}`">{{ _('Register') }}</button>
+    <button class="auth-btn" onclick="window.location.href = `{{ url_for('login') }}`">{{ _('Login') }}</button>
+    <button class="auth-btn" onclick="window.location.href = `{{ url_for('registration') }}`">{{ _('Register') }}</button>
   </div>
   <svg class="icon" viewBox="0 0 603 201" fill="#703868" xmlns="http://www.w3.org/2000/svg">
     <path d="M148.86 67.75V134.8L133.26 143.8L131.39 144.88V109.63H108.61V158.04L106.94 158.99L91.14 168.12V22.43L86.83 20.05L83.54 21.95L73.87 27.52L66.07 32.01L55.44 38.14L43.29 45.14L25.82 55.21L17.47 60.02V140L24.07 143.8L25.82 144.81L43.29 154.88L47.96 157.57H47.97L55.44 161.88V182.05L43.29 175.04L25.82 164.98L17.47 160.16L0 150.1V49.92L0.960007 49.37L17.47 39.86L25.82 35.04L43.29 24.98L55.44 17.98L55.74 17.8L68.96 10.18L86.64 0L91.14 2.47L104.52 9.86002L108.61 12.11V92.16H131.39V58.38L148.86 67.75Z" />

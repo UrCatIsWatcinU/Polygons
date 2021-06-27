@@ -457,9 +457,6 @@ a{
     display: flex;
     position: relative;
 }
-.local-btns{
-    margin-right: 10px;
-}
 
 .main-logo{
     margin-bottom: 30px;
@@ -806,10 +803,13 @@ a{
         width: 100%;
         box-sizing: border-box;
     }
+    .auth-btn{
+        display: none;
+    }
 }
 @media (max-width: 430px){
     html{
-        font-size: .9em;
+        font-size: .94em;
     }
     .ask-content,
     .modal-content{
@@ -818,7 +818,7 @@ a{
 }
 @media (max-width: 365px){
     html{
-        font-size: .81em;
+        font-size: .91em;
     }
 }
 

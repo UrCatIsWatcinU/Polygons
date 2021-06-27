@@ -590,6 +590,9 @@ let hexPath = () => `M 0 ${hexSizes.TRIANGLE_HEIGHT} L ${hexSizes.HEXAGON_WIDTH/
  * @param {HTMLElement} hexagonAbout 
  */
 const setHexAboutPosition = (hexagon, hexagonAbout) => {
+    hexagonAbout.addEventListener('dblclick', evt => {
+        evt.stopPropagation();
+    }, {passive: false})
     const checkHexVisibility = (r, h) => document.querySelector(`#r${r} #h${h}`) ? document.querySelector(`#r${r} #h${h}`).classList.contains('hexagon-visible') : false;
     let rId = hexagon.rowId;
     let hId = +hexagon.id.replace('h', '');
@@ -602,7 +605,7 @@ const setHexAboutPosition = (hexagon, hexagonAbout) => {
         top: (5 + (document.hexPad || 0)) * (1 / document.zoomIndex),
         side: (7.5 + (document.hexPad || 0)) * (1 / document.zoomIndex)
     }
-    if(document.zoomIndex || document.zoomIndex > 1) hexagonAbout.style.transform = `scale(${1 / document.zoomIndex})`;
+    if(document.zoomIndex && document.zoomIndex != 1) hexagonAbout.style.transform = `scale(${1 / document.zoomIndex})`;
 
     if(checkHexVisibility(rId, hId + 1) && checkHexVisibility(rId, hId - 1)){
         if(hexagon.parentElement.classList.contains('row-moved')){
@@ -671,42 +674,47 @@ const setHexAboutPosition = (hexagon, hexagonAbout) => {
     hexagonAbout.addEventListener('contentLoaded', () => {
         console.log('loaded');
         const rect = hexagonAbout.getBoundingClientRect();
-    
-        neededY = rect.top + document.body.scrollTop - (document.documentElement.clientHeight - rect.height) / 2;
-        neededX = rect.left + document.body.scrollLeft- (document.documentElement.clientWidth - rect.width) / 2;
+        
+        neededY = rect.top + document.body.scrollTop - (document.body.clientHeight - rect.height) / 2;
+        neededX = rect.left + document.body.scrollLeft - (rect.width > document.body.clientWidth ? 0 : (document.body.clientWidth - rect.width) / 2);
         
         const SPEED = .12;
         const oneStepY = (neededY - document.body.scrollTop) * SPEED;
-        const oneStepX = (neededX - document.body.scrollLeft) * SPEED;
+        let oneStepX = (neededX - document.body.scrollLeft) * SPEED;
         
         let previousY = document.body.scrollTop;
         let previousX = document.body.scrollLeft;
         
         const changeScroll = () => {
+            console.log(Math.abs(neededX - document.body.scrollLeft), oneStepX);
             let needNext = false;
             if(
                 Math.round(document.body.scrollTop) != Math.round(previousY) ||    
                 Math.round(document.body.scrollLeft) != Math.round(previousX)    
             ) return;
                 
-            if(Math.abs(Math.floor(neededY - document.body.scrollTop)) > Math.abs(oneStepY)){
+            if(Math.abs(neededY - document.body.scrollTop) >= Math.abs(oneStepY)){
                 document.body.scrollTop += oneStepY;
+                previousY = document.body.scrollTop;
                 needNext = true;
             }   
             
-            if(Math.abs(Math.floor(neededX - document.body.scrollLeft)) > Math.abs(oneStepX)){
+            if(Math.abs(neededX - document.body.scrollLeft) >= Math.abs(oneStepX)){
                 document.body.scrollLeft += oneStepX;
                 needNext = true;
+                previousX = document.body.scrollLeft;
             }   
-
-            if(needNext)requestAnimationFrame(changeScroll);
             
-            previousY = document.body.scrollTop;
-            previousX = document.body.scrollLeft;
+            if(needNext) requestAnimationFrame(changeScroll);
+            else{
+                oneStepX /= 2;
+
+                requestAnimationFrame(changeScroll)
+            } 
         }
-    
+        
         requestAnimationFrame(changeScroll);
-    })
+    });
 }
 
 /**

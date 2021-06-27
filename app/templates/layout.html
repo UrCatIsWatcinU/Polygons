@@ -45,7 +45,7 @@
         <polygon points="0,0 100,0 50,100"/>
       </svg>
       <div class="drop-menu">
-        {% for btn in btns + add_btns%}
+        {% for btn in btns + add_btns %}
           {% if btn.name != title %}
             <button class="drop-menu-button {{ btn.class or '' }}" onclick="window.location.href = `{{ btn.href }}`">{{ btn.name }}</button>
           {% endif %}

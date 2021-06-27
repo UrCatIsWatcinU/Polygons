@@ -97,7 +97,7 @@ html{
 .founded-polygon, .hexagon-drag{
   overflow: visible;
   z-index: 9;
-  filter: brightness(120%);
+  filter: brightness(120%) !important;
 }
 
 
@@ -444,10 +444,13 @@ html{
 .image-about{
   cursor: default;
   width: max-content;
+  min-width: 300px;
+  width: unset;
+  max-width: var(--about-w);;
 }
 .image-about img{
-  min-width: 300px;
-  max-width: var(--about-w);;
+  width: 100%;
+  height: 100%;
 }
 
 
@@ -756,6 +759,6 @@ html{
     grid-template-columns: 1fr;
   }
   .hexagon-about{
-    width: 98vw;
+    width: 96vw;
   }
 }
