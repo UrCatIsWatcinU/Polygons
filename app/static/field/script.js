@@ -931,7 +931,7 @@ window.addEventListener('load', async () => {
                 }
                 const user = JSON.parse(sessionStorage.getItem('user') || '{}');
                 
-                hexagon.ondblclick = (evt) => {
+                hexagon.addEventListener('dblclick', (evt) => {
                     if(user.userId != hexagon.userId && user.userRole != 2) return;     
                     let editedField = createEditedField(hexagon);
                     if(!editedField) return;
@@ -942,9 +942,8 @@ window.addEventListener('load', async () => {
                     
                     
                     editedField.setAttribute('contenteditable','true');
-                    editedField.focus();
-                    
-                }
+                    editedField.focus(); 
+                }, {passive: false});
             
                 const canCreateBgHex = () => hexagon.classList.contains('hexagon-visible') && !hexagon.obj.about;
                 hexagon.addEventListener('dragover', (evt) => {
@@ -1675,7 +1674,7 @@ window.addEventListener('load', async () => {
                             hexagon.dispatchEvent(new Event('stopClearing'));
 
                             if(hexagon.querySelector('.hexagon-about-content')){
-                                evt.stopImmediatePropagation();
+                                evt.stopPropagation();
                                 hexagon.querySelector('.hexagon-about-content').dispatchEvent(new Event('dblclick'));
                             }else{
                                 hexagon.dispatchEvent(new Event('dblclick'));
