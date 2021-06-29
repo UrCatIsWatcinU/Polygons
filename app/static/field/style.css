@@ -3,6 +3,9 @@ html{
   --field-hex-pad : 7px;
 }
 
+.ios{ 
+  user-select: none;
+}
 .field {
   /* width: 100%; 
   height: 100%; */
@@ -472,18 +475,8 @@ html{
 
 .find{
   margin: 0;
-  width: unset;
   margin-right: 5px;
 }
-.find *{
-  width: unset;
-}
-@media(max-width: 410px){
-  .find-input{
-    width: 100px;
-  }
-}
-
 
 .moveModal{
   position: relative;

@@ -190,14 +190,17 @@ a{
 }
 
 
-.flash,
 .controls{
     max-width: 95vw;
     position: fixed;
-    top: 10px;
     right: 10px;
     z-index: 5;
+    top: 10px;
     display: flex;
+}
+.controls .find{
+    flex: 1;
+    width: unset !important;
 }
 .role-select,
 .drop-menu{
@@ -662,6 +665,10 @@ a{
 
 
 .flash{
+    display: flex;
+    position: fixed;
+    right: 10px;
+    z-index: 5;
     justify-content: center;
     align-items: center;
     padding: 5px 10px;
