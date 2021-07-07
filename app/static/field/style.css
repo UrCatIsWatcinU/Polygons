@@ -14,6 +14,7 @@ html{
   white-space: nowrap;
   display: block;
   position: relative;
+  /* scroll-behavior: smooth; */
 }
 .scroll-btns{
   position: fixed;
@@ -62,8 +63,8 @@ html{
   --bgc: var(--main-c);
   z-index: 11 !important;
 }
-.hexagon-active .polygon{
-  filter: brightness(1.3);
+.hexagon-active .hexagon-editedField{
+  text-decoration: underline;
 }
 .hexagon-first .polygon{
   transform: scale(1.04);
@@ -448,7 +449,6 @@ html{
   cursor: default;
   width: max-content;
   min-width: 300px;
-  width: unset;
   max-width: var(--about-w);;
 }
 .image-about img{

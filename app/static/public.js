@@ -674,44 +674,56 @@ const setHexAboutPosition = (hexagon, hexagonAbout) => {
     hexagonAbout.addEventListener('contentLoaded', () => {
         const rect = hexagonAbout.getBoundingClientRect();
         
-        neededY = rect.top + document.body.scrollTop - (document.body.clientHeight - rect.height) / 2;
-        neededX = rect.left + document.body.scrollLeft - (rect.width > document.body.clientWidth ? 0 : (document.body.clientWidth - rect.width) / 2);
-        
-        const SPEED = .12;
-        const oneStepY = (neededY - document.body.scrollTop) * SPEED;
-        let oneStepX = (neededX - document.body.scrollLeft) * SPEED;
-        
-        let previousY = document.body.scrollTop;
-        let previousX = document.body.scrollLeft;
-        
-        const changeScroll = () => {
-            let needNext = false;
-            if(
-                Math.round(document.body.scrollTop) != Math.round(previousY) ||    
-                Math.round(document.body.scrollLeft) != Math.round(previousX)    
-            ) return;
-                
-            if(Math.abs(neededY - document.body.scrollTop) >= Math.abs(oneStepY)){
-                document.body.scrollTop += oneStepY;
-                previousY = document.body.scrollTop;
-                needNext = true;
-            }   
-            
-            if(Math.abs(neededX - document.body.scrollLeft) >= Math.abs(oneStepX)){
-                document.body.scrollLeft += oneStepX;
-                needNext = true;
-                previousX = document.body.scrollLeft;
-            }   
-            
-            if(needNext) requestAnimationFrame(changeScroll);
-            else{
-                oneStepX /= 2;
+        const neededY = rect.top + document.body.scrollTop - (document.body.clientHeight - rect.height) / 2;
+        const neededX = rect.left + document.body.scrollLeft - (rect.width > document.body.clientWidth ? 0 : (document.body.clientWidth - rect.width) / 2);
 
-                requestAnimationFrame(changeScroll)
-            } 
-        }
+        // document.body.style.scrollBehavior = 'smooth'
+        document.body.scrollTo({
+            top: neededY,
+            left: neededX,
+            behavior: 'smooth'
+        });
+
+        // document.body.style.scrollBehavior = ''
+
+        // const SPEED = .12;
+        // const oneStepY = (neededY - document.body.scrollTop) * SPEED;
+        // let oneStepX = (neededX - document.body.scrollLeft) * SPEED;
         
-        requestAnimationFrame(changeScroll);
+        // let previousY = document.body.scrollTop;
+        // let previousX = document.body.scrollLeft;
+        
+        // const changeScroll = () => {
+        //     let needNext = false;
+        //     if(
+        //         Math.round(document.body.scrollTop) != Math.round(previousY) ||    
+        //         Math.round(document.body.scrollLeft) != Math.round(previousX)    
+        //     ) return;
+                
+        //     if(Math.abs(neededY - document.body.scrollTop) >= Math.abs(oneStepY)){
+        //         document.body.scrollTop += oneStepY;
+        //         previousY = document.body.scrollTop;
+        //         needNext = true;
+        //     }   
+            
+        //     if(Math.abs(neededX - document.body.scrollLeft) >= Math.abs(oneStepX)){
+        //         document.body.scrollLeft += oneStepX;
+        //         needNext = true;
+        //         previousX = document.body.scrollLeft;
+        //     }   
+            
+        //     if(needNext){
+        //         requestAnimationFrame(changeScroll);
+        //         console.log(Math.abs(neededY - document.body.scrollTop), Math.abs(oneStepY));
+        //     }
+        //     else{
+        //         oneStepX /= 2;
+
+        //         requestAnimationFrame(changeScroll)
+        //     } 
+        // }
+        
+        // requestAnimationFrame(changeScroll);
     });
 }
 
