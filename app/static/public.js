@@ -19,7 +19,8 @@ translate.add({
         user: 'Author',
         chain: 'Chain',
         uid: 'Uid',
-        date: 'Date'
+        date: 'Date',
+        editTitle: 'Type new text'
     },
     defaults: {
         askTitle: 'Are you sure?',
@@ -96,7 +97,8 @@ translate.add({
     },
     btns: {
         send: 'Send',
-        close: 'Close'
+        close: 'Close',
+        save: 'Save'
     },
     upload: {
         cant: 'Cannot upload file',
@@ -133,6 +135,7 @@ translate.add({
             s: 'Ссылка скопирована',
             uns: 'Не удалось скопировать ссылку'
         },
+        editTitle: 'Введите новый текст'
     },
     defaults: {
         askTitle: 'Вы уверены?',
@@ -209,7 +212,8 @@ translate.add({
     },
     btns: {
         send: 'Отправить',
-        close: 'Закрыть'
+        close: 'Закрыть',
+        save: 'Сохранить'
     },
     upload: {
         cant: 'Невозможно залить файл',

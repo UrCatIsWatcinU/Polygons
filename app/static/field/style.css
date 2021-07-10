@@ -5,6 +5,11 @@ html{
 
 .ios{ 
   user-select: none;
+  -webkit-user-select: none;
+}
+[contenteditable]{
+  -webkit-user-select: auto !important; 
+  user-select: auto !important;
 }
 .field {
   /* width: 100%; 
@@ -684,21 +689,16 @@ html{
 
 
 
-/* .hexagon:last-child,
-.hexagon:first-child,
-.row:last-child,
-.row:first-child{
-  pointer-events: none;
-} */
-/* .row-first{
-  border-top: 5px var(--grid-c) solid;
+
+.edit-textarea{
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
 }
-.row:last-child{
-  border-bottom: 5px var(--grid-c) solid;
-} */
-/* #r1{
-  border: none;
-} */
+
+
+
+
 
 
 .hexsCont{

@@ -121,6 +121,11 @@ window.addEventListener('load', async () => {
                 complaint.querySelector('.complaint-close').onclick = hideModal;
             }
 
+            /**
+             * 
+             * @param {HTMLElement} hexagon 
+             * @returns {HTMLDivElement}
+             */
             const createEditedField = hexagon => {
                 if(hexagon.BGImg) return null;
                 let editedField = hexagon.querySelector('.hexagon-editedField');
@@ -937,15 +942,21 @@ window.addEventListener('load', async () => {
 
                 const user = JSON.parse(sessionStorage.getItem('user') || '{}');
                 
+                function selectElementContents(el) {
+                    var range = document.createRange();
+                    range.selectNodeContents(el);
+                    var sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                }
                 hexagon.addEventListener('dblclick', (evt) => {
                     if(user.userId != hexagon.userId && user.userRole != 2) return;     
                     let editedField = createEditedField(hexagon);
                     if(!editedField) return;
-                    evt.preventDefault();
+                    // evt.preventDefault();
                     if(!hexagon.classList.contains('hexagon-visible')) return;
                     hexagon.isFocused = true;
                     hexagon.classList.add('hexagon-active');   
-                    
                     
                     editedField.setAttribute('contenteditable','true');
                     setTimeout(() => {
@@ -1362,63 +1373,56 @@ window.addEventListener('load', async () => {
                     }
                 }, {passive: false});
             }else{
-                const MAX_CHANGE = 5;
-                let touchIsDown = false;
-                let contextMenuOpen = false;
-                let startMoveX, startMoveY;
-                let timeOut = null;
-                document.body.ontouchstart = (evt) => {
-                    if(hexsCont.isPinched) return;
+                // const MAX_CHANGE = 5;
+                // let touchIsDown = false;
+                // let contextMenuOpen = false;
+                // let startMoveX, startMoveY;
+                // let timeOut = null;
+                // document.body.ontouchstart = (evt) => {
+                //     if(hexsCont.isPinched) return;
 
-                    touchIsDown = true;
-                    startMoveX = evt.changedTouches[0].clientX;
-                    startMoveY = evt.changedTouches[0].clientY;
-                    if(!timeOut){
-                        timeOut = setTimeout(() => {
-                            if(touchIsDown){
-                                let contextMenuEvt = new Event('contextmenu', {
-                                    clientX: evt.changedTouches[0].clientX,
-                                    clientY: evt.changedTouches[0].clientY,
-                                });
-                                contextMenuEvt.clientX = evt.changedTouches[0].clientX;
-                                contextMenuEvt.clientY = evt.changedTouches[0].clientY;
-                                document.body.dispatchEvent(contextMenuEvt);
+                //     touchIsDown = true;
+                //     startMoveX = evt.changedTouches[0].clientX;
+                //     startMoveY = evt.changedTouches[0].clientY;
+                //     if(!timeOut){
+                //         timeOut = setTimeout(() => {
+                //             if(touchIsDown){
+                //                 let contextMenuEvt = new Event('contextmenu', {
+                //                     clientX: evt.changedTouches[0].clientX,
+                //                     clientY: evt.changedTouches[0].clientY,
+                //                 });
+                //                 contextMenuEvt.clientX = evt.changedTouches[0].clientX;
+                //                 contextMenuEvt.clientY = evt.changedTouches[0].clientY;
+                //                 document.body.dispatchEvent(contextMenuEvt);
         
-                                contextMenuOpen = true;
-                            }
-                        }, 600)
-                    }
-                }
+                //                 contextMenuOpen = true;
+                //                 timeOut = null;
+                //             }
+                //         }, 600)
+                //     }
+                // }
                 document.body.addEventListener('touchmove', (evt) => {
-                    if(startMoveX - evt.changedTouches[0].clientX > MAX_CHANGE || startMoveY - evt.changedTouches[0].clientY > MAX_CHANGE){
-                        clearContextMenus();
-                        touchIsDown = false;
-                    }
+                    clearContextMenus();
                 });
     
-                let touchEnd = evt => {
-                    if(contextMenuOpen){
-                        if(evt.cancelable){
-                            evt.preventDefault();
-                        } 
-                        contextMenuOpen = false;
-                    }else{
+                // let touchEnd = evt => {
+                //     if(contextMenuOpen){
+                //         if(evt.cancelable){
+                //             evt.preventDefault();
+                //         } 
+                //         contextMenuOpen = false;
+                //     }else{
     
-                    }
-                    touchIsDown = false;
-                }
-                addEventListener('touchend', touchEnd, {
-                    passive: false,
-                });
-                addEventListener('touchcancel', touchEnd, {
-                    passive: false,
-                });
-
-                // let pz = new PinchZoom(hexsCont, {
-                //     maxZoom: 10, 
-                //     minZoom: 5,
-                //     tapZoomFactor: 5
+                //     }
+                //     touchIsDown = false;
+                // }
+                // addEventListener('touchend', touchEnd, {
+                //     passive: false,
                 // });
+                // addEventListener('touchcancel', touchEnd, {
+                //     passive: false,
+                // });
+
                 let hammerHexsCont = new Hammer(hexsCont);
                 hammerHexsCont.get('pinch').set({ enable: true });
 
@@ -1437,6 +1441,17 @@ window.addEventListener('load', async () => {
                         lastScale = zoomIndex;
                     }
                 });
+                const press = new Hammer.Press({
+                    time: 600
+                })
+                hammerHexsCont.add([press])
+                hammerHexsCont.on('press', evt => {
+                    const contextMenuEvt = new Event('contextmenu');
+                    contextMenuEvt.clientX = evt.center.x;
+                    contextMenuEvt.clientY = evt.center.y;
+                    
+                    document.body.dispatchEvent(contextMenuEvt);
+                });
             }
 
             let visibleHexs = document.visibleHexs =  [];
@@ -1451,7 +1466,7 @@ window.addEventListener('load', async () => {
 
             document.body.oncontextmenu = (evt) => {
                 clearContextMenus();
-        
+                
                 let hexagon = document.elementFromPoint(evt.clientX, evt.clientY);
                 if(hexagon == document.body) return false;
                 while(!hexagon.classList.contains('hexagon')){
@@ -1685,7 +1700,31 @@ window.addEventListener('load', async () => {
                                 evt.stopPropagation();
                                 hexagon.querySelector('.hexagon-about-content').dispatchEvent(new Event('dblclick'));
                             }else{
-                                hexagon.dispatchEvent(new Event('dblclick'));
+                                const editModal = showModal('', '', true).querySelector('.modal-content');
+                                editModal.innerHTML = `
+                                    <h2 class="modal-title">${translate('contextmenu.editTitle')}</h2>
+                                    <textarea class="edit-textarea">${hexagon.obj.innerText}</textarea>
+                                    <div class="btns"> 
+                                        <button class="edit-save">${translate('btns.save')}</button>
+                                        <button class="edit-close">${translate('btns.close')}</button>
+                                    </div>
+                                `;
+
+                                editModal.querySelector('.edit-close').onclick = hideModal;
+                                editModal.querySelector('.edit-save').onclick = () => {
+                                    const input = editModal.querySelector('textarea');
+
+                                    const editedField = createEditedField(hexagon);
+                                    hexagon.obj.innerText = editedField.innerText = input.value;  
+                                    
+                                    socket.emit('hexs', {
+                                        action: 'change',
+                                        categ: document.title,
+                                        data: stringifyHexs([hexagon])
+                                    });
+                                    
+                                    hideModal();                   
+                                };
                             }
                         },
                         copy: () => {
