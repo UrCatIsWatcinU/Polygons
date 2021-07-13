@@ -532,8 +532,8 @@ let otherSettings = {
     bordered: false,
     turned: false,
     innerNum: false,
+    aboutAnim: false,
     ctrlZoom: true,
-    aboutAnim: true,
     slideSpeed: 1.6
 }
 
