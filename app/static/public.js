@@ -61,6 +61,7 @@ translate.add({
             Z: 'Zoom with ctrl button',
             S: 'Slide speed',
             RC: 'Reverse comments',
+            AA: 'Turn off about animation'
         },
         save: 'Save',
         reset: 'Reset',
@@ -180,6 +181,7 @@ translate.add({
             Z: 'Зум только с зажатым ctrl',
             S: 'Скорость навигации',
             RC: 'Обратный порядок комментариев',
+            AA: 'Отключить анимацию странички'
         },
         save: 'Сохранить',
         reset: 'Сбросить',
@@ -531,6 +533,7 @@ let otherSettings = {
     turned: false,
     innerNum: false,
     ctrlZoom: true,
+    aboutAnim: true,
     slideSpeed: 1.6
 }
 
@@ -674,60 +677,65 @@ const setHexAboutPosition = (hexagon, hexagonAbout) => {
             }
         }
     }
-    // hexagonAbout.style.opacity = 1;
+
+    if(otherSettings.aboutAnim) return;
     hexagonAbout.addEventListener('contentLoaded', () => {
         const rect = hexagonAbout.getBoundingClientRect();
         
         const neededY = rect.top + document.body.scrollTop - (document.body.clientHeight - rect.height) / 2;
         const neededX = rect.left + document.body.scrollLeft - (rect.width > document.body.clientWidth ? 0 : (document.body.clientWidth - rect.width) / 2);
 
-        // document.body.style.scrollBehavior = 'smooth'
-        document.body.scrollTo({
-            top: neededY,
-            left: neededX,
-            behavior: 'smooth'
-        });
-
-        // document.body.style.scrollBehavior = ''
-
-        // const SPEED = .12;
-        // const oneStepY = (neededY - document.body.scrollTop) * SPEED;
-        // let oneStepX = (neededX - document.body.scrollLeft) * SPEED;
-        
-        // let previousY = document.body.scrollTop;
-        // let previousX = document.body.scrollLeft;
-        
-        // const changeScroll = () => {
-        //     let needNext = false;
-        //     if(
-        //         Math.round(document.body.scrollTop) != Math.round(previousY) ||    
-        //         Math.round(document.body.scrollLeft) != Math.round(previousX)    
-        //     ) return;
-                
-        //     if(Math.abs(neededY - document.body.scrollTop) >= Math.abs(oneStepY)){
-        //         document.body.scrollTop += oneStepY;
-        //         previousY = document.body.scrollTop;
-        //         needNext = true;
-        //     }   
+        if(isIOS()){
+            let startY = document.body.scrollTop;
+            let startX = document.body.scrollLeft;
+            const SPEED = .12;
+            const oneStepY = (neededY - startY) * SPEED;
+            const oneStepX = (neededX - startX) * SPEED;
             
-        //     if(Math.abs(neededX - document.body.scrollLeft) >= Math.abs(oneStepX)){
-        //         document.body.scrollLeft += oneStepX;
-        //         needNext = true;
-        //         previousX = document.body.scrollLeft;
-        //     }   
+            let previousY = document.body.scrollTop;
+            let previousX = document.body.scrollLeft;
             
-        //     if(needNext){
-        //         requestAnimationFrame(changeScroll);
-        //         console.log(Math.abs(neededY - document.body.scrollTop), Math.abs(oneStepY));
-        //     }
-        //     else{
-        //         oneStepX /= 2;
+            const changeScrollY = () => {
+                if(
+                    Math.round(document.body.scrollTop) != Math.round(previousY) ||    
+                    (neededY > startY && neededY - document.body.scrollTop <= 0) ||
+                    (neededY < startY && neededY - document.body.scrollTop >= 0)
+                ) return;
 
-        //         requestAnimationFrame(changeScroll)
-        //     } 
-        // }
-        
-        // requestAnimationFrame(changeScroll);
+                document.body.scrollTop += oneStepY;
+                previousY = document.body.scrollTop;
+
+                requestAnimationFrame(changeScrollY);
+            }
+            requestAnimationFrame(changeScrollY);
+            
+            const changeScrollX = () => {
+                if(
+                    Math.round(document.body.scrollLeft) != Math.round(previousX) ||
+                    (neededX > startX && neededX - document.body.scrollLeft <= 0) ||
+                    (neededX < startX && neededX - document.body.scrollLeft >= 0) ||
+                    (neededX - document.body.scrollLeft == oneStepX)  
+                ){
+                    document.body.scrollLeft = neededX;
+                    return
+                }
+
+
+                document.body.scrollLeft += oneStepX;
+                previousX = document.body.scrollLeft;
+
+                requestAnimationFrame(changeScrollX);
+            }
+            requestAnimationFrame(changeScrollX);
+
+        }else{
+            document.body.scrollTo({
+                top: neededY,
+                left: neededX,
+                behavior: 'smooth'
+            });
+        }
+
     });
 }
 

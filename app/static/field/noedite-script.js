@@ -754,63 +754,10 @@ window.addEventListener('load', async () => {
                     })
                 });
             }else{
-                const MAX_CHANGE = 2;
-                let touchIsDown = false;
-                let contextMenuOpen = false;
-                let startMoveX, startMoveY;
-                let timeOut = null;
-                document.body.ontouchstart = (evt) => {
-                    if(hexsCont.isPinched) return;
-
-                    touchIsDown = true;
-                    startMoveX = evt.changedTouches[0].clientX;
-                    startMoveY = evt.changedTouches[0].clientY;
-                    if(!timeOut){
-                        timeOut = setTimeout(() => {
-                            if(touchIsDown){
-                                let contextMenuEvt = new Event('contextmenu', {
-                                    clientX: evt.changedTouches[0].clientX,
-                                    clientY: evt.changedTouches[0].clientY,
-                                });
-                                contextMenuEvt.clientX = evt.changedTouches[0].clientX;
-                                contextMenuEvt.clientY = evt.changedTouches[0].clientY;
-                                document.body.dispatchEvent(contextMenuEvt);
-        
-                                contextMenuOpen = true;
-                            }
-                        }, 600)
-                    }
-                }
                 document.body.addEventListener('touchmove', (evt) => {
-                    if(startMoveX - evt.changedTouches[0].clientX > MAX_CHANGE || startMoveY - evt.changedTouches[0].clientY > MAX_CHANGE){
-                        document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});
-                        touchIsDown = false;
-                    }
+                    document.querySelectorAll('.contextmenu').forEach(elem => {elem.remove()});
                 });
     
-                let touchEnd = evt => {
-                    if(contextMenuOpen){
-                        if(evt.cancelable){
-                            evt.preventDefault();
-                        } 
-                        contextMenuOpen = false;
-                    }else{
-    
-                    }
-                    touchIsDown = false;
-                }
-                addEventListener('touchend', touchEnd, {
-                    passive: false,
-                });
-                addEventListener('touchcancel', touchEnd, {
-                    passive: false,
-                });
-
-                // let pz = new PinchZoom(hexsCont, {
-                //     maxZoom: 10, 
-                //     minZoom: 5,
-                //     tapZoomFactor: 5
-                // });
                 let hammerHexsCont = new Hammer(hexsCont);
                 hammerHexsCont.get('pinch').set({ enable: true });
 
@@ -828,6 +775,18 @@ window.addEventListener('load', async () => {
 
                         lastScale = zoomIndex;
                     }
+                });
+
+                const press = new Hammer.Press({
+                    time: 600
+                });
+                hammerHexsCont.add([press]);
+                hammerHexsCont.on('press', evt => {
+                    const contextMenuEvt = new Event('contextmenu');
+                    contextMenuEvt.clientX = evt.center.x;
+                    contextMenuEvt.clientY = evt.center.y;
+                    
+                    document.body.dispatchEvent(contextMenuEvt);
                 });
             }
             

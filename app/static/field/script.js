@@ -1373,55 +1373,9 @@ window.addEventListener('load', async () => {
                     }
                 }, {passive: false});
             }else{
-                // const MAX_CHANGE = 5;
-                // let touchIsDown = false;
-                // let contextMenuOpen = false;
-                // let startMoveX, startMoveY;
-                // let timeOut = null;
-                // document.body.ontouchstart = (evt) => {
-                //     if(hexsCont.isPinched) return;
-
-                //     touchIsDown = true;
-                //     startMoveX = evt.changedTouches[0].clientX;
-                //     startMoveY = evt.changedTouches[0].clientY;
-                //     if(!timeOut){
-                //         timeOut = setTimeout(() => {
-                //             if(touchIsDown){
-                //                 let contextMenuEvt = new Event('contextmenu', {
-                //                     clientX: evt.changedTouches[0].clientX,
-                //                     clientY: evt.changedTouches[0].clientY,
-                //                 });
-                //                 contextMenuEvt.clientX = evt.changedTouches[0].clientX;
-                //                 contextMenuEvt.clientY = evt.changedTouches[0].clientY;
-                //                 document.body.dispatchEvent(contextMenuEvt);
-        
-                //                 contextMenuOpen = true;
-                //                 timeOut = null;
-                //             }
-                //         }, 600)
-                //     }
-                // }
                 document.body.addEventListener('touchmove', (evt) => {
                     clearContextMenus();
                 });
-    
-                // let touchEnd = evt => {
-                //     if(contextMenuOpen){
-                //         if(evt.cancelable){
-                //             evt.preventDefault();
-                //         } 
-                //         contextMenuOpen = false;
-                //     }else{
-    
-                //     }
-                //     touchIsDown = false;
-                // }
-                // addEventListener('touchend', touchEnd, {
-                //     passive: false,
-                // });
-                // addEventListener('touchcancel', touchEnd, {
-                //     passive: false,
-                // });
 
                 let hammerHexsCont = new Hammer(hexsCont);
                 hammerHexsCont.get('pinch').set({ enable: true });
@@ -1441,10 +1395,11 @@ window.addEventListener('load', async () => {
                         lastScale = zoomIndex;
                     }
                 });
+
                 const press = new Hammer.Press({
                     time: 600
-                })
-                hammerHexsCont.add([press])
+                });
+                hammerHexsCont.add([press]);
                 hammerHexsCont.on('press', evt => {
                     const contextMenuEvt = new Event('contextmenu');
                     contextMenuEvt.clientX = evt.center.x;
@@ -1995,6 +1950,7 @@ window.addEventListener('load', async () => {
                             <div class="innerNum-cont check-cont"><label class="check-label" for="innerNum">${translate('sets.check.I')}</label><input class="check-input" type="checkbox" id="innerNum"><div class="check-custom"></div></div>
                             <div class="ctrlZoom-cont check-cont"><label class="check-label" for="ctrlZoom">${translate('sets.check.Z')}</label><input class="check-input" type="checkbox" id="ctrlZoom"><div class="check-custom"></div></div>
                             <div class="reverseComments-cont check-cont"><label class="check-label" for="reverseComments">${translate('sets.check.RC')}</label><input class="check-input" type="checkbox" id="reverseComments"><div class="check-custom"></div></div>
+                            <div class="aboutAnim-cont check-cont"><label class="check-label" for="aboutAnim">${translate('sets.check.AA')}</label><input class="check-input" type="checkbox" id="aboutAnim"><div class="check-custom"></div></div>
                             <!-- <div class="slideSpeed-cont check-cont short-text-cont"><label class="check-label" for="slideSpeed">${translate('sets.check.S')}</label><input class="short-text-input" type="text" value="${otherSettings.slideSpeed}" id="slideSpeed"></div> -->
                         </div>
                     </div>
