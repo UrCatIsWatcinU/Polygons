@@ -131,21 +131,8 @@ html{
   bottom: calc(var(--triangle-height) + 4px + var(--hex-pad));
   left: 6px;
 }
-.hexagon-innerNum .hexagon-num{
-  width: min-content;
-  height: auto;
-  border: none;
-  background-color: transparent;
-  color: var(--white-c);
-  top: calc(var(--triangle-height) + 6px + var(--hex-pad) / 2);
-  left: calc(4px + var(--hex-pad));
-  font-size: .94em;
-}
-.hexagon-innerNum .hexagon-num::after{
-  content: '.';
-}
-.hexagon-innerNum .hexagon-editedField{
-  text-indent: 22px;
+.hexagon-woNums .hexagon-num{
+  display: none;
 }
 
 .hexagon-editedField{

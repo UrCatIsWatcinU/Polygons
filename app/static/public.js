@@ -57,7 +57,7 @@ translate.add({
             R: 'Rounded corners',
             B: 'Borders',
             T: 'Turned hexagons',
-            I: 'Inner numeration',
+            WN: 'Without numeration',
             Z: 'Zoom with ctrl button',
             S: 'Slide speed',
             RC: 'Reverse comments',
@@ -177,7 +177,7 @@ translate.add({
             R: 'Закругленные края',
             B: 'Рамки',
             T: 'Повернутые шестиугольники',
-            I: 'Нумерация внутри',
+            WN: 'Без нумерации',
             Z: 'Зум только с зажатым ctrl',
             S: 'Скорость навигации',
             RC: 'Обратный порядок комментариев',
@@ -531,8 +531,8 @@ let otherSettings = {
     rounded: false, 
     bordered: false,
     turned: false,
-    innerNum: false,
     aboutAnim: false,
+    woNums: false,
     ctrlZoom: true,
     slideSpeed: 1.6
 }
@@ -678,13 +678,20 @@ const setHexAboutPosition = (hexagon, hexagonAbout) => {
         }
     }
 
-    if(otherSettings.aboutAnim) return;
     hexagonAbout.addEventListener('contentLoaded', () => {
         const rect = hexagonAbout.getBoundingClientRect();
         
         const neededY = rect.top + document.body.scrollTop - (document.body.clientHeight - rect.height) / 2;
         const neededX = rect.left + document.body.scrollLeft - (rect.width > document.body.clientWidth ? 0 : (document.body.clientWidth - rect.width) / 2);
 
+        if(otherSettings.aboutAnim){
+            document.body.scrollTo({
+                top: neededY,
+                left: neededX,
+            });
+
+            return;
+        }
         if(isIOS()){
             let startY = document.body.scrollTop;
             let startX = document.body.scrollLeft;

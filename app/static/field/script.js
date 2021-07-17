@@ -942,13 +942,6 @@ window.addEventListener('load', async () => {
 
                 const user = JSON.parse(sessionStorage.getItem('user') || '{}');
                 
-                function selectElementContents(el) {
-                    var range = document.createRange();
-                    range.selectNodeContents(el);
-                    var sel = window.getSelection();
-                    sel.removeAllRanges();
-                    sel.addRange(range);
-                }
                 hexagon.addEventListener('dblclick', (evt) => {
                     if(user.userId != hexagon.userId && user.userRole != 2) return;     
                     let editedField = createEditedField(hexagon);
@@ -1000,7 +993,7 @@ window.addEventListener('load', async () => {
                 }
             
                 for(let setting in otherSettings){
-                    if(otherSettings[setting] && ['bordered', 'turned', 'innerNum'].includes(setting)){
+                    if(otherSettings[setting] && ['bordered', 'turned', 'woNums'].includes(setting)){
                         hexagon.classList.add('hexagon-' + setting);
                     }
                 }
@@ -1685,6 +1678,9 @@ window.addEventListener('load', async () => {
                         copy: () => {
                             let link = new URL(window.location.pathname, window.location.origin);
                             link.searchParams.append('hexId', hexagon.uuid);
+                            if(hexagon.querySelector('.hexagon-about')){
+                                link.searchParams.append('about', true);
+                            }
                             
                             if (!navigator.clipboard) {
                                 let textArea = document.createElement("textarea");
@@ -1874,6 +1870,16 @@ window.addEventListener('load', async () => {
                             block: 'center',
                             inline: 'center'
                         });
+
+                        setTimeout(() => {
+                            if(urlParams.get('about')){
+                                if(foundedHex.innerText){
+                                    foundedElem.querySelector('.hexagon-editedField').dispatchEvent(new Event('click'))
+                                }else if(foundedHex.BGImg){
+                                    foundedElem.dispatchEvent(new Event('click'))
+                                }
+                            }
+                        }, 0)
                         
                         foundedElem.classList.add('founded-polygon');
                         
@@ -1946,8 +1952,8 @@ window.addEventListener('load', async () => {
                         <div class="other-cont">
                             <div class="rounded-cont check-cont"><label class="check-label" for="rounded">${translate('sets.check.R')}</label><input class="check-input" type="checkbox" id="rounded"><div class="check-custom"></div></div>
                             <div class="bordered-cont check-cont"><label class="check-label" for="bordered">${translate('sets.check.B')}</label><input class="check-input" type="checkbox" id="bordered"><div class="check-custom"></div></div>
+                            <div class="woNums-cont check-cont"><label class="check-label" for="woNums">${translate('sets.check.WN')}</label><input class="check-input" type="checkbox" id="woNums"><div class="check-custom"></div></div>
                             <!-- <div class="turned-cont check-cont"><label class="check-label" for="turned">${translate('sets.check.B')}</label><input class="check-input" type="checkbox" id="turned"><div class="check-custom"></div></div> -->
-                            <div class="innerNum-cont check-cont"><label class="check-label" for="innerNum">${translate('sets.check.I')}</label><input class="check-input" type="checkbox" id="innerNum"><div class="check-custom"></div></div>
                             <div class="ctrlZoom-cont check-cont"><label class="check-label" for="ctrlZoom">${translate('sets.check.Z')}</label><input class="check-input" type="checkbox" id="ctrlZoom"><div class="check-custom"></div></div>
                             <div class="reverseComments-cont check-cont"><label class="check-label" for="reverseComments">${translate('sets.check.RC')}</label><input class="check-input" type="checkbox" id="reverseComments"><div class="check-custom"></div></div>
                             <div class="aboutAnim-cont check-cont"><label class="check-label" for="aboutAnim">${translate('sets.check.AA')}</label><input class="check-input" type="checkbox" id="aboutAnim"><div class="check-custom"></div></div>

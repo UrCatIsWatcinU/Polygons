@@ -904,6 +904,9 @@ window.addEventListener('load', async () => {
                     copy: () => {
                         let link = new URL(window.location.pathname, window.location.origin);
                         link.searchParams.append('hexId', hexagon.uuid);
+                        if(hexagon.querySelector('.hexagon-about')){
+                            link.searchParams.append('about', true);
+                        }
                         
                         if (!navigator.clipboard) {
                             let textArea = document.createElement("textarea");
@@ -1066,15 +1069,21 @@ window.addEventListener('load', async () => {
                             inline: 'center'
                         });
                         
+                        if(urlParams.get('about')){
+                            if(foundedHex.innerText){
+                                foundedElem.querySelector('.hexagon-editedField').dispatchEvent(new Event('click'))
+                            }else if(foundedHex.BGImg){
+                                foundedElem.dispatchEvent(new Event('click'))
+                            }
+                        }
+                        
                         foundedElem.classList.add('founded-polygon');
                         
                         setTimeout(() => {
                             foundedElem.classList.remove('founded-polygon');
                             history.pushState(null, null, '/fields/' + document.title); 
-                        history.pushState(null, null, '/fields/' + document.title); 
-                            history.pushState(null, null, '/fields/' + document.title); 
-                        }, 4000)
-                    }, {once: true})
+                        }, 4000);
+                    }, {once: true});
                     
                 }else{
                     let scrollCoords = JSON.parse(localStorage.getItem('userScroll-' + document.title) || `{"x": ${document.body.scrollWidth / 2}, "y":  ${document.body.scrollHeight / 2}}`);
