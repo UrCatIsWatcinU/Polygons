@@ -401,12 +401,16 @@ function hideModal(){
     if(!modal) return
 
     modal.style.display = 'none';
-    modal.querySelector('.modal-content').className = 'modal-content';
+    modal.innerHTML = `
+    <div class="modal-content">
+    </div>`;
 
     if(modal.querySelector('.modal-title') && modal.querySelector('.modal-body')){
         modal.querySelector('.modal-title').innerText = '';
         modal.querySelector('.modal-body').innerText = '';
     }
+
+    document.body.removeEventListener('mousedown', hideModal);
 }
 
 function createDropMenu(dropMenu = null, userCont = null, attachElem = null){
@@ -599,7 +603,22 @@ let hexPath = () => `M 0 ${hexSizes.TRIANGLE_HEIGHT} L ${hexSizes.HEXAGON_WIDTH/
 const setHexAboutPosition = (hexagon, hexagonAbout) => {
     hexagonAbout.addEventListener('dblclick', evt => {
         evt.stopPropagation();
-    }, {passive: false})
+    }, {passive: false});
+
+    if(otherSettings.aboutAnim){
+        hexagonAbout.remove();
+        hexagonAbout.style.position = 'relative';
+        hexagonAbout.style.top = '-40px';
+
+        const hexagonAboutModal = showModal('', '', true);
+        hexagonAboutModal.innerHTML = '';
+        hexagonAboutModal.append(hexagonAbout);
+
+        document.body.addEventListener('mousedown', hideModal);
+
+        return;
+    }
+    
     const checkHexVisibility = (r, h) => document.querySelector(`#r${r} #h${h}`) ? document.querySelector(`#r${r} #h${h}`).classList.contains('hexagon-visible') : false;
     let rId = hexagon.rowId;
     let hId = +hexagon.id.replace('h', '');
@@ -684,14 +703,6 @@ const setHexAboutPosition = (hexagon, hexagonAbout) => {
         const neededY = rect.top + document.body.scrollTop - (document.body.clientHeight - rect.height) / 2;
         const neededX = rect.left + document.body.scrollLeft - (rect.width > document.body.clientWidth ? 0 : (document.body.clientWidth - rect.width) / 2);
 
-        if(otherSettings.aboutAnim){
-            document.body.scrollTo({
-                top: neededY,
-                left: neededX,
-            });
-
-            return;
-        }
         if(isIOS()){
             let startY = document.body.scrollTop;
             let startX = document.body.scrollLeft;
