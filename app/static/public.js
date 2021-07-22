@@ -181,7 +181,7 @@ translate.add({
             Z: 'Зум только с зажатым ctrl',
             S: 'Скорость навигации',
             RC: 'Обратный порядок комментариев',
-            AA: 'Отключить анимацию странички'
+            AA: 'Отключить анимацию "побробнее"'
         },
         save: 'Сохранить',
         reset: 'Сбросить',
@@ -535,7 +535,7 @@ let otherSettings = {
     rounded: false, 
     bordered: false,
     turned: false,
-    aboutAnim: false,
+    aboutAnim: true,
     woNums: false,
     ctrlZoom: true,
     slideSpeed: 1.6
@@ -596,6 +596,8 @@ hexSizes.setBodyHeight(52 * 1.5);
 
 let hexPath = () => `M 0 ${hexSizes.TRIANGLE_HEIGHT} L ${hexSizes.HEXAGON_WIDTH/2} 0 L ${hexSizes.HEXAGON_WIDTH} ${hexSizes.TRIANGLE_HEIGHT} L ${hexSizes.HEXAGON_WIDTH} ${hexSizes.HEXAGON_HEIGHT-hexSizes.TRIANGLE_HEIGHT} L ${hexSizes.HEXAGON_WIDTH/2} ${hexSizes.HEXAGON_HEIGHT} L 0 ${hexSizes.HEXAGON_HEIGHT-hexSizes.TRIANGLE_HEIGHT} Z`;
 
+
+let contextmenuFn = null;
 /**
  * @param {HTMLElement} hexagon 
  * @param {HTMLElement} hexagonAbout 
@@ -615,6 +617,13 @@ const setHexAboutPosition = (hexagon, hexagonAbout) => {
         hexagonAboutModal.append(hexagonAbout);
 
         document.body.addEventListener('mousedown', hideModal);
+
+        hexagonAbout.oncontextmenu = (evt) => {
+            evt.stopPropagation();
+            if(contextmenuFn) contextmenuFn(evt, hexagon, hexagonAbout);
+
+            return false;
+        }
 
         return;
     }
