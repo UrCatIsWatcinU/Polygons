@@ -323,7 +323,11 @@ const showAsk = (yesCallback, body=translate('defaults.askBody'), title = transl
     let nBtn = document.createElement('button');
     nBtn.innerText = translate('defaults.n');;
 
-    yBtn.addEventListener('click', yesCallback);
+    yBtn.addEventListener('mousedown', (evt) => {
+        evt.stopPropagation();
+
+        yesCallback(evt);
+    });
     yBtn.addEventListener('click', () => {document.querySelector('.ask').remove()});
     nBtn.addEventListener('click', noCallback);
 
@@ -596,7 +600,6 @@ hexSizes.setBodyHeight(52 * 1.5);
 
 let hexPath = () => `M 0 ${hexSizes.TRIANGLE_HEIGHT} L ${hexSizes.HEXAGON_WIDTH/2} 0 L ${hexSizes.HEXAGON_WIDTH} ${hexSizes.TRIANGLE_HEIGHT} L ${hexSizes.HEXAGON_WIDTH} ${hexSizes.HEXAGON_HEIGHT-hexSizes.TRIANGLE_HEIGHT} L ${hexSizes.HEXAGON_WIDTH/2} ${hexSizes.HEXAGON_HEIGHT} L 0 ${hexSizes.HEXAGON_HEIGHT-hexSizes.TRIANGLE_HEIGHT} Z`;
 
-
 let contextmenuFn = null;
 /**
  * @param {HTMLElement} hexagon 
@@ -610,13 +613,46 @@ const setHexAboutPosition = (hexagon, hexagonAbout) => {
     if(otherSettings.aboutAnim){
         hexagonAbout.remove();
         hexagonAbout.style.position = 'relative';
-        hexagonAbout.style.top = '-40px';
+        hexagonAbout.style.top = '-30px';
 
         const hexagonAboutModal = showModal('', '', true);
-        hexagonAboutModal.innerHTML = '';
+        hexagonAboutModal.classList.add('hexagon-about-modal')
+        hexagonAboutModal.innerHTML = hexagon.obj.innerText ? `
+            <h3 class="hexagon-about-title">
+                <span>${hexagon.obj.innerText}</span>
+                <svg class="hexagon-about-close"><line x1="50%" y1="0%" x2="50%" y2="100%"></line><line x1="0%" y1="50%" x2="100%" y2="50%"></line></svg>
+            </h3>
+        ` : '';
         hexagonAboutModal.append(hexagonAbout);
 
-        document.body.addEventListener('mousedown', hideModal);
+        if(isTouchDevice()){
+            hm = new Hammer(hexagonAbout)
+            hm.on('swipeleft swiperight', evt => {
+                let nextHex = null
+                if(evt.type == 'swiperight'){
+                    nextHex = hexagon.chainObj.hexs.find(h => h.num == hexagon.num - 1)
+                }else{
+                    nextHex = hexagon.chainObj.hexs.find(h => h.num == hexagon.num + 1)
+                }
+
+                if(nextHex){
+                    const nextHexElem = document.querySelector(nextHex.selector)
+                    if(nextHexElem){
+                        const editedField = nextHexElem.querySelector('.hexagon-editedField'); 
+                        if(editedField){
+                            editedField.dispatchEvent(new Event('click'));
+                        }else{
+                            nextHexElem.dispatchEvent(new Event('click'))
+                        }
+                    }
+                }
+            }) 
+        }
+
+        document.body.addEventListener('mousedown', () => {
+            hideModal();
+            if(typeof(hexagonAbout.saveChanges) == 'function') hexagonAbout.saveChanges();
+        }, {once: true });
 
         hexagonAbout.oncontextmenu = (evt) => {
             evt.stopPropagation();

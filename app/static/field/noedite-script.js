@@ -90,13 +90,40 @@ window.addEventListener('load', async () => {
                             theme: 'snow',
                             debug: false, 
                             modules: {
-                                toolbar: false
+                                toolbar: {
+                                    container: ['search'],
+                                    handlers: { 
+                                        search() {
+                                            const range = hexagonAbout.editor.getSelection();
+                                            if(range){
+                                                if(range.length != 0){
+                                                    const text = hexagonAbout.editor.getText(range.index, range.length);
+
+                                                    document.querySelector('.find-input').value = text;
+                                                    document.querySelector('.find-button').dispatchEvent(new Event('click'));
+                                                    document.querySelector('.find-input').value = '';
+                                                    hideModal();
+                                                }
+                                            }
+                                        } 
+                                    }
+                                }
                             },
                             readOnly: true,
                         };
                         
                         const editor = new Quill('.hexagon-about-editor', editorOptions);
                         
+                        const searchBtn = hexagonAbout.querySelector('.ql-search')
+                        if(searchBtn){
+                            searchBtn.innerHTML = `
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-search">
+                                    <circle class="ql-stroke" cx="11" cy="11" r="8"></circle>
+                                    <line class="ql-stroke" x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                </svg>
+                            `;
+                        }
+
                         if(typeof(hexagon.about) == 'string'){
                             if(hexagon.about[0] == '{' || hexagon.about[0] == '['){
                                 hexagon.about = JSON.parse(hexagon.about || '{}');
@@ -515,7 +542,16 @@ window.addEventListener('load', async () => {
                         }
                     });
                 }
+
+                Object.defineProperty(hexagon, 'chainObj', {
+                    get () {
+                        console.log(getChain(hexagon.obj.chainId));
+                        return getChain(hexagon.obj.chainId);
+                    },
+                    configurable: false
+                })
             }
+
 
             const deleteHex = hexagon => {
                 let deletedHexs = [];
@@ -621,7 +657,6 @@ window.addEventListener('load', async () => {
             }
             
             if(!document.querySelector('.loading')) return;
-            document.body.className = 'field';
             document.body.style.width = '';
             document.body.style.height = '';
 

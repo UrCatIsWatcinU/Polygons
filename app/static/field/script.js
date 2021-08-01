@@ -188,7 +188,7 @@ window.addEventListener('load', async () => {
                         .then(res => res.ok && res)
                         .then(res => res || showModal('An error occured while uploading your changes', translate('ptl')))
                     }
-            
+                    
                     const clearAbouts = () => {
                         if(hexagon.isContextmenu || document.querySelectorAll('.ask').length) return;
                         document.querySelectorAll('.hexagon-about').forEach(elem => {
@@ -198,10 +198,11 @@ window.addEventListener('load', async () => {
                         document.removeEventListener('mousedown', clearAbouts);
                     }
                     clearAbouts();
-            
+                    
                     const user = JSON.parse(sessionStorage.getItem('user') || '{}');
-            
+                    
                     let hexagonAbout = document.createElement('div');
+                    hexagonAbout.saveChanges = () => saveChanges(hexagonAbout)
                     hexagonAbout.className = 'hexagon-about';
                     hexagonAbout.innerHTML = `
                     <div class="hexagon-about-controls">
@@ -234,20 +235,41 @@ window.addEventListener('load', async () => {
                     const selectActiveTab = () => {
                         if(hexagonAbout.querySelector(`.${activeAboutTab}Btn`)){
                             hexagonAbout.querySelector(`.${activeAboutTab}Btn`).style.textDecoration = 'underline';
-                        }
-                        if(hexagonAbout.querySelector(`.hexagon-about-${activeAboutTab}`)){
-                            hexagonAbout.querySelector(`.hexagon-about-${activeAboutTab}`).style.display = '';
+                        }   
+                        const activeBlock = hexagonAbout.querySelector(`.hexagon-about-${activeAboutTab}`); 
+                        if(activeBlock){
+                            activeBlock.style.display = '';
+
+                            if(activeAboutTab == 'content'){
+                                hexagonAbout.style.overflow = 'hidden'
+                            }
                         }
                     }
 
                     const content = () => hexagonAbout.querySelector('.hexagon-about-content');
 
+                    const searchFromAbout = () => {
+                        const range = hexagonAbout.editor.getSelection();
+                        if(range){
+                            if(range.length != 0){
+                                const text = hexagonAbout.editor.getText(range.index, range.length);
+
+                                document.querySelector('.find-input').value = text;
+                                document.querySelector('.find-button').dispatchEvent(new Event('mousedown'));
+                                document.querySelector('.find-input').value = '';
+                                hideModal();
+                            }
+                        }
+                    }
                     const setUpEditor = () => {
                         let editorOptions = {
                             theme: 'snow',
                             debug: false, 
                             modules: {
-                                toolbar: false
+                                toolbar: {
+                                    container: ['search'],
+                                    handlers: { search: searchFromAbout }
+                                }
                             },
                             readOnly: true,
                         };
@@ -256,20 +278,34 @@ window.addEventListener('load', async () => {
                                 readOnly: false,
                                 debug: 'warn',
                                 theme: 'snow',
+                                scrollingContainer: '.hexagon-about-editor',
                                 modules: {
-                                    toolbar: [
-                                        ['bold', 'italic', 'underline'],
-                                        
-                                        [{ 'header': 1 }, { 'header': 2 }],
-                                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-
-                                        ['clean']
-                                    ]
+                                    toolbar: {
+                                        container: [
+                                            ['bold', 'italic', 'underline'],
+                                            
+                                            [{ 'header': 1 }, { 'header': 2 }],
+                                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+    
+                                            ['search', 'clean']
+                                        ],
+                                        handlers: { search: searchFromAbout }
+                                    }
                                 }
                             }
                         }
                         
                         const editor = new Quill('.hexagon-about-editor', editorOptions);
+
+                        const searchBtn = hexagonAbout.querySelector('.ql-search')
+                        if(searchBtn){
+                            searchBtn.innerHTML = `
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-search">
+                                    <circle class="ql-stroke" cx="11" cy="11" r="8"></circle>
+                                    <line class="ql-stroke" x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                </svg>
+                            `;
+                        }
                         
                         if(typeof(hexagon.about) == 'string'){
                             if(hexagon.about[0] == '{' || hexagon.about[0] == '['){
@@ -653,9 +689,9 @@ window.addEventListener('load', async () => {
 
                                 hexagon.about = aboutContent;
 
-                                setUpEditor();
-
                                 selectActiveTab();
+                                
+                                setUpEditor();
 
                                 const loading = hexagonAbout.querySelector('.loading');
                                 loading.style.opacity = 0;
@@ -674,10 +710,9 @@ window.addEventListener('load', async () => {
                         //     loadAbout();
                         // });
                     }else{
-                        selectActiveTab();
-                        
                         setTimeout(() => {
                             setUpEditor();
+                            selectActiveTab();
                         }, 0)
                     }
                     
@@ -941,6 +976,14 @@ window.addEventListener('load', async () => {
                     });
                 }
 
+                Object.defineProperty(hexagon, 'chainObj', {
+                    get () {
+                        console.log(getChain(hexagon.obj.chainId));
+                        return getChain(hexagon.obj.chainId);
+                    },
+                    configurable: false
+                })
+
 
                 const user = JSON.parse(sessionStorage.getItem('user') || '{}');
                 
@@ -1028,6 +1071,7 @@ window.addEventListener('load', async () => {
                     let elem = document.querySelector(hexagon.selector);
                     if(elem){
                         setHexProps(elem);
+                        elem.obj = {}
                         elem.innerHTML = '<div class="hexagon-num">0</div>'
                     }
                     
@@ -1372,7 +1416,7 @@ window.addEventListener('load', async () => {
                     clearContextMenus();
                 });
 
-                let hammerHexsCont = new Hammer(hexsCont);
+                let hammerHexsCont = document.hammerHexsCont = new Hammer(hexsCont);
                 hammerHexsCont.get('pinch').set({ enable: true });
 
                 let lastScale = 1;
@@ -1556,7 +1600,7 @@ window.addEventListener('load', async () => {
                         
                         contextmenu.insertAdjacentHTML('afterbegin', `
                         ${!hexagonAbout ? '<div class="delete-btn contextmenu-item">Delete</div>' : ''}
-                        ${hexagon.obj.innerText && hexagonAbout ? '' : addFileStr}
+                        ${hexagon.obj.innerText || hexagonAbout ? '' : addFileStr}
                         ${hexagon.obj.BGImg ? '' : '<div class="contextmenu-item edit-btn">Edit</div>'}
                         ${user.userRole == 2 && !hexagonAbout ? '<div class="move-btn contextmenu-item">Move</div>' : ''}
                         `);
@@ -1953,8 +1997,8 @@ window.addEventListener('load', async () => {
                     <div class="font">
                         <h2 class="settings-title">${translate('sets.font')}</h2>
                         <div class="font-cont">
-                            <span class="font-input-cont"><label for="font-family">${translate('sets.fontF')} <a target="_blank" href="https://fonts.google.com/">Google</a></label>:&nbsp<input type="text" id="font-family" value="${font.family}"></span>
-                            <span class="font-input-cont"><label for="font-size">${translate('sets.fontS')}</label>:&nbsp<input type="range" min="${+font.size.replace('em', '') - .5}" max="${+font.size.replace('em', '') + .5}" step="${.5 / 3}" id="font-size" value="${font.size.replace('em', '')}"></span>
+                            <span class="font-input-cont"><label for="font-family">${translate('sets.fontF')} <a target="_blank" href="https://fonts.google.com/">Google</a></label>:&ensp;<input type="text" id="font-family" value="${font.family}"></span>
+                            <span class="font-input-cont"><label for="font-size">${translate('sets.fontS')}</label>:&ensp;<input type="range" min="${+font.size.replace('em', '') - .5}" max="${+font.size.replace('em', '') + .5}" step="${.5 / 3}" id="font-size" value="${font.size.replace('em', '')}"></span>
                         </div>
                         <div class="font-preview">
                         <h3 style="font-family: inherit; margin: 10px 0">Font settings example</h3>
