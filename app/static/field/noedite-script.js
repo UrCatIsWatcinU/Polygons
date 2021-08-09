@@ -90,24 +90,7 @@ window.addEventListener('load', async () => {
                             theme: 'snow',
                             debug: false, 
                             modules: {
-                                toolbar: {
-                                    container: ['search'],
-                                    handlers: { 
-                                        search() {
-                                            const range = hexagonAbout.editor.getSelection();
-                                            if(range){
-                                                if(range.length != 0){
-                                                    const text = hexagonAbout.editor.getText(range.index, range.length);
-
-                                                    document.querySelector('.find-input').value = text;
-                                                    document.querySelector('.find-button').dispatchEvent(new Event('click'));
-                                                    document.querySelector('.find-input').value = '';
-                                                    hideModal();
-                                                }
-                                            }
-                                        } 
-                                    }
-                                }
+                                toolbar: false
                             },
                             readOnly: true,
                         };
