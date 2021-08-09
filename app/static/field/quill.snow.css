@@ -605,6 +605,10 @@
 }
 .ql-snow .ql-editor a {
   text-decoration: underline;
+  color: var(--main-c);
+}
+.ql-snow .ql-editor a em {
+  color: var(--main-c);
 }
 .ql-snow .ql-editor blockquote {
   border-left: 4px solid var(--grid-c);

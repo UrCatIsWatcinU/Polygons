@@ -37,7 +37,8 @@ translate.add({
         content: 'Content',
         comments: 'Comments',
         yourComment: 'Your comment',
-        inReply: 'in reply to'
+        inReply: 'in reply to',
+        lmTitle: 'Enter link'
     },
     complaint: {
         text: 'Text',
@@ -153,7 +154,8 @@ translate.add({
         content: 'Контент',
         comments: 'Комментарии',
         yourComment: 'Ваш комментарий',
-        inReply: 'в ответ'
+        inReply: 'в ответ',
+        lmTitle: 'Введите ссылку'
     },
     complaint: {
         text: 'Текст жалобы',
@@ -626,8 +628,7 @@ const setHexAboutPosition = (hexagon, hexagonAbout) => {
         hexagonAboutModal.append(hexagonAbout);
 
         if(isTouchDevice()){
-            hm = new Hammer(hexagonAbout)
-            hm.on('swipeleft swiperight', evt => {
+            (new Hammer(hexagonAbout)).on('swipeleft swiperight', evt => {
                 let nextHex = null
                 if(evt.type == 'swiperight'){
                     nextHex = hexagon.chainObj.hexs.find(h => h.num == hexagon.num - 1)

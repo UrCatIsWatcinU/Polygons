@@ -177,7 +177,7 @@ window.addEventListener('load', async () => {
                     const saveChanges = hexAboutElem => {
                         if(!hexAboutElem || !hexAboutElem.editor) return;
 
-                        const editor = hexagonAbout.editor;
+                        const editor = hexAboutElem.editor;
 
                         hexagon.about = editor.getContents();
 
@@ -248,28 +248,12 @@ window.addEventListener('load', async () => {
 
                     const content = () => hexagonAbout.querySelector('.hexagon-about-content');
 
-                    const searchFromAbout = () => {
-                        const range = hexagonAbout.editor.getSelection();
-                        if(range){
-                            if(range.length != 0){
-                                const text = hexagonAbout.editor.getText(range.index, range.length);
-
-                                document.querySelector('.find-input').value = text;
-                                document.querySelector('.find-button').dispatchEvent(new Event('mousedown'));
-                                document.querySelector('.find-input').value = '';
-                                hideModal();
-                            }
-                        }
-                    }
                     const setUpEditor = () => {
                         let editorOptions = {
                             theme: 'snow',
                             debug: false, 
                             modules: {
-                                toolbar: {
-                                    container: ['search'],
-                                    handlers: { search: searchFromAbout }
-                                }
+                                toolbar: false
                             },
                             readOnly: true,
                         };
@@ -287,9 +271,44 @@ window.addEventListener('load', async () => {
                                             [{ 'header': 1 }, { 'header': 2 }],
                                             [{ 'list': 'ordered'}, { 'list': 'bullet' }],
     
-                                            ['search', 'clean']
+                                            ['link', 'clean']
                                         ],
-                                        handlers: { search: searchFromAbout }
+                                        handlers: { 
+                                            link(value){
+                                                if(!value) return this.quill.format('link', false);
+
+                                                const linkModal = setClassName(document.createElement('div'), 'modal link-modal');
+                                                linkModal.style.zIndex = 100;
+                                                linkModal.style.display = 'flex ';
+                                                linkModal.innerHTML = `
+                                                    <div class="modal-content">
+                                                        <h2 class="modal-title">${translate('hexAbout.lmTitle')}</h2>
+                                                        <input id="link-input" type="text">
+                                                        <div class="btns">
+                                                            <button class="link-modal-save">${translate('btns.save')}</button>
+                                                            <button class="link-modal-close">${translate('btns.close')}</button>
+                                                        </div>
+                                                    </div>
+                                                `;
+                                                linkModal.querySelector('.modal-content').addEventListener('mousedown', evt => { evt.stopPropagation() }, {passive: false})
+
+                                                document.body.append(linkModal);
+
+                                                const input = linkModal.querySelector('#link-input');
+
+                                                linkModal.querySelector('.link-modal-close').onclick = () => linkModal.remove();
+                                                
+                                                linkModal.querySelector('.link-modal-save').onclick = () => {
+                                                    let link = input.value;
+
+                                                    
+
+                                                    this.quill.format('link', link);
+                                                    linkModal.remove();
+                                                }
+
+                                            } 
+                                        }
                                     }
                                 }
                             }
@@ -978,7 +997,6 @@ window.addEventListener('load', async () => {
 
                 Object.defineProperty(hexagon, 'chainObj', {
                     get () {
-                        console.log(getChain(hexagon.obj.chainId));
                         return getChain(hexagon.obj.chainId);
                     },
                     configurable: false

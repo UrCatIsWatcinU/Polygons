@@ -20,6 +20,8 @@ html{
   display: block;
   position: relative;
   /* scroll-behavior: smooth; */
+
+  --about-w: 470px;
 }
 .scroll-btns{
   position: fixed;
@@ -150,7 +152,8 @@ html{
 }
 
 .hexagon-about-modal{
-  --about-w: 470px;
+  --about-w: 600px;
+  --max-about-height: 67vh;
   flex-direction: column;
 }
 .hexagon-about-title{
@@ -173,7 +176,6 @@ html{
   position: static !important;
 }
 .hexagon-about{
-  --about-w: 470px;
   background: var(--about-bgc);
   color: var(--about-fgc);
   width: var(--about-w);
@@ -766,6 +768,10 @@ html{
   .settings-grid{
     grid-template-columns: 1fr 1fr;
   }
+
+  .hexagon-about-modal{
+    --about-w: 470px;
+  }
 }
 @media(max-width: 520px){
   .settings input{
@@ -783,5 +789,12 @@ html{
   .hexagon-about-title,
   .hexagon-about{
     width: 96vw;
+  }
+
+  .ql-toolbar button{ 
+    margin-right: 0px !important;
+  }
+  .ql-toolbar{
+    margin-right: 5px !important;
   }
 }
