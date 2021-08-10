@@ -627,27 +627,30 @@ const setHexAboutPosition = (hexagon, hexagonAbout) => {
         ` : '';
         hexagonAboutModal.append(hexagonAbout);
 
-        if(isTouchDevice()){
-            (new Hammer(hexagonAbout)).on('swipeleft swiperight', evt => {
-                let nextHex = null
-                if(evt.type == 'swiperight'){
-                    nextHex = hexagon.chainObj.hexs.find(h => h.num == hexagon.num - 1)
-                }else{
-                    nextHex = hexagon.chainObj.hexs.find(h => h.num == hexagon.num + 1)
-                }
+        const switchAbout = evt => {
+            let nextHex = null
+            if(evt.type == 'swiperight'){
+                nextHex = hexagon.chainObj.hexs.find(h => h.num == hexagon.num - 1)
+            }else{
+                nextHex = hexagon.chainObj.hexs.find(h => h.num == hexagon.num + 1)
+            }
 
-                if(nextHex){
-                    const nextHexElem = document.querySelector(nextHex.selector)
-                    if(nextHexElem){
-                        const editedField = nextHexElem.querySelector('.hexagon-editedField'); 
-                        if(editedField){
-                            editedField.dispatchEvent(new Event('click'));
-                        }else{
-                            nextHexElem.dispatchEvent(new Event('click'))
-                        }
+            if(nextHex){
+                const nextHexElem = document.querySelector(nextHex.selector)
+                if(nextHexElem){
+                    const editedField = nextHexElem.querySelector('.hexagon-editedField'); 
+                    if(editedField){
+                        editedField.dispatchEvent(new Event('click'));
+                    }else{
+                        nextHexElem.dispatchEvent(new Event('click'))
                     }
                 }
-            }) 
+            }
+        }
+
+        if(isTouchDevice()){
+            (new Hammer(hexagonAbout)).on('swipeleft swiperight', switchAbout) 
+            if(hexagonAbout.querySelector('.hexagon-about-editor')) (new Hammer(hexagonAbout.querySelector('.hexagon-about-editor'))).on('swipeleft swiperight', switchAbout) 
         }
 
         document.body.addEventListener('mousedown', () => {

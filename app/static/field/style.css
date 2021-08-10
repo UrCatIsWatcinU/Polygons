@@ -195,8 +195,6 @@ html{
   font-size: .97em;
   display: flex;
   flex-direction: column;
-  /* opacity: 0; */
-  touch-action: pan-x pan-y !important;
 }
 .touch-device .hexagon-about{
   height: calc(var(--max-about-height) - 10vh);
