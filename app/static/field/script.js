@@ -165,7 +165,7 @@ window.addEventListener('load', async () => {
             
                 // плашка подробнее
                 editedField.onclick = evt => {
-                    if(!hexagon.classList.contains('hexagon-visible') || !editedField.innerText) return;
+                    if(!hexagon.classList.contains('hexagon-visible') || !editedField.innerText || document.querySelector('.hexagon-about')) return;
             
                     clearContextMenus();
             

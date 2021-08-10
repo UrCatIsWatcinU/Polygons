@@ -627,17 +627,21 @@ const setHexAboutPosition = (hexagon, hexagonAbout) => {
         ` : '';
         hexagonAboutModal.append(hexagonAbout);
 
+        const editorElem = hexagonAbout.querySelector('.hexagon-about-content');
+
         const switchAbout = evt => {
             let nextHex = null
             if(evt.type == 'swiperight'){
-                nextHex = hexagon.chainObj.hexs.find(h => h.num == hexagon.num - 1)
+                nextHex = hexagon.chainObj.hexs.find(h => h.num == hexagon.num - 1);
             }else{
-                nextHex = hexagon.chainObj.hexs.find(h => h.num == hexagon.num + 1)
+                nextHex = hexagon.chainObj.hexs.find(h => h.num == hexagon.num + 1);
             }
 
             if(nextHex){
-                const nextHexElem = document.querySelector(nextHex.selector)
+                const nextHexElem = document.querySelector(nextHex.selector);
                 if(nextHexElem){
+                    hexagonAbout.remove()
+
                     const editedField = nextHexElem.querySelector('.hexagon-editedField'); 
                     if(editedField){
                         editedField.dispatchEvent(new Event('click'));
@@ -650,7 +654,7 @@ const setHexAboutPosition = (hexagon, hexagonAbout) => {
 
         if(isTouchDevice()){
             (new Hammer(hexagonAbout)).on('swipeleft swiperight', switchAbout) 
-            if(hexagonAbout.querySelector('.hexagon-about-editor')) (new Hammer(hexagonAbout.querySelector('.hexagon-about-editor'))).on('swipeleft swiperight', switchAbout) 
+            if(editorElem) (new Hammer(editorElem)).on('swipeleft swiperight', switchAbout) 
         }
 
         document.body.addEventListener('mousedown', () => {
