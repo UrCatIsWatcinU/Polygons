@@ -156,6 +156,10 @@ html{
   --max-about-height: 67vh;
   flex-direction: column;
 }
+.hexagon-about-modal > * {
+  position: relative;
+  top: -30px;
+}
 .hexagon-about-title{
   margin: 0;
   width: var(--about-w);
@@ -166,14 +170,15 @@ html{
   padding: 5px 10px;
   background-color: var(--about-bgc);
   color: var(--about-fgc);
-  position: relative;
-  top: -30px;
   box-sizing: border-box;
   border-radius: 5px;
 }
 .hexagon-about-close{
   --size: 2em;
   position: static !important;
+}
+.hexagon-about-arrow{
+  padding: 10px 5px ;
 }
 .hexagon-about{
   background: var(--about-bgc);

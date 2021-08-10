@@ -619,13 +619,19 @@ const setHexAboutPosition = (hexagon, hexagonAbout) => {
 
         const hexagonAboutModal = showModal('', '', true);
         hexagonAboutModal.classList.add('hexagon-about-modal')
-        hexagonAboutModal.innerHTML = hexagon.obj.innerText ? `
+        hexagonAboutModal.innerHTML = `
             <h3 class="hexagon-about-title">
-                <span>${hexagon.obj.innerText}</span>
+                <span>${hexagon.obj.num}. ${hexagon.obj.innerText}</span>
                 <svg class="hexagon-about-close"><line x1="50%" y1="0%" x2="50%" y2="100%"></line><line x1="0%" y1="50%" x2="100%" y2="50%"></line></svg>
             </h3>
-        ` : '';
-        hexagonAboutModal.append(hexagonAbout);
+            <div class="hexagon-about-arrows">
+                <svg class="hexagon-about-arrow arrow-left" xmlns="http://www.w3.org/2000/svg" width="28" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--main-c)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                <svg class="hexagon-about-arrow arrow-right" xmlns="http://www.w3.org/2000/svg" width="28" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--main-c)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </div>
+        `;
+        hexagonAboutModal.querySelector('.hexagon-about-title') ? 
+        hexagonAboutModal.querySelector('.hexagon-about-title').after(hexagonAbout):
+        hexagonAboutModal.prepend(hexagonAbout);
 
         const editorElem = hexagonAbout.querySelector('.hexagon-about-content');
 
@@ -653,14 +659,20 @@ const setHexAboutPosition = (hexagon, hexagonAbout) => {
         }
 
         if(isTouchDevice()){
-            (new Hammer(hexagonAbout)).on('swipeleft swiperight', switchAbout) 
-            if(editorElem) (new Hammer(editorElem)).on('swipeleft swiperight', switchAbout) 
+            (new Hammer(hexagonAbout)).on('swipeleft swiperight', switchAbout); 
+            if(editorElem) (new Hammer(editorElem)).on('swipeleft swiperight', switchAbout);
+
+            hexagonAboutModal.querySelector('.arrow-left').onclick = () => switchAbout({type: 'swiperight'})
+            hexagonAboutModal.querySelector('.arrow-right').onclick = () => switchAbout({type: 'swipeleft'})
         }
 
         document.body.addEventListener('mousedown', () => {
             hideModal();
             if(typeof(hexagonAbout.saveChanges) == 'function') hexagonAbout.saveChanges();
         }, {once: true });
+        hexagonAboutModal.querySelector('.hexagon-about-arrows').addEventListener('mousedown', evt => {
+            evt.stopPropagation()
+        })
 
         hexagonAbout.oncontextmenu = (evt) => {
             evt.stopPropagation();
