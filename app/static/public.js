@@ -662,9 +662,9 @@ const setHexAboutPosition = (hexagon, hexagonAbout) => {
             (new Hammer(hexagonAbout)).on('swipeleft swiperight', switchAbout); 
             if(editorElem) (new Hammer(editorElem)).on('swipeleft swiperight', switchAbout);
 
-            hexagonAboutModal.querySelector('.arrow-left').onclick = () => switchAbout({type: 'swiperight'})
-            hexagonAboutModal.querySelector('.arrow-right').onclick = () => switchAbout({type: 'swipeleft'})
         }
+        hexagonAboutModal.querySelector('.arrow-left').onclick = () => switchAbout({type: 'swiperight'})
+        hexagonAboutModal.querySelector('.arrow-right').onclick = () => switchAbout({type: 'swipeleft'})
 
         document.body.addEventListener('mousedown', () => {
             hideModal();
