@@ -11,6 +11,7 @@ translate.add({
         copy: 'Copy link',
         move: 'Move',
         img: 'Add image',
+        imgLabel: 'Add image',
         copyMsgs: {
             s: 'Copied',
             uns: 'Was not possible to copy the link'
@@ -126,6 +127,7 @@ translate.add({
         move: 'Переместить',
         copy: 'Ссылка',
         img: 'Вставить картинку',
+        imgLabel: 'Вставить картинку',
         complain: 'Пожаловаться',
         user: 'Автор',
         chain: 'Цепочка',

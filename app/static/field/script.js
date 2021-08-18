@@ -995,12 +995,14 @@ window.addEventListener('load', async () => {
                     });
                 }
 
-                Object.defineProperty(hexagon, 'chainObj', {
-                    get () {
-                        return getChain(hexagon.obj.chainId);
-                    },
-                    configurable: false
-                })
+                if(typeof(hexagon.chainObj) == 'undefined'){
+                    Object.defineProperty(hexagon, 'chainObj', {
+                        get () {
+                            return getChain(hexagon.obj.chainId);
+                        },
+                        configurable: false
+                    })
+                }
 
 
                 const user = JSON.parse(sessionStorage.getItem('user') || '{}');
@@ -1054,6 +1056,8 @@ window.addEventListener('load', async () => {
                 hexagon.ondragleave = () => {
                     hexagon.classList.remove('hexagon-drag');
                 }
+
+                hexagon.onclick = null  
             
                 for(let setting in otherSettings){
                     if(otherSettings[setting] && ['bordered', 'turned', 'woNums'].includes(setting)){
@@ -1088,9 +1092,11 @@ window.addEventListener('load', async () => {
                     
                     let elem = document.querySelector(hexagon.selector);
                     if(elem){
-                        setHexProps(elem);
-                        elem.obj = {}
-                        elem.innerHTML = '<div class="hexagon-num">0</div>'
+                        const newElem = elem.cloneNode(true);
+                        elem.parentNode.replaceChild(newElem, elem);
+                        setHexProps(newElem);
+                        // elem.obj = {}
+                        // elem.innerHTML = '<div class="hexagon-num">0</div>'
                     }
                     
                     if(hexagon.num === 1){
@@ -1106,7 +1112,7 @@ window.addEventListener('load', async () => {
                             if(hexagon.num > 1){
                                 let hexsToDelete = [];
                                 chain.hexs = chain.hexs.filter(h => {
-                                    if(h.num <   hexagon.num) return true;
+                                    if(h.num < hexagon.num + 1) return true;
 
                                     hexsToDelete.push(h);
                                 });
@@ -1117,7 +1123,7 @@ window.addEventListener('load', async () => {
                         }
                     }
                     
-                    visibleHexs = visibleHexs.filter(hex => hex.uuid != hexagon.uuid);
+                    visibleHexs.splice(visibleHexs.findIndex(hex => hex.uuid == hexagon.uuid), 1);
                 }
                 deleteHexInner(hexagon);
         
@@ -1181,7 +1187,7 @@ window.addEventListener('load', async () => {
                         if(hexToSetId) hexToSetId.obj = hex
                     });
 
-                    visibleHexs.push(...data.hexs)
+                    // visibleHexs.push(...data.hexs)
                 }
 
                 let firstHexs = hexs.filter(hexToCheck => !hexToCheck.chainId);
@@ -1472,9 +1478,11 @@ window.addEventListener('load', async () => {
                 for(let chain of chains){
                     if(chain && chain.id == id) return chain
                 }
+
+                return null
             }
             
-            document.addEventListener('click', clearContextMenus);
+            document.addEventListener('mousedown', clearContextMenus);
 
             contextmenuFn = document.body.oncontextmenu = (evt, hexagon = null, hexagonAbout = null) => {
                 clearContextMenus();
@@ -1566,7 +1574,7 @@ window.addEventListener('load', async () => {
                     }else{
                         contextmenu.innerHTML = translate('contextmenu.create');
                         
-                        contextmenu.onclick = () => {
+                        contextmenu.addEventListener('mousedown', () => {
                             hexagon.userId = user.userId,
                             hexagon.username = document.querySelector('.username').innerText,
                             hexagon.creationDate = (new Date()).getTime() / 1000,
@@ -1596,7 +1604,7 @@ window.addEventListener('load', async () => {
                             hexagon.querySelector('.hexagon-num').innerText = hexagon.obj.num = hexagonIdInChain + 1;
                             
                             sendHexsCreationReq([hexagon.obj]);
-                        }
+                        })
                     }
                 }else{
                     hexagon.isContextmenu = true;
@@ -1614,7 +1622,7 @@ window.addEventListener('load', async () => {
                     <div class="contextmenu-item contextmenu-info">${translate('contextmenu.date')}: ${hexDate.toLocaleDateString()}</div>`;
 
                     if(!hexagon.obj.userId || (user.userId == hexagon.obj.userId) || user.userRole == 2){
-                        const addFileStr = `<label for="hex-img" class="contextmenu-item">${translate('contextmenu.img')}</label><input class="img-btn" id="hex-img" type="file" style="display: none;">`
+                        const addFileStr = `<label for="hex-img" class="imgLabel-btn contextmenu-item">${translate('contextmenu.img')}</label><input class="img-btn" id="hex-img" type="file" style="display: none;">`
                         
                         contextmenu.insertAdjacentHTML('afterbegin', `
                         ${!hexagonAbout ? '<div class="delete-btn contextmenu-item">Delete</div>' : ''}
@@ -1811,17 +1819,25 @@ window.addEventListener('load', async () => {
                 
                                 createBgHex(hexagon, imgUploadRes.url);
                             }, evt, 'BG');
+                        },
+                        imgLabel: () => {
+                            
                         }
                     } 
 
                     for(let action in actions){
                         const actionBtn = contextmenu.querySelector(`.${action}-btn`); 
                         if(actionBtn){
-                            actionBtn.innerText = translate(`contextmenu.${action}`)
-                            actionBtn.addEventListener(action == 'img' ? 'input' : 'mousedown', actions[action], {passive: false})
+                            if(action != 'img') actionBtn.innerText = translate(`contextmenu.${action}`)
+                            actionBtn.addEventListener('mousedown', evt => evt.stopPropagation(), {passive: false})
+                            actionBtn.addEventListener(action == 'img' ? 'input' : 'mousedown', evt => {
+                                actions[action](evt);
+                                if(action != 'imgLabel') clearContextMenus()
+                            }, {passive: false})
                         } 
                     }
                 }
+                
                 contextmenu.style.top = evt.clientY + 'px';
                 contextmenu.style.left = evt.clientX + 'px';
                 document.body.append(contextmenu);
