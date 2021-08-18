@@ -666,6 +666,10 @@ const setHexAboutPosition = (hexagon, hexagonAbout) => {
             hexAboutHammer.on('swipeleft swiperight', switchAbout); 
             if(editorElem) hexAboutHammer.on('swipeleft swiperight', switchAbout);
 
+            const press = new Hammer.Press({
+                time: 600
+            });
+            hexAboutHammer.add([press]);
             hexAboutHammer.on('press', evt => {
                 evt.preventDefault()
                 const contextMenuEvt = new Event('contextmenu');
