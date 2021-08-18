@@ -224,7 +224,7 @@ html{
   flex-direction: column;
   /* max-height: 60vh */
 }
-.ios .hexagon-about-content{
+.ios .hexagon-about-content *{
   user-select: none;
 }
 .hexagon-about-editor{
