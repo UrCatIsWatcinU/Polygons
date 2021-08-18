@@ -6,7 +6,6 @@ html{
 .ios{ 
   user-select: none;
   -webkit-user-select: none;
-  opacity: .2;
 }
 [contenteditable]{
   -webkit-user-select: auto !important; 
