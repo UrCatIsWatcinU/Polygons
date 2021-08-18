@@ -1464,6 +1464,7 @@ window.addEventListener('load', async () => {
                 });
                 hammerHexsCont.add([press]);
                 hammerHexsCont.on('press', evt => {
+                    evt.preventDefault()
                     const contextMenuEvt = new Event('contextmenu');
                     contextMenuEvt.clientX = evt.center.x;
                     contextMenuEvt.clientY = evt.center.y;
@@ -1486,8 +1487,6 @@ window.addEventListener('load', async () => {
 
             contextmenuFn = document.body.oncontextmenu = (evt, hexagon = null, hexagonAbout = null) => {
                 clearContextMenus();
-
-                alert('contextmenu');
 
                 if(!hexagon){
                     hexagon = document.elementFromPoint(evt.clientX, evt.clientY);
