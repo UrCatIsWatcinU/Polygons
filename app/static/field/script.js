@@ -1465,6 +1465,7 @@ window.addEventListener('load', async () => {
                 hammerHexsCont.add([press]);
                 hammerHexsCont.on('press', evt => {
                     evt.preventDefault()
+                    alert('contextmenu')
                     const contextMenuEvt = new Event('contextmenu');
                     contextMenuEvt.clientX = evt.center.x;
                     contextMenuEvt.clientY = evt.center.y;
@@ -1825,12 +1826,12 @@ window.addEventListener('load', async () => {
                             
                         }
                     } 
-
+                    
+                    contextmenu.addEventListener('mousedown', evt => evt.stopPropagation(), {passive: false})
                     for(let action in actions){
                         const actionBtn = contextmenu.querySelector(`.${action}-btn`); 
                         if(actionBtn){
                             if(action != 'img') actionBtn.innerText = translate(`contextmenu.${action}`)
-                            actionBtn.addEventListener('mousedown', evt => evt.stopPropagation(), {passive: false})
                             actionBtn.addEventListener(action == 'img' ? 'input' : 'mousedown', evt => {
                                 actions[action](evt);
                                 if(action != 'imgLabel') clearContextMenus()
