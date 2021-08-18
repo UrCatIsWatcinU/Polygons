@@ -661,9 +661,19 @@ const setHexAboutPosition = (hexagon, hexagonAbout) => {
         }
 
         if(isTouchDevice()){
-            (new Hammer(hexagonAbout)).on('swipeleft swiperight', switchAbout); 
-            if(editorElem) (new Hammer(editorElem)).on('swipeleft swiperight', switchAbout);
 
+            const hexAboutHammer = new Hammer(hexagonAbout)
+            hexAboutHammer.on('swipeleft swiperight', switchAbout); 
+            if(editorElem) hexAboutHammer.on('swipeleft swiperight', switchAbout);
+
+            hexAboutHammer.on('press', evt => {
+                evt.preventDefault()
+                const contextMenuEvt = new Event('contextmenu');
+                contextMenuEvt.clientX = evt.center.x;
+                contextMenuEvt.clientY = evt.center.y;
+                
+                hexagonAbout.dispatchEvent(contextMenuEvt);
+            })
         }
         hexagonAboutModal.querySelector('.arrow-left').onclick = () => switchAbout({type: 'swiperight'})
         hexagonAboutModal.querySelector('.arrow-right').onclick = () => switchAbout({type: 'swipeleft'})

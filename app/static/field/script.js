@@ -1465,7 +1465,6 @@ window.addEventListener('load', async () => {
                 hammerHexsCont.add([press]);
                 hammerHexsCont.on('press', evt => {
                     evt.preventDefault()
-                    alert('contextmenu')
                     const contextMenuEvt = new Event('contextmenu');
                     contextMenuEvt.clientX = evt.center.x;
                     contextMenuEvt.clientY = evt.center.y;
