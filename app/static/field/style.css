@@ -6,6 +6,7 @@ html{
 .ios{ 
   user-select: none;
   -webkit-user-select: none;
+  -khtml-user-select: none;
 }
 [contenteditable]{
   -webkit-user-select: auto !important; 
@@ -226,6 +227,8 @@ html{
 }
 .ios .hexagon-about-content *{
   user-select: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
 }
 .hexagon-about-editor{
   overflow-y: auto;
