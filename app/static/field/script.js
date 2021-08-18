@@ -1487,6 +1487,8 @@ window.addEventListener('load', async () => {
             contextmenuFn = document.body.oncontextmenu = (evt, hexagon = null, hexagonAbout = null) => {
                 clearContextMenus();
 
+                console.log('contextmenu');
+
                 if(!hexagon){
                     hexagon = document.elementFromPoint(evt.clientX, evt.clientY);
                     if(hexagon == document.body) return false;
