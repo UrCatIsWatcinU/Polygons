@@ -225,11 +225,11 @@ html{
   flex-direction: column;
   /* max-height: 60vh */
 }
-.ios .hexagon-about-content *{
+/* .ios .hexagon-about-content *{
   user-select: none;
   -webkit-user-select: none;
   -khtml-user-select: none;
-}
+} */
 .hexagon-about-editor{
   overflow-y: auto;
   height: max-content;
